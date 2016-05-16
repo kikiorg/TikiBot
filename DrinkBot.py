@@ -4,8 +4,8 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
 import time
-import atexit
 import csv
+import atexit
 
 ############################
 #  PUMP CALIBRATION TABLE  #
