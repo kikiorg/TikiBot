@@ -81,7 +81,11 @@ for each_drink in recipe_book:
         # print "ingr: " , each_ingredient
         # Skip the ingredients that are not used in this recipe
         # Comment this out of you want empty entries to be added
+<<<<<<< HEAD
         if each_drink[each_ingredient] is not '':
+=======
+        if (each_drink[each_ingredient] is not ''):
+>>>>>>> ac6a3db8403de95e857d86776c27964609cbec0c
             # Explanation:
             # tl;dr eg: drinks["Mai Tai]["Orgeat"] = ".25oz"
             # recipe_name is "Recipe" -- the title of the first column, which is the list of drink names
