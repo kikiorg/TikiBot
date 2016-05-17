@@ -242,10 +242,23 @@ def mixMe(ingredient, ounces):
     ingredient.setSpeed(255)
     ingredient.run(Adafruit_MotorHAT.FORWARD)
 
-    clock = task.Clock()
-    l = task.LoopingCall(clock, 1.5, ingredient.run,Adafruit_MotorHAT.RELEASE)
-    l.start(1.5)
+    reactor.callLater( 1.5, ingredient.run,Adafruit_MotorHAT.RELEASE)
     reactor.run()
+#    clock = task.Clock()
+#    l = task.LoopingCall(clock, 1.5, ingredient.run,Adafruit_MotorHAT.RELEASE)
+#    l.start(1.5)
+#    reactor.run()
+
+
+#from twisted.internet import reactor
+
+#def f(s):
+#    print "this will run 3.5 seconds after it was scheduled: %s" % s
+
+#reactor.callLater(3.5, f, "hello, world")
+
+## f() will only be called if the event loop is started.
+#reactor.run()
 
 ####### Sample code to test interrupts
     # def runEverySecond( some_text ):
