@@ -8,20 +8,9 @@ import csv
 import atexit
 
 
-####### Temp code to test interrupts
+####### These are needed for the Bot interrupts -- to start and stop the motors on a timer
 from twisted.internet import task
 from twisted.internet import reactor
-
-def runEverySecond( some_text ):
-    print some_text
-
-l = task.LoopingCall(runEverySecond, "Kiki a second has passed")
-l.start(1.0) # call every second
-
-# l.stop() will stop the looping calls
-reactor.run()
-####### END Temp code to test interrupts
-
 
 
 ############################
@@ -243,11 +232,31 @@ else:
 # DEFINE mixMe code
 
 
-def mixMe(ingredient, ounces):
+def mixMeOld(ingredient, ounces):
     ingredient.setSpeed(255)
     ingredient.run(Adafruit_MotorHAT.FORWARD)
     time.sleep(ounces)
     ingredient.run(Adafruit_MotorHAT.RELEASE)
+
+def mixMe(ingredient, ounces):
+    ingredient.setSpeed(255)
+    ingredient.run(Adafruit_MotorHAT.FORWARD)
+
+    l = task.LoopingCall(ingredient.run,Adafruit_MotorHAT.RELEASE)
+    l.start(ounces)
+    reactor.run()
+    
+####### Sample code to test interrupts
+    # def runEverySecond( some_text ):
+    #print some_text
+
+    #l = task.LoopingCall(runEverySecond, "Kiki a second has passed")
+    #l.start(1.0) # call every second
+
+    # l.stop() will stop the looping calls
+    #reactor.run()
+####### END Temp code to test interrupts
+
 
 
 # Define primeMe code
