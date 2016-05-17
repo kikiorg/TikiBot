@@ -242,10 +242,11 @@ def mixMe(ingredient, ounces):
     ingredient.setSpeed(255)
     ingredient.run(Adafruit_MotorHAT.FORWARD)
 
-    l = task.LoopingCall(ingredient.run,Adafruit_MotorHAT.RELEASE)
-    l.start(ounces)
+    clock = task.Clock()
+    l = task.LoopingCall(clock, 1.5, ingredient.run,Adafruit_MotorHAT.RELEASE)
+    l.start(1.5)
     reactor.run()
-    
+
 ####### Sample code to test interrupts
     # def runEverySecond( some_text ):
     #print some_text
