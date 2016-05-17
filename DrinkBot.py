@@ -293,6 +293,9 @@ while True:
             print "Type stop to not prime a pump."
             my_drink == raw_input("Which pump to prime?")
         primeMe(ingr_pumps[my_drink])
+    elif my_drink in ["Exit","exit","X","x"]:
+        print "I'm done!"
+        break
     elif my_drink not in drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     else:
