@@ -7,6 +7,23 @@ import time
 import csv
 import atexit
 
+
+####### Temp code to test interrupts
+from twisted.internet import task
+from twisted.internet import reactor
+
+def runEverySecond( some_text ):
+    print some_text
+
+l = task.LoopingCall(runEverySecond, "a second has passed")
+l.start(1.0) # call every second
+
+# l.stop() will stop the looping calls
+reactor.run()
+####### END Temp code to test interrupts
+
+
+
 ############################
 #  PUMP CALIBRATION TABLE  #
 ############################
@@ -81,11 +98,7 @@ for each_drink in recipe_book:
         # print "ingr: " , each_ingredient
         # Skip the ingredients that are not used in this recipe
         # Comment this out of you want empty entries to be added
-<<<<<<< HEAD
         if each_drink[each_ingredient] is not '':
-=======
-        if (each_drink[each_ingredient] is not ''):
->>>>>>> ac6a3db8403de95e857d86776c27964609cbec0c
             # Explanation:
             # tl;dr eg: drinks["Mai Tai]["Orgeat"] = ".25oz"
             # recipe_name is "Recipe" -- the title of the first column, which is the list of drink names
@@ -142,7 +155,7 @@ bottom_hat = Adafruit_MotorHAT(addr=0x60)
 
 # middle hat has A0 jumper closed, so its address 0x61.
 # Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
-###   middle_hat = Adafruit_MotorHAT(addr=0x61)
+middle_hat = Adafruit_MotorHAT(addr=0x61)
 # top hat has A0 jumper closed, so its address 0x62. 
 # Board 2: Address = 0x62 Offset = binary 0010 (bridge A1, the one above A0)
 ###   top_hat = Adafruit_MotorHAT(addr=0x62)
