@@ -15,7 +15,7 @@ from twisted.internet import reactor
 def runEverySecond( some_text ):
     print some_text
 
-l = task.LoopingCall(runEverySecond, "a second has passed")
+l = task.LoopingCall(runEverySecond, "Kiki a second has passed")
 l.start(1.0) # call every second
 
 # l.stop() will stop the looping calls
