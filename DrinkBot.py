@@ -41,20 +41,6 @@ recipe_name = ingr_list[0]
 # This is a pesky exception, so to make it clean, we remove that column title 
 ingr_list.remove(recipe_name)
 
-# Check if there's a calibration row in the drink recipe .csv file
-# If there is not, then enter not_calibrated into each calibration factor
-# Note: Why not just calibrate them now?  Because this allows for a Calibration line
-# to have individual entries of not_calibrated so the user can recalibrate individual pumps
-# simply by entering the number ito the .csv file.
-
-if drinks.get("Calibration") is None:
-    print "NO CALIBRATION!!!!"
-    for each_ingredient in ingr_list:
-        # This will force each pump to be calibrated by the user
-        drinks["Calibration"][each_ingredient] = Motors.not_calibrated
-else:
-    # Since there's a line for calibration, don't actually treat it like a drink. :)
-    drink_names.remove("Calibration")
 
 
 #####################################
@@ -80,7 +66,22 @@ for each_drink in recipe_book:
             # each_drink is the whole row from the file, and each_drink[each_ingredient] one single ingreidnt amount
             drinks[each_drink[recipe_name]][each_ingredient] = each_drink[each_ingredient]
         else:
+            # The .csv file has nothing for this cell, so stick in a 0 for none dispensed
             drinks[each_drink[recipe_name]][each_ingredient] = 0
+
+# Check if there's a calibration row in the drink recipe .csv file
+# If there is not, then enter not_calibrated into each calibration factor
+# Note: Why not just calibrate them now?  Because this allows for a Calibration line
+# to have individual entries of not_calibrated so the user can recalibrate individual pumps
+# simply by entering the number ito the .csv file.
+
+if drinks.get("Calibration") is None:
+    print "NO CALIBRATION!!!!"
+    for each_ingredient in ingr_list:
+        # This will force each pump to be calibrated by the user
+        drinks["Calibration"][each_ingredient] = Motors.not_calibrated
+
+drink_names.remove("Calibration")
 
 
 #############################################################
