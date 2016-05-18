@@ -123,7 +123,7 @@ for each_motor in range(1, 5):
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
 
 for each_pump in ingr_pumps:
-    print "Each pump: ", Motors( "Lemon", 2.1 ).name()
+    print "Each pump: ", Motors( "Lemon", 2.1 ).name
 
 
 
