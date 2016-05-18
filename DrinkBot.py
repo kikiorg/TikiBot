@@ -123,11 +123,6 @@ for each_motor in range(1, 5):
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
     print ingr_pumps[each_ingredient]
 
-for each_pump in ingr_list:
-    if each_pump in ingr_pumps:
-        print "Each pump: ", ingr_pumps[each_pump].name
-
-
 
 #######################
 # PRINT INGREDIENTS   #
