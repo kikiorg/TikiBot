@@ -246,7 +246,7 @@ class ThreadMe(threading.Thread):
     def __init__(self, motor_list, ounces, name):
         # I need only the motor, not the whole list for this.
         # Passing the name, though, assures the key and name match
-        super(Motors, self).__init__()
+        super(ThreadMe, self).__init__()
         self.motor = motor_list[name]
         self.ounces = ounces
         self.name = name
