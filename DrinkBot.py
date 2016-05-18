@@ -238,56 +238,46 @@ def mixMeOld(ingredient, ounces):
     time.sleep(ounces)
     ingredient.run(Adafruit_MotorHAT.RELEASE)
 
-def mixMe(ingredient, ounces):
-    ingredient.setSpeed(255)
-    ingredient.run(Adafruit_MotorHAT.FORWARD)
 
-    reactor.callLater( 1.5, ingredient.run,Adafruit_MotorHAT.RELEASE)
-    reactor.run()
-#    clock = task.Clock()
-#    l = task.LoopingCall(clock, 1.5, ingredient.run,Adafruit_MotorHAT.RELEASE)
-#    l.start(1.5)
-#    reactor.run()
+class Motors():
+    def __init__(self, motor, name):
+        self.motor = motor
+        self.name = name
 
+    import threading
+    class thread_me(threading.Thread):
+        def __init__( self, motor, ounces, name ):
+            super(Motors, self).__init__()
+            self.motor = motor
+            self.ounces = ounces
+            self.name = name
+            self.start()
+            self.join()
 
-#from twisted.internet import reactor
+        def run(self):
+            self.motor.setSpeed(255)
+            self.motor.run(Adafruit_MotorHAT.FORWARD)
+            time.sleep(self.ounces)
+            print self.name + " finished dispensing."
+            self.motor.run(Adafruit_MotorHAT.RELEASE)
 
-#def f(s):
-#    print "this will run 3.5 seconds after it was scheduled: %s" % s
+    # Define primeMe code
+    def prime(self):
+        my_thread = Motors(self.motor, prime_seconds)
 
-#reactor.callLater(3.5, f, "hello, world")
-
-## f() will only be called if the event loop is started.
-#reactor.run()
-
-####### Sample code to test interrupts
-    # def runEverySecond( some_text ):
-    #print some_text
-
-    #l = task.LoopingCall(runEverySecond, "Kiki a second has passed")
-    #l.start(1.0) # call every second
-
-    # l.stop() will stop the looping calls
-    #reactor.run()
-####### END Temp code to test interrupts
-
+        answer = raw_input("More?")
+        while answer == "y":
+            my_thread = Motors(self.motor, prime_seconds / 10)
+            answer = raw_input("More? [y/n]")
 
 
-# Define primeMe code
-def primeMe(ingredient):
-    ingredient.setSpeed(255)
-    ingredient.run(Adafruit_MotorHAT.FORWARD)
-    time.sleep(prime_seconds)
-    ingredient.run(Adafruit_MotorHAT.RELEASE)
+    def dispense(self, ounces):
+        my_thread = Motors(self.motor, ounces)
 
-    answer = raw_input("More?")
-    while answer == "y":
-        ingredient.setSpeed(255)
-        ingredient.run(Adafruit_MotorHAT.FORWARD)
-        time.sleep(prime_seconds / 10)
-        ingredient.run(Adafruit_MotorHAT.RELEASE)
-        answer = raw_input("More? [y/n]")
-
+print "gonna dispense!  Look out!"
+ingredient1 = Motors(ingr_pumps["one"], "one")
+ingredient1.dispense(2)
+print "BAM!!  Done!"
 
 #######################
 # PRINT INGREDIENTS   #
