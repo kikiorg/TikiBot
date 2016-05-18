@@ -7,11 +7,9 @@ import time
 import csv
 import atexit
 
-
 ####### These are needed for the Bot interrupts -- to start and stop the motors on a timer
 from twisted.internet import task
 from twisted.internet import reactor
-
 
 ############################
 #  PUMP CALIBRATION TABLE  #
@@ -47,7 +45,6 @@ prime_seconds = 2
 peristaltic_2oz = 2
 # If the calibration value for a pump is 0, then this pump is not calibr$
 not_calibrated = 0
-
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
@@ -145,7 +142,9 @@ bottom_hat = Adafruit_MotorHAT(addr=0x60)
 # middle hat has A0 jumper closed, so its address 0x61.
 # Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
 middle_hat = Adafruit_MotorHAT(addr=0x61)
-# top hat has A0 jumper closed, so its address 0x62. 
+
+
+# top hat has A0 jumper closed, so its address 0x62.
 # Board 2: Address = 0x62 Offset = binary 0010 (bridge A1, the one above A0)
 ###   top_hat = Adafruit_MotorHAT(addr=0x62)
 
@@ -229,6 +228,7 @@ else:
     # Since there's a line for calibration, don't actually treat it like a drink. :)
     drink_names.remove("Calibration")
 
+
 # DEFINE mixMe code
 
 
@@ -239,40 +239,46 @@ def mixMeOld(ingredient, ounces):
     ingredient.run(Adafruit_MotorHAT.RELEASE)
 
 
+import threading
+
+
+class ThreadMe(threading.Thread):
+    def __init__(self, motor_list, ounces, name):
+        # I need only the motor, not the whole list for this.
+        # Passing the name, though, assures the key and name match
+        super(Motors, self).__init__()
+        self.motor = motor_list[name]
+        self.ounces = ounces
+        self.name = name
+        self.start()
+        self.join()
+
+    def run(self):
+        self.motor.setSpeed(255)
+        self.motor.run(Adafruit_MotorHAT.FORWARD)
+        time.sleep(self.ounces)
+        print self.name + " finished dispensing."
+        self.motor.run(Adafruit_MotorHAT.RELEASE)
+
+
 class Motors():
-    def __init__(self, motor, name):
-        self.motor = motor
+    def __init__(self, motor_list, name):
+        self.motor_list = motor_list
         self.name = name
 
-    import threading
-    class thread_me(threading.Thread):
-        def __init__( self, motor_list, ounces, name ):
-            super(Motors, self).__init__()
-            self.motor = motor_list[name]
-            self.ounces = ounces
-            self.name = name
-            self.start()
-            self.join()
-
-        def run(self):
-            self.motor.setSpeed(255)
-            self.motor.run(Adafruit_MotorHAT.FORWARD)
-            time.sleep(self.ounces)
-            print self.name + " finished dispensing."
-            self.motor.run(Adafruit_MotorHAT.RELEASE)
 
     # Define primeMe code
     def prime(self):
-        my_thread = Motors(self.motor, prime_seconds)
+        my_thread = ThreadMe(self.motor_list, prime_seconds, self.name)
 
         answer = raw_input("More?")
         while answer == "y":
-            my_thread = Motors(self.motor, prime_seconds / 10)
+            my_thread = ThreadMe(self.motor_list, prime_seconds / 10, self.name)
             answer = raw_input("More? [y/n]")
 
-
     def dispense(self, ounces):
-        my_thread = Motors(self.motor, ounces)
+        my_thread = ThreadMe(self.motor_list, ounces, self.name)
+
 
 print "gonna dispense!  Look out!"
 ingredient1 = Motors(ingr_pumps, "Orange Juice")
@@ -296,7 +302,7 @@ while True:
             print "Type stop to not prime a pump."
             my_drink == raw_input("Which pump to prime?")
         primeMe(ingr_pumps[my_drink])
-    elif my_drink in ["Exit","exit","X","x"]:
+    elif my_drink in ["Exit", "exit", "X", "x"]:
         print "I'm done!"
         break
     elif my_drink not in drink_names:
@@ -305,8 +311,10 @@ while True:
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
-                print "Normalized: ", float(drinks[my_drink][each_ingredient]) * calibration_factor[each_ingredient], " seconds."
-                mixMe(ingr_pumps[each_ingredient], float(drinks[my_drink][each_ingredient]) * calibration_factor[each_ingredient])
+                print "Normalized: ", float(drinks[my_drink][each_ingredient]) * calibration_factor[
+                    each_ingredient], " seconds."
+                mixMe(ingr_pumps[each_ingredient],
+                      float(drinks[my_drink][each_ingredient]) * calibration_factor[each_ingredient])
 
 # Close the file at the end.
 # Note, this annoys me and is not tidy to leave the file open the whole time!
