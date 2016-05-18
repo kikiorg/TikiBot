@@ -189,6 +189,3 @@ class Motors():
 
     def calibrate(self):
         my_thread = ThreadMe(self.motor, Motors.calibration_seconds, self.name)
-
-    def name(self):
-        return self.name
