@@ -246,9 +246,9 @@ class Motors():
 
     import threading
     class thread_me(threading.Thread):
-        def __init__( self, motor, ounces, name ):
+        def __init__( self, motor_list, ounces, name ):
             super(Motors, self).__init__()
-            self.motor = motor
+            self.motor = motor_list[name]
             self.ounces = ounces
             self.name = name
             self.start()
@@ -275,7 +275,7 @@ class Motors():
         my_thread = Motors(self.motor, ounces)
 
 print "gonna dispense!  Look out!"
-ingredient1 = Motors(ingr_pumps["one"], "one")
+ingredient1 = Motors(ingr_pumps, "Orange Juice")
 ingredient1.dispense(2)
 print "BAM!!  Done!"
 
