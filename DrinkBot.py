@@ -122,8 +122,8 @@ for each_motor in range(1, 5):
     calibration_factor = drinks["Calibration"][each_ingredient]
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
 
-for each_pump in ingr_list:
-    print "Each pump: " + Motors( "Lemon", 2.1 )
+for each_pump in ingr_pumps:
+    print "Each pump: ", each_pump.name()
 
 
 
