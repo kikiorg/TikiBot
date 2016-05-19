@@ -6,32 +6,6 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 import time
 import atexit
 
-############################################
-# Initialize the motors on the Bot         #
-############################################
-# Set up the address for each of the pumps #
-# NOTE: Since we don't have all 3 hats,    #
-#   I've commented out for the other       #
-#   two boards, until they come in         #
-############################################
-
-############################################
-# Initialize the motors on the Bot         #
-############################################
-# Set up the address for each of the pumps #
-# NOTE: Since we don't have all 3 hats,    #
-#   I've commented out for the other       #
-#   two boards, until they come in         #
-############################################
-
-# bottom hat is default address 0x60
-# Board 0: Address = 0x60 Offset = binary 0000 (no jumpers required)
-bottom_hat = Adafruit_MotorHAT(addr=0x60)
-
-# middle hat has A0 jumper closed, so its address 0x61.
-# Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
-middle_hat = Adafruit_MotorHAT(addr=0x61)
-
 
 # top hat has A0 jumper closed, so its address 0x62.
 # Board 2: Address = 0x62 Offset = binary 0010 (bridge A1, the one above A0)
@@ -99,6 +73,9 @@ class ThreadMe(threading.Thread):
 class LessThanZeroException(Exception):
     pass
 
+class HatNotConnected(Exception):
+    pass
+
 class Motors():
     calibration_seconds = 60
     # This pumps should dispense 2oz in calibration_seconds amount of time
@@ -108,16 +85,55 @@ class Motors():
     # This is how long it should take to fill the pump tubing to dispense
     prime_seconds = 2
 
+    ############################################
+    # Initialize the motors on the Bot         #
+    ############################################
+    # Set up the address for each of the pumps #
+    # NOTE: Since we don't have all 3 hats,    #
+    #   I've commented out for the other       #
+    #   two boards, until they come in         #
+    ############################################
+
+    # bottom hat is default address 0x60
+    # Board 0: Address = 0x60 Offset = binary 0000 (no jumpers required)
+    bottom_hat = Adafruit_MotorHAT(addr=0x60)
+
+    # middle hat has A0 jumper closed, so its address 0x61.
+    # Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
+    middle_hat = Adafruit_MotorHAT(addr=0x61)
+
+    # top hat has A1 jumper closed, so its address 0x62.
+    # Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
+    # top_hat = Adafruit_MotorHAT(addr=0x62)
+
     # Ok, this is sneaky.  We have (possibly) 3 Hats, each with 4 possible pump controllers.
     # As I create more and more pumps, I want to iterate through all the pumps available.
     # I'm going to use a class variable to iterate through them.
 
-    # Motor controllers are numbered [1-4]
-    next_pump_number = 1
+    # Motor controllers are numbered [1-4] -- this increments before it's used, so initialized to 0
+    next_pump_number = 0
     # Start with the bottom most Hat
-    current_motor = bottom_hat.getMotor(next_pump_number)
+    current_hat = bottom_hat
+    current_motor = current_hat.getMotor(next_pump_number)
 
     def __init__(self, name, calibration):
+        # This is my sneaky code to iterate through all the motors as each is initialized
+        # It goes through the 4 pumps for each hat
+        if Motors.next_pump_number >= 4:
+            next_pump_number = 1
+            if Motors.current_hat == Motors.bottom_hat:
+                Motors.current_hat = Motors.middle_hat
+                print "Note: now adding pumps from the middle hat."
+            elif Motors.current_hat == Motors.middle_hat:
+                raise HatNotConnected("Trying to use a Hat at address 0x62!  Does not exist!")
+                Motors.current_hat = top_hat
+                print "Note: now adding pumps from the top hat."
+            else:
+                raise HatNotConnected("Trying to use a Hat at address 0x63!  Does not exist!")
+        else:
+            Motors.next_pump_number += 1
+        print "Initializing Motor: ", Motors.next_pump_number
+        Motors.current_motor = current_hat.getMotor(Motors.next_pump_number)
         self.motor = Motors.current_motor
         self.name = name
         # If the calibration == not_calibrated, it will run a calibration
