@@ -117,7 +117,7 @@ class Motors():
 
     def __init__(self, name, calibration):
         # recommended for auto-disabling motors on shutdown!
-        atexit.register(Motors.turnOffMotors)
+        atexit.register(Motors.turnOffMotors, Motors)
 
         # This is my sneaky code to iterate through all the motors as each is initialized
         # It goes through the 4 pumps for each hat
