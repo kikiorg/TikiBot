@@ -133,7 +133,7 @@ class Motors():
         else:
             Motors.next_pump_number += 1
         print "Initializing Motor: ", Motors.next_pump_number
-        Motors.current_motor = current_hat.getMotor(Motors.next_pump_number)
+        Motors.current_motor = Motors.current_hat.getMotor(Motors.next_pump_number)
         self.motor = Motors.current_motor
         self.name = name
         # If the calibration == not_calibrated, it will run a calibration
