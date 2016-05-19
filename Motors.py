@@ -28,8 +28,8 @@ class ThreadMe(threading.Thread):
     def run(self):
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.FORWARD)
+        print self.name + " dispensing now."
         time.sleep(self.time)
-        print self.name + " finished dispensing."
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
 
