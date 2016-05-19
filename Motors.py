@@ -11,16 +11,6 @@ import atexit
 # Board 2: Address = 0x62 Offset = binary 0010 (bridge A1, the one above A0)
 ###   top_hat = Adafruit_MotorHAT(addr=0x62)
 
-# Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
-# recommended for auto-disabling motors on shutdown!
-def turnOffMotors():
-    # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
-    for each_motor in range(1, 5):
-        bottom_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-        middle_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-        # top_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-
-atexit.register(turnOffMotors)
 
 import threading
 
@@ -106,6 +96,15 @@ class Motors():
     # Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
     # top_hat = Adafruit_MotorHAT(addr=0x62)
 
+    # Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
+    # recommended for auto-disabling motors on shutdown!
+    def turnOffMotors(self):
+        # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
+        for each_motor in range(1, 5):
+            Motors.bottom_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+            Motors.middle_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+            # Motors.top_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+
     # Ok, this is sneaky.  We have (possibly) 3 Hats, each with 4 possible pump controllers.
     # As I create more and more pumps, I want to iterate through all the pumps available.
     # I'm going to use a class variable to iterate through them.
@@ -117,6 +116,9 @@ class Motors():
     current_motor = None
 
     def __init__(self, name, calibration):
+        # recommended for auto-disabling motors on shutdown!
+        atexit.register(Motors.turnOffMotors)
+
         # This is my sneaky code to iterate through all the motors as each is initialized
         # It goes through the 4 pumps for each hat
         if Motors.next_pump_number >= 4:
@@ -151,13 +153,13 @@ class Motors():
             if yesno == "yes":
                 self.dispense(Motors.calibration_seconds)
                 new_factor = raw_input("How much liquid was delivered?")
-                return 1 / float(new_factor) * Motors.calibration_seconds
+                return float(1 / new_factor * Motors.calibration_seconds)
                 print "Note: please change the value in your .csv file for " + name
             else:
                 print "Well...ok, but that means I'll enter a standard 2oz for this pump and it will be inaccurate!"
-                return 1 / Motors.peristaltic_2oz * Motors.calibration_seconds
+                return float(1 / Motors.peristaltic_2oz * Motors.calibration_seconds)
         else:
-            return calibration
+            return float(calibration)
 
     # This primes the pump.  It assumes the lines are totally empty, but also allows the user to
     # kick the pump by 1/10ths too.
