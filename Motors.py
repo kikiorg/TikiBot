@@ -172,7 +172,7 @@ class Motors():
             answer = raw_input("More? [y/n]")
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
-    def dispense(self, ounces):
+    def dispense(self, ounces, my_thread):
         # self.calibration is multiplied by the ounces to find the time to run the pump -- must be >0
         # Note: this should always be true, but being safe here!
         if self.calibration <= 0:

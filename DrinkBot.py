@@ -129,7 +129,7 @@ for each_motor in range(1, 9):
 # PRINT INGREDIENTS   #
 #######################
 # This prints all the ingredients, including 'Recipe'
-
+a_thread = None
 while True:
     print ("I can make these drinks:  ")
     for each_drink in drink_names:
@@ -152,7 +152,7 @@ while True:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
                 #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
-                ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
+                ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]), a_thread)
 
 # Close the file at the end.
 # Note, this annoys me and is not tidy to leave the file open the whole time!
