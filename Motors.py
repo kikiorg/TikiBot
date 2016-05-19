@@ -6,7 +6,6 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 import time
 import atexit
 
-
 ############################################
 # Initialize the motors on the Bot         #
 ############################################
@@ -38,53 +37,16 @@ middle_hat = Adafruit_MotorHAT(addr=0x61)
 # Board 2: Address = 0x62 Offset = binary 0010 (bridge A1, the one above A0)
 ###   top_hat = Adafruit_MotorHAT(addr=0x62)
 
+# Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
 # recommended for auto-disabling motors on shutdown!
 def turnOffMotors():
-    bottom_hat.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-    bottom_hat.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-    bottom_hat.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-    bottom_hat.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
-
-
-# middle_hat.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-# middle_hat.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-# middle_hat.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-# middle_hat.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
-# top_hat.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-# top_hat.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-# top_hat.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-# top_hat.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+    # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
+    for each_motor in range(1, 5):
+        bottom_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        middle_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        # top_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
 
 atexit.register(turnOffMotors)
-
-#####################
-# Bottom Hat motors #
-#####################
-# Note: The pumps are indexed by the ingredient name
-#   range(1,5) means make a set of 5 numbers, 0-indexed, start at 1
-#   Keep in mind, 0-index to 5, is [0,1,2,3,4]
-#   So starting at 1 means [1,2,3,4]
-#   Index #0 is the name "Recipe" so it is skipped
-
-
-#####################
-# PUMP CALIBRATION  #
-#####################
-
-# OLD CODE!!!  REMOVE WHEN DONE!!!
-# This is the calibration for how long to run the pump for 1 ounce
-# Note: The drink calibration factor is the number of ounces delivered in 60 seconds -- around 2oz
-# Thus, drinks["Calibration"][each_ingredient] should be near to 2oz, the amount that pump delivered in 60 seconds
-# In short, the calibration_factor for each pump is multiplied by the number of ounces delivered for that drink
-#def calibrate_pump(pump):
-#    pump.setSpeed(255)
-#    pump.run(Adafruit_MotorHAT.FORWARD)
-#    time.sleep(calibration_seconds)
-#    pump.run(Adafruit_MotorHAT.RELEASE)
-#    print "60 seconds of run have been delivered."
-#    print "Please enter into your calibration line the exact amount just dispensed."
-
-
 
 import threading
 
@@ -106,9 +68,10 @@ class ThreadMe(threading.Thread):
         print self.name + " finished dispensing."
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
-############################
-#  PUMP CALIBRATION TABLE  #
-############################
+
+#############################
+#  NOTES: PUMP CALIBRATION  #
+#############################
 # This is a standardized calibration table.
 # To pump 1 ounce, you run each pump approximately this amount.
 # The way the rest of the calibration code works, is you run the pump this amount
@@ -133,6 +96,9 @@ class ThreadMe(threading.Thread):
 # 2oz/Xoz * 60 / 2oz = accurate 1oz -- scaled to 1oz
 # 1oz/Xoz * 60 = accurate 1oz -- complete normalized formula
 
+class LessThanZeroException(Exception):
+    pass
+
 class Motors():
     calibration_seconds = 60
     # This pumps should dispense 2oz in calibration_seconds amount of time
@@ -154,28 +120,31 @@ class Motors():
     def __init__(self, name, calibration):
         self.motor = Motors.current_motor
         self.name = name
+        # If the calibration == not_calibrated, it will run a calibration
+        # Note: not-calibrated is generally 0 (will not dispense!), so don't just copy this into self!
         self.calibration = self.calibrate_pump(calibration)
-
 
     # This returns the best calibration value.
     # If the calibration was not set in the .csv file, then ask the user to calibrate the pump
-    # If the pump needs to be calibrated, it dispenses for 2 seconds, then asks for the amount actuall dispensed.
+    # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
+    # then asks for the amount actually dispensed.
     # It then calculates a normalized 1oz dispense rate.
     def calibrate_pump(self, calibration):
         if calibration == self.not_calibrated:
             yesno = raw_input("Do you want to calibrate pump for " + self.name + "?")
             if yesno == "yes":
-                self.calibrate()
+                self.dispense(Motors.calibration_seconds)
                 new_factor = raw_input("How much liquid was delivered?")
                 return 1 / float(new_factor) * Motors.calibration_seconds
                 print "Note: please change the value in your .csv file for " + name
             else:
                 print "Well...ok, but that means I'll enter a standard 2oz for this pump and it will be inaccurate!"
-                return 1 / 2 * Motors.calibration_seconds
+                return 1 / Motors.peristaltic_2oz * Motors.calibration_seconds
         else:
             return calibration
 
-    # Define primeMe code
+    # This primes the pump.  It assumes the lines are totally empty, but also allows the user to
+    # kick the pump by 1/10ths too.
     def prime(self):
         my_thread = ThreadMe(self.motor, Motors.prime_seconds, self.name)
 
@@ -184,8 +153,11 @@ class Motors():
             my_thread = ThreadMe(self.motor, Motors.prime_seconds / 10, self.name)
             answer = raw_input("More? [y/n]")
 
+    # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces):
+        # self.calibration is multiplied by the ounces to find the time to run the pump -- must be >0
+        # Note: this should always be true, but being safe here!
+        if self.calibration <= 0:
+            raise LessThanZeroException(self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
         my_thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
-
-    def calibrate(self):
-        my_thread = ThreadMe(self.motor, Motors.calibration_seconds, self.name)
+        print "Finished dispensing ", ounces, " of ", self.name, "."
