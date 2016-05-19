@@ -152,7 +152,8 @@ while True:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
                 #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
-                my_thread = ThreadMe(ingr_pumps[each_ingredient].motor, ingr_pumps[each_ingredient].ounces * ingr_pumps[each_ingredient].calibration, ingr_pumps[each_ingredient].name)
+                a_thread = ThreadMe(ingr_pumps[each_ingredient].motor, drinks[my_drink][each_ingredient] *
+                                    ingr_pumps[each_ingredient].calibration, ingr_pumps[each_ingredient].name)
                 #ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]), a_thread)
 
 # Close the file at the end.
