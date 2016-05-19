@@ -117,7 +117,8 @@ def print_recipes():
 
 ingr_pumps = {}
 temp_ingr_list = iter(ingr_list)
-for each_motor in range(1, 5):
+# We have two hats right now, so 8 pumps -- range is zero indexed, 0-8, starting at 1
+for each_motor in range(1, 9):
     each_ingredient = temp_ingr_list.next()
     calibration_factor = drinks["Calibration"][each_ingredient]
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )

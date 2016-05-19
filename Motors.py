@@ -120,7 +120,7 @@ class Motors():
         # This is my sneaky code to iterate through all the motors as each is initialized
         # It goes through the 4 pumps for each hat
         if Motors.next_pump_number >= 4:
-            next_pump_number = 1
+            Motors.next_pump_number = 1
             if Motors.current_hat == Motors.bottom_hat:
                 Motors.current_hat = Motors.middle_hat
                 print "Note: now adding pumps from the middle hat."
