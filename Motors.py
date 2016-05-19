@@ -114,7 +114,7 @@ class Motors():
     next_pump_number = 0
     # Start with the bottom most Hat
     current_hat = bottom_hat
-    current_motor = current_hat.getMotor(next_pump_number)
+    current_motor = None
 
     def __init__(self, name, calibration):
         # This is my sneaky code to iterate through all the motors as each is initialized
