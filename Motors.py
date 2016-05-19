@@ -178,4 +178,4 @@ class Motors():
         if self.calibration <= 0:
             raise LessThanZeroException(self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
         my_thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
-        print "Finished dispensing ", ounces, " of ", self.name, "."
+        # print "Finished dispensing ", ounces, " of ", self.name, "."
