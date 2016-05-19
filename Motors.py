@@ -22,8 +22,8 @@ class ThreadMe(threading.Thread):
         self.motor = motor
         self.time = time
         self.name = name
-        self.start()
-        self.join()
+        #self.start()
+        #self.join()
 
     def run(self):
         self.motor.setSpeed(255)
@@ -172,10 +172,12 @@ class Motors():
             answer = raw_input("More? [y/n]")
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
-    def dispense(self, ounces):
+    def dispense(self, ounces, my_thread):
         # self.calibration is multiplied by the ounces to find the time to run the pump -- must be >0
         # Note: this should always be true, but being safe here!
         if self.calibration <= 0:
             raise LessThanZeroException(self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
         my_thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
+        my_thread.start()
+        my_thread.join()
         # print "Finished dispensing ", ounces, " of ", self.name, "."
