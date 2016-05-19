@@ -15,11 +15,11 @@ import atexit
 import threading
 
 class ThreadMe(threading.Thread):
-    def __init__(self, motor_list, time, name):
+    def __init__(self, motor, time, name):
         # I need only the motor, not the whole list for this.
         # Passing the name, though, assures the key and name match
         super(ThreadMe, self).__init__()
-        self.motor = motor_list[name]
+        self.motor = motor
         self.time = time
         self.name = name
         self.start()
