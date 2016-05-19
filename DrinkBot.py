@@ -151,7 +151,7 @@ while True:
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
-                print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
+                #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
                 ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
 
 # Close the file at the end.
