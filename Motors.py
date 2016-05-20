@@ -32,7 +32,6 @@ class ThreadMe(threading.Thread):
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
-
 #############################
 #  NOTES: PUMP CALIBRATION  #
 #############################
