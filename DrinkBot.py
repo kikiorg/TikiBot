@@ -69,6 +69,9 @@ for each_drink in recipe_book:
             # The .csv file has nothing for this cell, so stick in a 0 for none dispensed
             drinks[each_drink[recipe_name]][each_ingredient] = 0
 
+# Done getting the info from the file.
+myFile.close()
+
 # Check if there's a calibration row in the drink recipe .csv file
 # If there is not, then enter not_calibrated into each calibration factor
 # Note: Why not just calibrate them now?  Because this allows for a Calibration line
@@ -122,14 +125,11 @@ for each_motor in range(1, 9):
     each_ingredient = temp_ingr_list.next()
     calibration_factor = drinks["Calibration"][each_ingredient]
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
-    print ingr_pumps[each_ingredient]
-
 
 #######################
 # PRINT INGREDIENTS   #
 #######################
 # This prints all the ingredients, including 'Recipe'
-a_thread = None
 while True:
     print ("I can make these drinks:  ")
     for each_drink in drink_names:
@@ -148,15 +148,14 @@ while True:
     elif my_drink not in drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     else:
+        # Start all the pumps going
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
                 #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
-                a_thread = ThreadMe(ingr_pumps[each_ingredient].motor, float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration, ingr_pumps[each_ingredient].name)
-                a_thread.start()
-                a_thread.join()
-                #ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]), a_thread)
+                ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
+        # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
+        for each_ingredient in drinks[my_drink]:
+            if drinks[my_drink][each_ingredient] > 0:
+                ingr_pumps[each_ingredient].is_done()
 
-# Close the file at the end.
-# Note, this annoys me and is not tidy to leave the file open the whole time!
-myFile.close()
