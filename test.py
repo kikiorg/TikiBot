@@ -100,6 +100,7 @@ class Motors(threading.Thread):
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
 
+<<<<<<< Updated upstream
 class Kiki(threading.Thread):
     def __init__(self, time):
         super(Kiki, self).__init__()
@@ -121,6 +122,12 @@ thread1 = Kiki(9)
 #thread2 = Motors(ingr_pumps["two"],3)
 #thread3 = Motors(ingr_pumps["three"],6)
 #thread4 = Motors(ingr_pumps["four"],9)
+=======
+thread1 = Motors(ingr_pumps["one"],1)
+thread2 = Motors(ingr_pumps["two"],3)
+thread3 = Motors(ingr_pumps["three"],6)
+thread4 = Motors(ingr_pumps["four"],9)
+>>>>>>> Stashed changes
 #thread1.start()
 #thread1.join()
 #thread4.start()

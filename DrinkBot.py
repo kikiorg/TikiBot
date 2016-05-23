@@ -8,6 +8,12 @@
 import time
 import csv
 import atexit
+
+import logging
+import sys
+sys.path.insert(0, 'pynfc/src')
+from mifareauth import NFCReader
+
 # Kiki's awesome Motors Class that does threading and other cool stuff!
 from Motors import Motors, ThreadMe
 
@@ -130,7 +136,10 @@ for each_motor in range(1, 9):
 # PRINT INGREDIENTS   #
 #######################
 # This prints all the ingredients, including 'Recipe'
+# RFID_reader = NFCReader()
 while True:
+#    RFID_reader.run()
+
     print ("I can make these drinks:  ")
     for each_drink in drink_names:
         print each_drink
@@ -148,6 +157,12 @@ while True:
     elif my_drink not in drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     else:
+
+        logger = logging.getLogger("cardhandler").info
+        RFID_reader = NFCReader(logger)
+        while NFCReader(logger).run():
+            pass
+
         # Start all the pumps going
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
