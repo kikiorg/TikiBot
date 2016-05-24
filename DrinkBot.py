@@ -3,25 +3,14 @@
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
 import csv
-<<<<<<< HEAD
-import atexit
 
 import logging
 import sys
 sys.path.insert(0, 'pynfc/src')
 from mifareauth import NFCReader
 
-# Kiki's awesome Motors Class that does threading and other cool stuff!
-from Motors import Motors, ThreadMe
-
-####### These are needed for the Bot interrupts -- to start and stop the motors on a timer
-from twisted.internet import task
-from twisted.internet import reactor
-
-=======
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
->>>>>>> 6d99b6d6bd0806edcb56d9f617af9fdce397d267
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
