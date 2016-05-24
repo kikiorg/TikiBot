@@ -3,14 +3,11 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
+# Needed to sleep-wait for pump to finish dispensing.
 import time
+# Needed to assure all pumps have been turned off if the program ends.
+# Pumps have a state either on or off.
 import atexit
-
-
-# top hat has A0 jumper closed, so its address 0x62.
-# Board 2: Address = 0x62 Offset = binary 0010 (bridge A1, the one above A0)
-###   top_hat = Adafruit_MotorHAT(addr=0x62)
-
 
 import threading
 
@@ -83,7 +80,6 @@ bottom_hat = Adafruit_MotorHAT(addr=0x60)
 # Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
 middle_hat = Adafruit_MotorHAT(addr=0x61)
 
-
 # top hat has A1 jumper closed, so its address 0x62.
 # Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
 # top_hat = Adafruit_MotorHAT(addr=0x62)
@@ -101,26 +97,27 @@ atexit.register(turnOffMotors)
 
 
 class Motors():
-    calibration_seconds = 60
-    # This pumps should dispense 2oz in calibration_seconds amount of time
+    # We assume these are pumps that dispense about 2oz every 60 seconds.
     peristaltic_2oz = 2
-    # If the calibration value for a pump is 0, then this pump is not calibr$
+    calibration_seconds = 60
+    # If the calibration value for a pump is 0, then this pump is not calibrated
     not_calibrated = 0
     # This is how long it should take to fill the pump tubing to dispense
     prime_seconds = 2
-    # The pumps spike in current for about this alount of time.
+    # The pumps spike in current for about this amount of time.
+    # This is used between pump startups so there's not a massive current spike
+    # from all pumps starting at once.
     current_spike_stabilze = 0.1
 
 
     # Ok, this is sneaky.  We have (possibly) 3 Hats, each with 4 possible pump controllers.
-    # As I create more and more pumps, I want to iterate through all the pumps available.
+    # As I create more and more ingredient pumps, I want to iterate through all the pumps available.
     # I'm going to use a class variable to iterate through them.
 
-    # Motor controllers are numbered [1-4] -- this increments before it's used, so initialized to 0
+    # Motor controllers are numbered [1-4] -- this increments before it's first used, so initialized to 0
     next_pump_number = 0
     # Start with the bottom most Hat
     current_hat = bottom_hat
-    current_motor = None
 
     def __init__(self, name, calibration):
         # This is my sneaky code to iterate through all the motors as each is initialized
@@ -138,8 +135,7 @@ class Motors():
                 raise HatNotConnected("Trying to use a Hat at address 0x63!  Does not exist!")
         else:
             Motors.next_pump_number += 1
-        Motors.current_motor = Motors.current_hat.getMotor(Motors.next_pump_number)
-        self.motor = Motors.current_motor
+        self.motor = Motors.current_hat.getMotor(Motors.next_pump_number)
         self.name = name
         self.thread = None
         # If the calibration == not_calibrated, it will run a calibration
@@ -165,7 +161,7 @@ class Motors():
         else:
             return float(calibration)
 
-    # This primes the pump.  It assumes the lines are totally empty, but also allows the user to
+    # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
     # kick the pump by 1/10ths too.
     def prime(self):
         self.thread = ThreadMe(self.motor, Motors.prime_seconds, self.name)
@@ -182,6 +178,7 @@ class Motors():
         # Note: this should always be true, but being safe here!
         if self.calibration <= 0:
             raise LessThanZeroException(self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
+        # The pumps are run as processor threads, so all pumps can run concurrently.
         self.thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
@@ -189,5 +186,10 @@ class Motors():
         time.sleep(Motors.current_spike_stabilze)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
-    def is_done(self):
+    # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.
+    # It causes the main program to wait until the pump has completed before it moves on to the next drink.
+    # The upshot is that you have to separate the .join() function from the .start() function, so all
+    # pumps get started first. If you .start() then immediately .join(), then the pumps will run one after the other
+    # instead of all at once.  .join() must be run for every pump *after* all the pumps have started.
+    def wait_untill_done(self):
         self.thread.join()
