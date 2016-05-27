@@ -86,11 +86,11 @@ middle_hat = Adafruit_MotorHAT(addr=0x61)
 
 # Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
 # recommended for auto-disabling motors on shutdown!
-def turnOffMotors(self):
+def turnOffMotors():
     # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
     for each_motor in range(1, 5):
-        Motors.bottom_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-        Motors.middle_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        bottom_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        middle_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
         # Motors.top_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
 # recommended for auto-disabling motors on shutdown!
 atexit.register(turnOffMotors)
@@ -178,12 +178,12 @@ class Motors():
         # Note: this should always be true, but being safe here!
         if self.calibration <= 0:
             raise LessThanZeroException(self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
-        # The pumps are run as processor threads, so all pumps can run concurrently.
-        self.thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
         time.sleep(Motors.current_spike_stabilze)
+        # The pumps are run as processor threads, so all pumps can run concurrently.
+        self.thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.

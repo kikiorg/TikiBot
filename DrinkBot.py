@@ -117,25 +117,55 @@ def print_recipes():
 
 
 ingr_pumps = {}
+valid_ingr_list = []
 temp_ingr_list = iter(ingr_list)
 # We have two hats right now, so 8 pumps -- range is zero indexed, 0-8, starting at 1
 for each_motor in range(1, 9):
     each_ingredient = temp_ingr_list.next()
     calibration_factor = drinks["Calibration"][each_ingredient]
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
+    valid_ingr_list.append(each_ingredient)
 
 #######################
 # PRINT INGREDIENTS   #
 #######################
 # This prints all the ingredients, including 'Recipe'
 # RFID_reader = NFCReader()
+my_drink_ID = None
+my_drink = ""
+
 while True:
 #    RFID_reader.run()
 
-    print ("I can make these drinks:  ")
+    print ("***************************   I can make these drinks:  ")
     for each_drink in drink_names:
         print each_drink
-    my_drink = raw_input("Enter Drink Name:  ")
+
+    logger = logging.getLogger("cardhandler").info
+    # print "Kiki: Before init"
+    RFID_reader = NFCReader(logger)
+    while RFID_reader._card_uid == None:
+        RFID_reader.run()
+    print "*****************************   Now throw the idol into the volcano!!!  Here's the ID: ", RFID_reader._card_uid
+    my_drink_ID = RFID_reader._card_uid
+    while RFID_reader._card_uid != None:
+        RFID_reader.run()
+
+    print "Encode (Kiki):", RFID_reader._card_uid, " drink: ", my_drink_ID == "045f8552334680"
+
+    # WARNING!!!  HARD CODED DRINK NAMES!!!! Kiki
+    my_drink = "ta"
+    if my_drink_ID == "0xdc0a723b": # The sample card that came with the device
+        my_drink = "t" # This is the test drink name --Kiki crossing fingers!!!
+    elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
+        my_drink = "ta"
+    elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
+        my_drink = "Tail-less Scorpion"
+    else:
+        my_drink = "Mai Tai"
+
+
+    # my_drink = raw_input("Enter Drink Name:  ")
     if my_drink == "Prime":
         my_drink = raw_input("Which pump to prime?  ")
         while my_drink not in ingr_list and my_drink != "stop":
@@ -149,20 +179,18 @@ while True:
     elif my_drink not in drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     else:
-
-        logger = logging.getLogger("cardhandler").info
-        RFID_reader = NFCReader(logger)
-        while NFCReader(logger).run():
-            pass
-
+        print "***************************   Making this drink: ", my_drink_ID
         # Start all the pumps going
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
                 #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
-                ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
+                if each_ingredient in valid_ingr_list:
+                    ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
+                else:
+                    print "We don't have ", each_ingredient, " on a pump in this DrinkBot."
         # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
         for each_ingredient in drinks[my_drink]:
-            if drinks[my_drink][each_ingredient] > 0:
+            if each_ingredient in valid_ingr_list and drinks[my_drink][each_ingredient] > 0:
                 ingr_pumps[each_ingredient].wait_untill_done()
 
