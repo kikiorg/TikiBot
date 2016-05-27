@@ -151,7 +151,7 @@ while True:
     while RFID_reader._card_uid != None:
         RFID_reader.run()
 
-    print "Encode (Kiki):", RFID_reader._card_uid, " drink: ", my_drink_ID == "045f8552334680"
+    #print "Encode (Kiki):", RFID_reader._card_uid, " drink: ", my_drink_ID == "045f8552334680"
 
     # WARNING!!!  HARD CODED DRINK NAMES!!!! Kiki
     my_drink = "ta"
@@ -179,7 +179,7 @@ while True:
     elif my_drink not in drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     else:
-        print "***************************   Making this drink: ", my_drink_ID
+        print "***************************   Making this drink: ", my_drink
         # Start all the pumps going
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
