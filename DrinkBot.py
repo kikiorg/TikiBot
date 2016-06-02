@@ -8,6 +8,7 @@ import logging
 import sys
 sys.path.insert(0, 'pynfc/src')
 from mifareauth import NFCReader
+import time
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
@@ -143,14 +144,25 @@ while True:
 
     logger = logging.getLogger("cardhandler").info
     # print "Kiki: Before init"
+    #my_drink_ID = None
+
     RFID_reader = NFCReader(logger)
-    while RFID_reader._card_uid == None:
-        RFID_reader.run()
-    print "*****************************   Now throw the idol into the volcano!!!  Here's the ID: ", RFID_reader._card_uid
-    my_drink_ID = RFID_reader._card_uid
+    time_polling = time.mktime(time.gmtime())
+    RFID_reader.run()
+
     while RFID_reader._card_uid != None:
+        if time.mktime(time.gmtime()) - time_polling > 120:
+            print "Will die in ", 155-(time.mktime(time.gmtime()) - time_polling), " seconds!"
         RFID_reader.run()
 
+    # Assert: RFID_reader._card_uid == None
+    while RFID_reader._card_uid == None:
+        if time.mktime(time.gmtime()) - time_polling > 120:
+            print "Will die in ", 155-(time.mktime(time.gmtime()) - time_polling), " seconds!"
+        RFID_reader.run()
+    print "*****************************   Now throw the idol into the volcano!!!  Here's the ID: ", RFID_reader._card_uid
+    # Assert: RFID_reader._card_uid != None
+    my_drink_ID = RFID_reader._card_uid
     #print "Encode (Kiki):", RFID_reader._card_uid, " drink: ", my_drink_ID == "045f8552334680"
 
     # WARNING!!!  HARD CODED DRINK NAMES!!!! Kiki
@@ -161,6 +173,10 @@ while True:
         my_drink = "ta"
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
         my_drink = "Tail-less Scorpion"
+    elif my_drink_ID == "8ca3dba1":  # round sample RFID tag -- taped to tan bottle opener
+        my_drink = "Hurricane"
+    elif my_drink_ID == "0496a589ba578c":  # tiny little RFID tag -- tapes to black bottle opener
+        my_drink = "Hawaiian Eye"
     else:
         my_drink = "Mai Tai"
 
