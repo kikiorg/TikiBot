@@ -167,9 +167,9 @@ while True:
 
     # WARNING!!!  HARD CODED DRINK NAMES!!!! Kiki
     my_drink = "ta"
-    if my_drink_ID == "0xdc0a723b": # The sample card that came with the device
+    if my_drink_ID == "dc0a723b": # The sample card that came with the device
         print "Found the large white sample card"
-        my_drink = "t" # This is the test drink name --Kiki crossing fingers!!!
+        my_drink = "Exit" # This is the test drink name --Kiki crossing fingers!!!
     elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
         print "Found Kiki's Clipper card"
         my_drink = "ta"
@@ -181,10 +181,29 @@ while True:
         my_drink = "Hurricane"
     elif my_drink_ID == "0496a589ba578c":  # tiny little RFID tag -- tapes to black bottle opener
         print "Found the tiny rectangular card"
-        my_drink = "ta"
-#        my_drink = "Hawaiian Eye"
-    else:
+        my_drink = "Outrigger"
+
+    elif my_drink_ID == "1cbfdba1":  # tiny little RFID tag -- tapes to black bottle opener
+        print "Found the brown Hawaiin idol"
+        my_drink = "Hawaiian Eye"
+    elif my_drink_ID == "0cd9dea1":  # tiny little RFID tag -- tapes to black bottle opener
+        print "Found the black Hawaiin idol"
+        my_drink = "Trader Vic Grog"
+    elif my_drink_ID == "bc5bdca1":  # tiny little RFID tag -- tapes to black bottle opener
+        print "Found the tall black idol"
+        my_drink = "Scorpion"
+    elif my_drink_ID == "0496a589ba60a0":  # tiny little RFID tag -- tapes to black bottle opener
+        print "Found the seahorse"
         my_drink = "Mai Tai"
+    elif my_drink_ID == "0496a589ba56ac":  # tiny little RFID tag -- tapes to black bottle opener
+        print "Found the baggie"
+        my_drink = "Pieces of Eight"
+    elif my_drink_ID == "0496a589ba665a":  # tiny little RFID tag -- tapes to black bottle opener
+        print "Found the Chief!!!"
+        my_drink = "Chief Lapu Lapu"
+    else:
+        print "CARD NOT FOUND!!! RDFI: ", my_drink_ID
+        my_drink = "ta"
 
 
     # my_drink = raw_input("Enter Drink Name:  ")
@@ -195,7 +214,7 @@ while True:
             print "Type stop to not prime a pump."
             my_drink == raw_input("Which pump to prime?")
         ingr_pumps[my_drink].prime()
-    elif my_drink in ["Exit", "exit", "X", "x"]:
+    elif my_drink in ["Kill", "Exit", "exit", "X", "x"]:
         print "I'm done!"
         break
     elif my_drink not in drink_names:
