@@ -72,29 +72,49 @@ class HatNotConnected(Exception):
 #   two boards, until they come in         #
 ############################################
 
+#self.__modulations = (nfc.nfc_modulation * len(mods))()
+#for i in range(len(mods)):
+#    self.__modulations[i].nmt = mods[i][0]
+#    self.__modulations[i].nbr = mods[i][1]
+
+hat_stack = []
 # bottom hat is default address 0x60
 # Board 0: Address = 0x60 Offset = binary 0000 (no jumpers required)
-bottom_hat = Adafruit_MotorHAT(addr=0x60)
+hat_stack.append(Adafruit_MotorHAT(addr=0x60))
 
 # middle hat has A0 jumper closed, so its address 0x61.
 # Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
-middle_hat = Adafruit_MotorHAT(addr=0x61)
+hat_stack.append(Adafruit_MotorHAT(addr=0x61))
+#hat_stack[1] = Adafruit_MotorHAT(addr=0x61)
 
 # top hat has A1 jumper closed, so its address 0x62.
 # Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
-# top_hat = Adafruit_MotorHAT(addr=0x62)
+hat_stack.append(Adafruit_MotorHAT(addr=0x62))
+#hat_stack[2] = Adafruit_MotorHAT(addr=0x62)
+
+all_hats = Adafruit_MotorHAT(addr=0x70) # Not used, but should address all hats at once
+
+# Quick test of all motors -- this turns them all on for one second
+def test_all_motors():
+    # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
+    for each_hat in range(3):
+        for each_motor in range(1, 5):
+            hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.FORWARD)
+            print "Testing Hat: ", each_hat, " and Motor: ", each_motor
+            time.sleep(1)
+            hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
 
 # Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
 # recommended for auto-disabling motors on shutdown!
 def turnOffMotors():
     # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
     for each_motor in range(1, 5):
-        bottom_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-        middle_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        hat_stack[0].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        hat_stack[1].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+        hat_stack[2].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
         # Motors.top_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
 # recommended for auto-disabling motors on shutdown!
 atexit.register(turnOffMotors)
-
 
 class Motors():
     # We assume these are pumps that dispense about 2oz every 60 seconds.
@@ -117,27 +137,36 @@ class Motors():
     # Motor controllers are numbered [1-4] -- this increments before it's first used, so initialized to 0
     next_pump_number = 0
     # Start with the bottom most Hat
-    current_hat = bottom_hat
+    current_hat = hat_stack[0]
 
     def __init__(self, name, calibration):
         # This is my sneaky code to iterate through all the motors as each is initialized
         # It goes through the 4 pumps for each hat
         if Motors.next_pump_number >= 4:
             Motors.next_pump_number = 1
-            if Motors.current_hat == bottom_hat:
-                Motors.current_hat = middle_hat
-                print "Note: now adding pumps from the middle hat."
-            elif Motors.current_hat == middle_hat:
-                raise HatNotConnected("Trying to use a Hat at address 0x62!  Does not exist!")
-                # Motors.current_hat = top_hat
-                print "Note: now adding pumps from the top hat."
-            else:
+            if Motors.current_hat == hat_stack[0]:
+                Motors.current_hat = hat_stack[1]
+                # print "Note: now adding pumps from the middle hat."
+            elif Motors.current_hat == hat_stack[1]:
+                Motors.current_hat = hat_stack[2]
+                # print "Note: now adding pumps from the top hat."
+            elif Motors.current_hat == hat_stack[2]:
                 raise HatNotConnected("Trying to use a Hat at address 0x63!  Does not exist!")
+                # Motors.current_hat = top_hat
+                # print "Note: now adding pumps from the top hat."
+            else:
+                raise HatNotConnected("Trying to use a Hat beyond address 0x63!  Does not exist!")
         else:
             Motors.next_pump_number += 1
         self.motor = Motors.current_hat.getMotor(Motors.next_pump_number)
+        # print "Current motor: ", self.motor
         self.name = name
         self.thread = None
+        # Quick test of each motor --Kiki
+        #self.motor.run(Adafruit_MotorHAT.FORWARD)
+        #time.sleep(1)
+        #self.motor.run(Adafruit_MotorHAT.RELEASE)
+
         # If the calibration == not_calibrated, it will run a calibration
         # Note: not-calibrated is generally 0 (will not dispense!), so don't just copy this into self!
         self.calibration = self.calibrate_pump(calibration)
@@ -191,5 +220,9 @@ class Motors():
     # The upshot is that you have to separate the .join() function from the .start() function, so all
     # pumps get started first. If you .start() then immediately .join(), then the pumps will run one after the other
     # instead of all at once.  .join() must be run for every pump *after* all the pumps have started.
-    def wait_untill_done(self):
+    def wait_until_done(self):
         self.thread.join()
+
+
+
+

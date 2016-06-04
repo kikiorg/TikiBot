@@ -120,8 +120,8 @@ def print_recipes():
 ingr_pumps = {}
 valid_ingr_list = []
 temp_ingr_list = iter(ingr_list)
-# We have two hats right now, so 8 pumps -- range is zero indexed, 0-8, starting at 1
-for each_motor in range(1, 9):
+# We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
+for each_motor in range(1, 13):
     each_ingredient = temp_ingr_list.next()
     calibration_factor = drinks["Calibration"][each_ingredient]
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
@@ -152,13 +152,13 @@ while True:
 
     while RFID_reader._card_uid != None:
         if time.mktime(time.gmtime()) - time_polling > 120:
-            print "Will die in ", 155-(time.mktime(time.gmtime()) - time_polling), " seconds!"
+            print "Will die in ", 153-(time.mktime(time.gmtime()) - time_polling), " seconds!"
         RFID_reader.run()
 
     # Assert: RFID_reader._card_uid == None
     while RFID_reader._card_uid == None:
         if time.mktime(time.gmtime()) - time_polling > 120:
-            print "Will die in ", 155-(time.mktime(time.gmtime()) - time_polling), " seconds!"
+            print "Will die in ", 153-(time.mktime(time.gmtime()) - time_polling), " seconds!"
         RFID_reader.run()
     print "*****************************   Now throw the idol into the volcano!!!  Here's the ID: ", RFID_reader._card_uid
     # Assert: RFID_reader._card_uid != None
@@ -168,15 +168,21 @@ while True:
     # WARNING!!!  HARD CODED DRINK NAMES!!!! Kiki
     my_drink = "ta"
     if my_drink_ID == "0xdc0a723b": # The sample card that came with the device
+        print "Found the large white sample card"
         my_drink = "t" # This is the test drink name --Kiki crossing fingers!!!
     elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
+        print "Found Kiki's Clipper card"
         my_drink = "ta"
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
+        print "Found Charlotte's Clipper card"
         my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "8ca3dba1":  # round sample RFID tag -- taped to tan bottle opener
+        print "Found the round RFID card"
         my_drink = "Hurricane"
     elif my_drink_ID == "0496a589ba578c":  # tiny little RFID tag -- tapes to black bottle opener
-        my_drink = "Hawaiian Eye"
+        print "Found the tiny rectangular card"
+        my_drink = "ta"
+#        my_drink = "Hawaiian Eye"
     else:
         my_drink = "Mai Tai"
 
@@ -208,5 +214,5 @@ while True:
         # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
         for each_ingredient in drinks[my_drink]:
             if each_ingredient in valid_ingr_list and drinks[my_drink][each_ingredient] > 0:
-                ingr_pumps[each_ingredient].wait_untill_done()
+                ingr_pumps[each_ingredient].wait_until_done()
 
