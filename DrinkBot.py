@@ -157,24 +157,26 @@ while True:
 
     # Assert: RFID_reader._card_uid == None
     while RFID_reader._card_uid == None:
-        if time.mktime(time.gmtime()) - time_polling > 120:
-            print "Will die in ", 153-(time.mktime(time.gmtime()) - time_polling), " seconds!"
+        #if time.mktime(time.gmtime()) - time_polling > 120:
+        #    print "Will die in ", 153-(time.mktime(time.gmtime()) - time_polling), " seconds!"
         RFID_reader.run()
-    print "*****************************   Now throw the idol into the volcano!!!  Here's the ID: ", RFID_reader._card_uid
+    print "*****************************   Now throw the idol into the volcano!!!"
+    print "Here's the ID: ", RFID_reader._card_uid
     # Assert: RFID_reader._card_uid != None
     my_drink_ID = RFID_reader._card_uid
     #print "Encode (Kiki):", RFID_reader._card_uid, " drink: ", my_drink_ID == "045f8552334680"
 
     # WARNING!!!  HARD CODED DRINK NAMES!!!! Kiki
-    my_drink = "ta"
+    my_drink = "test all"
     if my_drink_ID == "dc0a723b": # The sample card that came with the device
         print "Found the large white sample card"
         my_drink = "Exit" # This is the test drink name --Kiki crossing fingers!!!
-    elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
-        print "Found Kiki's Clipper card"
-        my_drink = "ta"
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
         print "Found Charlotte's Clipper card"
+        my_drink = "Prime"
+	my_drink = "test all"
+    elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
+        print "Found Kiki's Clipper card"
         my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "8ca3dba1":  # round sample RFID tag -- taped to tan bottle opener
         print "Found the round RFID card"
@@ -214,6 +216,13 @@ while True:
             print "Type stop to not prime a pump."
             my_drink == raw_input("Which pump to prime?")
         ingr_pumps[my_drink].prime()
+    elif my_drink in ["test all2"]:
+	i = 1
+        for each_ingredient in valid_ingr_list:
+            print "Pump number:", i, " name: ", each_ingredient
+            ingr_pumps[each_ingredient].dispense(2.0)
+	    time.sleep(5)
+	    i = i + 1
     elif my_drink in ["Kill", "Exit", "exit", "X", "x"]:
         print "I'm done!"
         break
