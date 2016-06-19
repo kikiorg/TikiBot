@@ -119,11 +119,11 @@ atexit.register(turnOffMotors)
 class Motors():
     # We assume these are pumps that dispense about 2oz every 60 seconds.
     peristaltic_2oz = 2
-    calibration_seconds = 60
+    calibration_seconds = 10
     # If the calibration value for a pump is 0, then this pump is not calibrated
-    not_calibrated = 0
+    not_calibrated = 0.0
     # This is how long it should take to fill the pump tubing to dispense
-    prime_seconds = 2
+    prime_seconds = 10
     # The pumps spike in current for about this amount of time.
     # This is used between pump startups so there's not a massive current spike
     # from all pumps starting at once.
@@ -138,6 +138,8 @@ class Motors():
     next_pump_number = 0
     # Start with the bottom most Hat
     current_hat = hat_stack[0]
+    # Kiki remove this or fix it
+    calibration_string = ""
 
     def __init__(self, name, calibration):
         # This is my sneaky code to iterate through all the motors as each is initialized
@@ -169,7 +171,11 @@ class Motors():
 
         # If the calibration == not_calibrated, it will run a calibration
         # Note: not-calibrated is generally 0 (will not dispense!), so don't just copy this into self!
-        self.calibration = self.calibrate_pump(calibration)
+	print "Kiki I;m about to calibrate."
+	# Note: calibration was not always a float, so we must force it
+	# The problem arises when 0.0 == 0 is false.
+        self.calibration = 0.0
+        self.calibration = self.calibrate_pump(float(calibration))
 
     # This returns the best calibration value.
     # If the calibration was not set in the .csv file, then ask the user to calibrate the pump
@@ -177,18 +183,23 @@ class Motors():
     # then asks for the amount actually dispensed.
     # It then calculates a normalized 1oz dispense rate.
     def calibrate_pump(self, calibration):
+	print "Kiki calibration values: ", calibration, " -- ", self.not_calibrated, " is true? ", calibration == self.not_calibrated
         if calibration == self.not_calibrated:
             yesno = raw_input("Do you want to calibrate pump for " + self.name + "?")
             if yesno == "yes":
-                self.dispense(Motors.calibration_seconds)
+                self.calibration = float(1.0 / Motors.peristaltic_2oz * Motors.calibration_seconds)
+                print "Kiki self.calibraion ", self.calibration
+		self.dispense(Motors.calibration_seconds)
+		self.wait_until_done()
                 new_factor = raw_input("How much liquid was delivered?")
-                return float(1 / new_factor * Motors.calibration_seconds)
                 print "Note: please change the value in your .csv file for " + name
+		calibration_string.append( new_factor + ",")
+                return float(1 / new_factor * Motors.calibration_seconds)
             else:
                 print "Well...ok, but that means I'll enter a standard 2oz for this pump and it will be inaccurate!"
                 return float(1 / Motors.peristaltic_2oz * Motors.calibration_seconds)
         else:
-            return float(calibration)
+            return float(calibration/Motors.peristaltic_2oz  * Motors.calibration_seconds)
 
     # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
     # kick the pump by 1/10ths too.
@@ -205,7 +216,7 @@ class Motors():
     def dispense(self, ounces):
         # self.calibration is multiplied by the ounces to find the time to run the pump -- must be >0
         # Note: this should always be true, but being safe here!
-        if self.calibration <= 0:
+        if self.calibration <= 0.0:
             raise LessThanZeroException(self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
@@ -221,8 +232,7 @@ class Motors():
     # pumps get started first. If you .start() then immediately .join(), then the pumps will run one after the other
     # instead of all at once.  .join() must be run for every pump *after* all the pumps have started.
     def wait_until_done(self):
+	print "Kiki Calibration string: "
+	print self.calibration_string
         self.thread.join()
-
-
-
 

@@ -123,7 +123,7 @@ temp_ingr_list = iter(ingr_list)
 # We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
 for each_motor in range(1, 13):
     each_ingredient = temp_ingr_list.next()
-    calibration_factor = drinks["Calibration"][each_ingredient]
+    calibration_factor = float(drinks["Calibration"][each_ingredient])
     ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
     valid_ingr_list.append(each_ingredient)
 
