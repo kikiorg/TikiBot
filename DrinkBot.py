@@ -174,10 +174,10 @@ while True:
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
         print "Found Charlotte's Clipper card"
         my_drink = "Prime"
-	my_drink = "test all"
+        my_drink = "Pieces of Eight"
     elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
         print "Found Kiki's Clipper card"
-        my_drink = "Tail-less Scorpion"
+	my_drink = "Prime"
     elif my_drink_ID == "8ca3dba1":  # round sample RFID tag -- taped to tan bottle opener
         print "Found the round RFID card"
         my_drink = "Hurricane"
@@ -198,8 +198,8 @@ while True:
         print "Found the seahorse"
         my_drink = "Mai Tai"
     elif my_drink_ID == "0496a589ba56ac":  # tiny little RFID tag -- tapes to black bottle opener
-        print "Found the baggie"
-        my_drink = "Pieces of Eight"
+        print "Found the Lady Virgin"
+        my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "0496a589ba665a":  # tiny little RFID tag -- tapes to black bottle opener
         print "Found the Chief!!!"
         my_drink = "Chief Lapu Lapu"
@@ -209,13 +209,17 @@ while True:
 
 
     # my_drink = raw_input("Enter Drink Name:  ")
-    if my_drink == "Prime":
-        my_drink = raw_input("Which pump to prime?  ")
-        while my_drink not in ingr_list and my_drink != "stop":
-            print "I don't have a pump for " + my_drink
-            print "Type stop to not prime a pump."
-            my_drink == raw_input("Which pump to prime?")
-        ingr_pumps[my_drink].prime()
+    if my_drink in ["Prime"]:
+	for each_ingr in valid_ingr_list:
+            ingr_pumps[each_ingr].prime()
+#        while True:
+#            my_drink = raw_input("Which pump to prime (stop to stop)?  ")
+#            while my_drink not in ingr_list and my_drink != "stop":
+#                print "I don't have a pump for " + my_drink
+#                print "Type stop to not prime a pump."
+#                my_drink == raw_input("Which pump to prime (stop to stop)?")
+#            ingr_pumps[my_drink].prime()
+            
     elif my_drink in ["test all2"]:
 	i = 1
         for each_ingredient in valid_ingr_list:

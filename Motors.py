@@ -26,7 +26,7 @@ class ThreadMe(threading.Thread):
     def run(self):
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.FORWARD)
-        print self.name + " dispensing now for", self.time, "seconds."
+        # print self.name + " Kiki dispensing now for", self.time, "seconds."
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
@@ -236,8 +236,8 @@ class Motors():
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
         time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        print "Kiki Disepensing for this seconds: ", ounces * self.calibration, " name: ", self.name
-        print "Kiki ounces: ", ounces , " calibration factor: ", self.calibration, " name: ", self.name
+        # print "Kiki Disepensing for this seconds: ", ounces * self.calibration, " name: ", self.name
+        # print "Kiki ounces: ", ounces , " calibration factor: ", self.calibration, " name: ", self.name
         self.thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
@@ -247,6 +247,4 @@ class Motors():
     # pumps get started first. If you .start() then immediately .join(), then the pumps will run one after the other
     # instead of all at once.  .join() must be run for every pump *after* all the pumps have started.
     def wait_until_done(self):
-        print "Kiki Calibration string: "
-        print Motors.calibration_string
         self.thread.join()
