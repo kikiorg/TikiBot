@@ -30,6 +30,24 @@ class ThreadMe(threading.Thread):
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
+    class ThreadMeBackward(threading.Thread):
+        def __init__(self, motor, time, name):
+            # I need only the motor, not the whole list for this.
+            # Passing the name, though, assures the key and name match
+            super(ThreadMeBackward, self).__init__()
+            self.motor = motor
+            self.time = time
+            self.name = name
+            self.start()
+            # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
+
+        def run(self):
+            self.motor.setSpeed(255)
+            self.motor.run(Adafruit_MotorHAT.BACKWARD)
+            # print self.name + " Kiki dispensing now for", self.time, "seconds."
+            time.sleep(self.time)
+            self.motor.run(Adafruit_MotorHAT.RELEASE)
+
 
 #############################
 #  NOTES: PUMP CALIBRATION  #
@@ -131,7 +149,8 @@ class Motors():
     # If the calibration value for a pump is 0, then this pump is not calibrated
     not_calibrated = 0.0
     # This is how long it should take to fill the pump tubing to dispense
-    prime_seconds = 10
+    prime_seconds = 13
+    purge_seconds = 17
     # The pumps spike in current for about this amount of time.
     # This is used between pump startups so there's not a massive current spike
     # from all pumps starting at once.
@@ -223,6 +242,11 @@ class Motors():
         while answer == "y":
             my_thread = ThreadMe(self.motor, Motors.prime_seconds / 10, self.name)
             answer = raw_input("More? [y/n]")
+
+    def reverse_purge(self):
+        self.thread = ThreadMeBackward(self.motor, Motors.purge_seconds, self.name)
+    def forward_purge(self):
+        self.thread = ThreadMe(self.motor, Motors.purge_seconds, self.name)
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces):
