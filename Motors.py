@@ -12,11 +12,11 @@ import atexit
 import threading
 
 
-class ThreadMe(threading.Thread):
+class ThreadYou(threading.Thread):
     def __init__(self, motor, time, name):
         # I need only the motor, not the whole list for this.
         # Passing the name, though, assures the key and name match
-        super(ThreadMe, self).__init__()
+        super(ThreadYou, self).__init__()
         self.motor = motor
         self.time = time
         self.name = name
@@ -30,23 +30,23 @@ class ThreadMe(threading.Thread):
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
-    class ThreadMeBackward(threading.Thread):
-        def __init__(self, motor, time, name):
-            # I need only the motor, not the whole list for this.
-            # Passing the name, though, assures the key and name match
-            super(ThreadMeBackward, self).__init__()
-            self.motor = motor
-            self.time = time
-            self.name = name
-            self.start()
-            # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
+class ThreadMeBackward(threading.Thread):
+    def __init__(self, motor, time, name):
+        # I need only the motor, not the whole list for this.
+        # Passing the name, though, assures the key and name match
+        super(ThreadMeBackward, self).__init__()
+        self.motor = motor
+        self.time = time
+        self.name = name
+        self.start()
+        # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
 
-        def run(self):
-            self.motor.setSpeed(255)
-            self.motor.run(Adafruit_MotorHAT.BACKWARD)
-            # print self.name + " Kiki dispensing now for", self.time, "seconds."
-            time.sleep(self.time)
-            self.motor.run(Adafruit_MotorHAT.RELEASE)
+    def run(self):
+        self.motor.setSpeed(255)
+        self.motor.run(Adafruit_MotorHAT.BACKWARD)
+        # print self.name + " Kiki dispensing now for", self.time, "seconds."
+        time.sleep(self.time)
+        self.motor.run(Adafruit_MotorHAT.RELEASE)
 
 
 #############################
@@ -235,18 +235,18 @@ class Motors():
     # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
     # kick the pump by 1/10ths too.
     def prime(self):
-        self.thread = ThreadMe(self.motor, Motors.prime_seconds, self.name)
+        self.thread = ThreadYou(self.motor, Motors.prime_seconds, self.name)
         self.thread.join()  # Wait until pump is done before continuing
 
         answer = raw_input("More?")
         while answer == "y":
-            my_thread = ThreadMe(self.motor, Motors.prime_seconds / 10, self.name)
+            my_thread = ThreadYou(self.motor, Motors.prime_seconds / 10, self.name)
             answer = raw_input("More? [y/n]")
 
     def reverse_purge(self):
         self.thread = ThreadMeBackward(self.motor, Motors.purge_seconds, self.name)
     def forward_purge(self):
-        self.thread = ThreadMe(self.motor, Motors.purge_seconds, self.name)
+        self.thread = ThreadYou(self.motor, Motors.purge_seconds, self.name)
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces):
