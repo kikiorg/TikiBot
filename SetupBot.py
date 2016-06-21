@@ -185,7 +185,7 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
         # Purge with air
         print "Purge tubes with air."
         prime_all_pumps()
-        yesno = raw_input("Put hoses into rinse water then press Enter. (CTRL-C to end) ")
+        yesno = raw_input("Put hoses into bleach water then press Enter. (CTRL-C to end) ")
 
         # Run bleach water through the tubes -- run this twice
         print "1) Prime pumps with bleach."
@@ -196,6 +196,7 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
         # Purge with air
         print "Purge tubes with air."
         prime_all_pumps()
+        yesno = raw_input("Put hoses into rinse water then press Enter. (CTRL-C to end) ")
 
         # Run water through the tubes -- run this twice
         print "1) Prime pumps with water."

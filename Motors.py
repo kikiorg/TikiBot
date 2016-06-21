@@ -243,6 +243,10 @@ class Motors():
         elif prime_value < 0.0:
             print "Invalid prime value!  Less than zero!  Using default: ", Motors.prime_seconds_default
             prime_value = Motors.prime_seconds_default
+        # The pump will have a current spike when it first starts up.
+        # This delay allows that current spike to settle to operating current.
+        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMe(self.motor, prime_value, self.name)
 
     def reverse_purge(self, my_purge_seconds = purge_seconds_default):
