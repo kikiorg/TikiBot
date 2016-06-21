@@ -79,13 +79,13 @@ def calibrate_pumps():
         # This will force each pump to be calibrated by the user
         each_pump = Motors.not_calibrated
 
-def prime_pumps(direction = "forward"):
+def prime_all_pumps(direction = "forward"):
     if direction in ["forward"]:
         for each_ingr in valid_ingr_list:
-            ingr_pumps[each_ingr].forward_purge()
+            ingr_pumps[each_ingr].forward_purge(purge_values[each_ingr])
     else:
         for each_ingr in valid_ingr_list:
-            ingr_pumps[each_ingr].reverse_purge()
+            ingr_pumps[each_ingr].reverse_purge(purge_values[each_ingr] * 1.25)
     for each_ingr in valid_ingr_list:
         ingr_pumps[each_ingredient].wait_until_done()
 
@@ -117,7 +117,10 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
 
     print "List of commands: "
     print "[C]alibrate: "
+    print "[G]lobal calibration check: "
+    print "    This dispenses all pumps for 1oz -- more like a fast checksum"
     print "[P]rime -- prime all pumps"
+    print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
     print "[S]hutdown full phase -- this includes these steps:"
     print "    Reverse liquids -- then wait"
     print "    Prime 2x with water -- then wait, purge with air, wait"
@@ -133,7 +136,12 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
             ingr_pumps[each_ingr].prime(purge_values[each_ingr])
         for each_ingr in valid_ingr_list:
             ingr_pumps[each_ingr].wait_until_done()
-
+    elif my_command in ["G", "g", "global", "Global"]:
+        for each_ingr in valid_ingr_list:
+            ingr_pumps[each_ingr].dispense(1.0)
+        for each_ingr in valid_ingr_list:
+            ingr_pumps[each_ingr].wait_until_done()
+    elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
         # Go through all the pumps and make sure each is primed
         i = 0
         for each_ingr in valid_ingr_list:
@@ -145,62 +153,60 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
                 print "More for Pump #", i, " Name: ", each_ingr, "?"
                 yesno = raw_input("Enter [y/n]: ")
 
-                # while True:
-#            my_drink = raw_input("Which pump to prime (stop to stop)?  ")
-#            while my_drink not in ingr_list and my_drink != "stop":
-#                print "I don't have a pump for " + my_drink
-#                print "Type stop to not prime a pump."
-#                my_drink == raw_input("Which pump to prime (stop to stop)?")
-#            ingr_pumps[my_drink].prime()
     elif my_command in ["C", "c", "Calibrate", "calibrate"]:
-        print "This feature has not been implemented yet."
-#        for each_ingr in valid_ingr_list:
-#            ingr_pumps[each_ingr].prime()
-# while True:
-#            my_drink = raw_input("Which pump to prime (stop to stop)?  ")
-#            while my_drink not in ingr_list and my_drink != "stop":
-#                print "I don't have a pump for " + my_drink
-#                print "Type stop to not prime a pump."
-#                my_drink == raw_input("Which pump to prime (stop to stop)?")
-#            ingr_pumps[my_drink].prime()
+        new_calibration_string = "Calibration,"
+        yesno = raw_input("Have all the pumps been primed? [y/n] ")
+        if yesno not in ["Y", "y", "Yes", "YES", "yes"]:
+            yesno = raw_input("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
+            prime_all_pumps()
+
+        i = 0
+        for each_ingr in valid_ingr_list:
+            i = i + 1
+            yesno = raw_input("Force calibrate Pump #" + str(i) + " [" + each_ingr + "]? [y/n] ")
+            if yesno in ["Y", "y", "yes", "YES", "Yes"]:
+                ingr_pumps[each_ingr].force_calibrate_pump()
+            new_calibration_string += str(ingr_pumps[each_ingr].calibration_oz) + ","
+        print new_calibration_string
+
     elif my_command in ["S", "s", "Shutdown", "shutdown"]:
         # Reverse all the liquid back into the bottles
         print "Reverse purging liquids back to bottles."
-        prime_pumps("reverse")
+        prime_all_pumps("reverse")
         yesno = raw_input("Put hoses into rinse water then press Enter. (CTRL-C to end) ")
 
         # Run water through the tubes -- run this twice
         print "1) Prime pumps with water."
-        prime_pumps()
+        prime_all_pumps()
         print "2) Purge pumps with water."
-        prime_pumps()
+        prime_all_pumps()
         yesno = raw_input("Remove the hoses to allow air to enter then press Enter. (CTRL-C to end) ")
 
         # Purge with air
         print "Purge tubes with air."
-        prime_pumps()
+        prime_all_pumps()
         yesno = raw_input("Put hoses into rinse water then press Enter. (CTRL-C to end) ")
 
         # Run bleach water through the tubes -- run this twice
         print "1) Prime pumps with bleach."
-        prime_pumps()
+        prime_all_pumps()
         print "2) Purge pumps with bleach."
-        prime_pumps()
+        prime_all_pumps()
         yesno = raw_input("Remove the hoses to allow air to enter then press Enter. (CTRL-C to end) ")
         # Purge with air
         print "Purge tubes with air."
-        prime_pumps()
+        prime_all_pumps()
 
         # Run water through the tubes -- run this twice
         print "1) Prime pumps with water."
-        prime_pumps()
+        prime_all_pumps()
         print "2) Purge pumps with water."
-        prime_pumps()
+        prime_all_pumps()
         yesno = raw_input("Remove the hoses to allow air to enter then press Enter. (CTRL-C to end) ")
 
         # Purge with air
         print "Purge tubes with air."
-        prime_pumps()
+        prime_all_pumps()
         yesno = raw_input("YOU ARE NOW READY TO SHUT DOWN. (CTRL-C to end) ")
 
     elif my_command in ["X", "x", "E", "e", "Q", "q", "Exit", "exit", "Quit", "quit"]:

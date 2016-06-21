@@ -37,8 +37,7 @@ recipe_name = ingr_list[0]
 # The first row is all the ingredients, but the first entry is the first column title "Recipes"
 # This is a pesky exception, so to make it clean, we remove that column title 
 ingr_list.remove(recipe_name)
-
-
+ingr_list.remove("Prime") # Don't need this for this program
 
 #####################################
 # Create the list of drink recipes  #
@@ -78,28 +77,12 @@ myFile.close()
 # to have individual entries of not_calibrated so the user can recalibrate individual pumps
 # simply by entering the number ito the .csv file.
 
-if drinks.get("Calibration") is None:
-    print "NO CALIBRATION!!!!"
-    for each_ingredient in ingr_list:
-        # This will force each pump to be calibrated by the user
-        drinks["Calibration"][each_ingredient] = Motors.not_calibrated
-
 drink_names.remove("Calibration")
-
+drink_names.remove("Prime")
 
 #############################################################
-# This prints all the ingredients, including 'Recipe'       #
+# This prints all the ingredients, not including 'Recipe'   #
 #############################################################
-# NOTE: This might not work -- needs to be code checked --Kiki
-def print_recipes_old():
-    for each_drink in recipe_book:
-        for each_ingredient in ingr_list:
-            # Skip the ingredients that are not used in this recipe
-            # Comment this out of you want empty entries to be printed
-            if each_drink[each_ingredient] is not '':
-                print each_ingredient + ': ' + each_drink[each_ingredient]
-
-
 def print_recipes():
     for each_drink in drink_names:
         print each_drink
@@ -116,15 +99,14 @@ def print_recipes():
 #     DRINK MAKER     #
 #######################
 
-
 ingr_pumps = {}
 valid_ingr_list = []
 temp_ingr_list = iter(ingr_list)
 # We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
 for each_motor in range(1, 13):
     each_ingredient = temp_ingr_list.next()
-    calibration_factor = float(drinks["Calibration"][each_ingredient])
-    ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_factor )
+    calibration_oz = float(drinks["Calibration"][each_ingredient])
+    ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz )
     valid_ingr_list.append(each_ingredient)
 
 #######################
@@ -261,7 +243,7 @@ while True:
         for each_ingredient in drinks[my_drink]:
             if drinks[my_drink][each_ingredient] > 0:
                 print each_ingredient + ": " + drinks[my_drink][each_ingredient]
-                #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_factor, " seconds."
+                #print "Normalized: ", float(drinks[my_drink][each_ingredient]) * ingr_pumps[each_ingredient].calibration_oz, " seconds."
                 if each_ingredient in valid_ingr_list:
                     ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
                 else:

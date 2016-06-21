@@ -12,11 +12,12 @@ import atexit
 import threading
 
 
-class ThreadYou(threading.Thread):
+class ThreadMe(threading.Thread):
+    # motor = which motor by ref; time = actual time to run; name = name assigned to pump
     def __init__(self, motor, time, name):
         # I need only the motor, not the whole list for this.
         # Passing the name, though, assures the key and name match
-        super(ThreadYou, self).__init__()
+        super(ThreadMe, self).__init__()
         self.motor = motor
         self.time = time
         self.name = name
@@ -31,6 +32,7 @@ class ThreadYou(threading.Thread):
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
 class ThreadMeBackward(threading.Thread):
+    # motor = which motor by ref; time = actual time to run; name = name assigned to pump
     def __init__(self, motor, time, name):
         # I need only the motor, not the whole list for this.
         # Passing the name, though, assures the key and name match
@@ -144,13 +146,16 @@ atexit.register(turnOffMotors)
 
 class Motors():
     # We assume these are pumps that dispense about 2oz every 60 seconds.
-    peristaltic_2oz = 2
-    calibration_seconds = 60
+    peristaltic_2oz = 2.0
+    calibration_seconds = 60.0
+    # NOTE!!!  REMOVE THIS!!! Kiki
     # If the calibration value for a pump is 0, then this pump is not calibrated
-    not_calibrated = 0.0
-    # This is how long it should take to fill the pump tubing to dispense
-    prime_seconds = 13
-    purge_seconds = 17
+    # not_calibrated = 0.0
+    # This is how long it should take to fill the pump tubing to dispense -- no longer, so none is wasted
+    prime_seconds_default = 13
+    # NOTE!!! I Don't think this is used!!! Kiki
+    # Reverse purge a little longer to be sure the tube is completely purged
+    purge_seconds_default = 17
     # The pumps spike in current for about this amount of time.
     # This is used between pump startups so there's not a massive current spike
     # from all pumps starting at once.
@@ -167,7 +172,7 @@ class Motors():
     # Kiki remove this or fix it
     calibration_string = ""
 
-    def __init__(self, name, calibration):
+    def __init__(self, name, calibration_oz = peristaltic_2oz):
         # This is my sneaky code to iterate through all the motors as each is initialized
         # It goes through the 4 pumps for each hat
         if Motors.next_pump_number >= 4:
@@ -190,71 +195,73 @@ class Motors():
         # print "Current motor: ", self.motor
         self.name = name
         self.thread = None
-        # Quick test of each motor --Kiki
-        # self.motor.run(Adafruit_MotorHAT.FORWARD)
-        # time.sleep(1)
-        # self.motor.run(Adafruit_MotorHAT.RELEASE)
+        # Change June 20, 2016: Changedthe function of the calibration factor
+        #   Now the factor is calculated in one place: dispense, and if no calibration is provided, it uses a default
+        self.calibration_oz = calibration_oz
 
-        # If the calibration == not_calibrated, it will run a calibration
-        # Note: not-calibrated is generally 0.0 (will not dispense!), so don't just copy this into self!
-        # Note: calibration was not always a float, so we must force it
-        # The problem arises when 0.0 == 0 is false.
-        self.calibration = 0.0
-        self.calibration = self.calibrate_pump(float(calibration))
-
+    # NOTE:  REMOVE THIS FUNCTION!!!! Kiki
     # This returns the best calibration value.
     # If the calibration was not set in the .csv file, then ask the user to calibrate the pump
     # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
     # then asks for the amount actually dispensed.
     # It then calculates a normalized 1oz dispense rate.
-    def calibrate_pump(self, calibration):
-        if calibration == self.not_calibrated:
-            yesno = raw_input("Do you want to calibrate pump for " + self.name + "? ")
-            if yesno in ["yes", "y", "Y", "YES"]:
-                # Must assign some kind of calibration value before dispensing -- default is peristaltic_2oz
-                self.calibration = float(1.0 / Motors.peristaltic_2oz * Motors.calibration_seconds)
-                self.dispense(Motors.peristaltic_2oz)
-                self.wait_until_done()
-                amount_dispensed = raw_input("How much liquid was delivered? ")
-                # 1oz / actual oz = X seconds / actual dispense time
-                # solve for X -- which is the time it really should run to dispense 1oz
-                # X seconds = 1oz/actual oz * actual dispense time
-                # So now to dispense, say, 1.5oz, you multiply 1.5 * X to equal the seconds to run
-                new_factor = float(1.0 / float(amount_dispensed) * Motors.calibration_seconds)
-                print "New factor ", new_factor
-                Motors.calibration_string += str(amount_dispensed) + ","
-                return new_factor
-            else:
-                print "Well...ok, but that means I'll enter a standard ", Motors.peristaltic_2oz, " for this pump and it will be inaccurate!"
-                new_factor = float(1.0 / Motors.peristaltic_2oz * Motors.calibration_seconds)
-                return new_factor
-        else:
-            new_factor = float(1.0 / calibration * Motors.calibration_seconds)
-            return new_factor
+    #def calibrate_pump(self, calibration_oz):
+    #    if calibration_oz == self.not_calibrated:
+    #        print "Pump " + self.name + " is not calibrated!  Using the default of ", peristaltic_2oz
+    #        self.calibration_oz = peristaltic_2oz
+    #    return self.calibration_oz
+
+        # This returns the best calibration value.
+        # If the calibration was not set in the .csv file, then ask the user to calibrate the pump
+        # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
+        # then asks for the amount actually dispensed.
+        # It then calculates a normalized 1oz dispense rate.
+    def force_calibrate_pump(self):
+        # Must assign some kind of calibration value before dispensing -- default is peristaltic_2oz
+        print "Old calibration ounces: ", self.calibration_oz
+        self.dispense(Motors.peristaltic_2oz)
+        self.wait_until_done()
+        amount_dispensed = raw_input("How much liquid was delivered [press Enter if exactly 2.0]? ")
+        # This is where things get tricky: we now have to reverse engineer the actual ounces
+        # Let's say, given the current calibration, 2oz should be 2oz:
+        # 2oz theory / 2oz actual = X * (formula) * 2oz / (formula) * 2oz
+        # Test this formula with numbers:
+        # last dispensed 2.5oz in 60 seconds, formula = 1oz/2.5oz*60sec = ~24sec
+        # now dispenses 2.7 in 60 seconds, so now it dispenses more
+        # 2oz theory / 2oz actual = X
+        if amount_dispensed is not "" and float(amount_dispensed) > 0.0:
+            self.calibration_oz = self.calibration_oz * (float(amount_dispensed) / Motors.peristaltic_2oz)
+            print "Adjusted amount for " + self.name + ":" + str(self.calibration_oz)
+            print "Factor: " + str(float(amount_dispensed) / Motors.peristaltic_2oz )
+        return self.calibration_oz
 
     # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
     # kick the pump by 1/10ths too.
-    def prime(self):
-        self.thread = ThreadYou(self.motor, Motors.prime_seconds, self.name)
-        self.thread.join()  # Wait until pump is done before continuing
+    def prime(self, prime_value=0.0):
+        if prime_value == 0.0:
+            prime_value = Motors.prime_seconds_default
+        elif prime_value < 0.0:
+            print "Invalid prime value!  Less than zero!  Using default: ", Motors.prime_seconds_default
+            prime_value = Motors.prime_seconds_default
+        self.thread = ThreadMe(self.motor, prime_value, self.name)
 
-        answer = raw_input("More?")
-        while answer == "y":
-            my_thread = ThreadYou(self.motor, Motors.prime_seconds / 10, self.name)
-            answer = raw_input("More? [y/n]")
-
-    def reverse_purge(self):
-        self.thread = ThreadMeBackward(self.motor, Motors.purge_seconds, self.name)
-    def forward_purge(self):
-        self.thread = ThreadYou(self.motor, Motors.purge_seconds, self.name)
+    def reverse_purge(self, my_purge_seconds = purge_seconds_default):
+        self.thread = ThreadMeBackward(self.motor, my_purge_seconds, self.name)
+    def forward_purge(self, my_purge_seconds = purge_seconds_default):
+        self.thread = ThreadMe(self.motor, Motors.purge_seconds_default, self.name)
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces):
-        # self.calibration is multiplied by the ounces to find the time to run the pump -- must be >0
+        # Formala: 1oz / actual oz dispensed in 60 seconds = time for 1oz / 60 seconds -- solve for time for 1oz
+        #          1oz / calibration_oz = X / Motors.calibration_seconds
+        # Or:      time for one ounce = 1oz / actual oz dispensed in 60 seconds * 60 seconds
+        #          calibrated_time = 1oz / calibration_oz * Motors.calibration_seconds
+        # Multiply X times ounces for the actual time for those calibrated ounces
+        calibrated_time = float(float(ounces) / self.calibration_oz * Motors.calibration_seconds)
         # Note: this should always be true, but being safe here!
-        if self.calibration <= 0.0:
+        if calibrated_time <= 0.0:
             raise LessThanZeroException(
-                self.name + ' - calibration:' + str(self.calibration) + ' Must be >0 for motors to run!')
+                self.name + ' - calibration:' + str(self.calibration_oz) + ' Must be >0 for motors to run!')
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
@@ -262,7 +269,7 @@ class Motors():
         # The pumps are run as processor threads, so all pumps can run concurrently.
         # print "Kiki Disepensing for this seconds: ", ounces * self.calibration, " name: ", self.name
         # print "Kiki ounces: ", ounces , " calibration factor: ", self.calibration, " name: ", self.name
-        self.thread = ThreadMe(self.motor, ounces * self.calibration, self.name)
+        self.thread = ThreadMe(self.motor, calibrated_time, self.name)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.
