@@ -133,7 +133,7 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     # my_drink = raw_input("Enter Drink Name:  ")
     if my_command in ["P", "p", "prime", "Prime"]:
         for each_ingr in valid_ingr_list:
-            ingr_pumps[each_ingr].prime(purge_values[each_ingr])
+            ingr_pumps[each_ingr].prime(purge_values[each_ingr] - 2)
         for each_ingr in valid_ingr_list:
             ingr_pumps[each_ingr].wait_until_done()
     elif my_command in ["G", "g", "global", "Global"]:
@@ -144,14 +144,23 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
         # Go through all the pumps and make sure each is primed
         i = 0
+        total_string = ""
         for each_ingr in valid_ingr_list:
             i += 1
             print "More for Pump #", i, " Name: ", each_ingr, "?"
             yesno = raw_input( "Enter [y/n]: " )
-            while yesno in ["Y", "y", "Yes", "YES", "yes"]:
-                ingr_pumps[each_ingr].prime(purge_values[each_ingr]/10)
+            total_tiny = 0
+            while yesno not in ["Y", "y", "Yes", "YES", "yes"]:
+#                ingr_pumps[each_ingr].prime(purge_values[each_ingr]/20)
+#                ingr_pumps[each_ingr].prime(0.025)
+#                total_tiny = total_tiny + 0.025
+                ingr_pumps[each_ingr].prime(float(yesno))
+                total_tiny = total_tiny + float(yesno)
                 print "More for Pump #", i, " Name: ", each_ingr, "?"
                 yesno = raw_input("Enter [y/n]: ")
+            print "Total extra priming for " + each_ingr + ": " + str(total_tiny)
+            total_string += str(total_tiny) + ","
+        print total_string
 
     elif my_command in ["C", "c", "Calibrate", "calibrate"]:
         new_calibration_string = "Calibration,"
