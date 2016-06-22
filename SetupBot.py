@@ -10,8 +10,25 @@ sys.path.insert(0, 'pynfc/src')
 from mifareauth import NFCReader
 import time
 
-# Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
+# The Motors Class that does threading and other cool stuff.
 from Motors import Motors
+
+#############################################
+# To Do List for this file:                 #
+#############################################
+# Restructure Shutdown command:
+#   Instead of a set routine, this should have a menu of steps
+#   The user can press [Enter] to go ahead with the correct next step
+#   Or the user can enter a number to repeat or skip to a step.
+#   This will give a lot more control over shutdown, handling more contingencies
+#
+# Error checking:
+#   Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
+#   Check for the existence of the Prime line -- if it doesn't exist, then use defaults
+#   Check for strings vs floats vs ints and handle the error
+# Constants: change any hard coded constants to global named constants
+# Integration: Possibly integrate this entire file into the original DrinkBot.py
+# Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
@@ -38,17 +55,12 @@ recipe_name = ingr_list[0]
 ingr_list.remove(recipe_name)
 
 
-# for each_drink in recipe_book:
-#     drinks[each_drink[recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
-
 # KIKI CHECK FOR EXISTANCE OF THIS LINE!!!!  MAKE DEFAULTS!!!
 calibration_list = recipe_book.next()
-calibration_values = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
+calibration_values = {}  # Start with an empty list, so we can append each ingredient Key:Value pair
 # Now go through all the ingredients for this drink, and append the amounts into the drink
 for each_value in ingr_list:
-    # print "ingr: " , each_ingredient
-    # Skip the ingredients that are not used in this recipe
-    # Comment this out of you want empty entries to be added
+    # Grab all the calibration values -- note, do not keep this as an actual recipe
     if calibration_list[each_value] is not '':
         calibration_values[each_value] = float(calibration_list[each_value])
     else:
@@ -58,18 +70,15 @@ for each_value in ingr_list:
 
 # KIKI CHECK FOR EXISTANCE OF THIS LINE!!!!  MAKE DEFAULTS!!!
 purge_list = recipe_book.next()
-purge_values = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
-# Now go through all the ingredients for this drink, and append the amounts into the drink
+purge_values = {}  # Start with an empty list, so we can append each ingredient Key:Value pair
 for each_value in ingr_list:
-    # print "ingr: " , each_ingredient
-    # Skip the ingredients that are not used in this recipe
-    # Comment this out of you want empty entries to be added
+    # Grab all the prime values -- note, do not keep this as an actual recipe
     if purge_list[each_value] is not '':
         # ASSERT: add assert that this is a value -- Kiki
         purge_values[each_value] = float(purge_list[each_value])
     else:
         # The .csv file has nothing for this cell, so use a default value
-        purge_values[each_value] = Motors.prime_seconds
+        purge_values[each_value] = Motors.prime_seconds_default
 
 # Done getting the info from the file.
 myFile.close()
@@ -111,7 +120,6 @@ my_command = ""
 
 
 while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit", "Quit", "q", "Q"]:
-#    RFID_reader.run()
 
     logger = logging.getLogger("cardhandler").info
 
@@ -133,7 +141,7 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     # my_drink = raw_input("Enter Drink Name:  ")
     if my_command in ["P", "p", "prime", "Prime"]:
         for each_ingr in valid_ingr_list:
-            ingr_pumps[each_ingr].prime(purge_values[each_ingr] - 2)
+            ingr_pumps[each_ingr].prime(purge_values[each_ingr])
         for each_ingr in valid_ingr_list:
             ingr_pumps[each_ingr].wait_until_done()
     elif my_command in ["G", "g", "global", "Global"]:
@@ -142,25 +150,36 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
         for each_ingr in valid_ingr_list:
             ingr_pumps[each_ingr].wait_until_done()
     elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
+        # Overview:
         # Go through all the pumps and make sure each is primed
+        # Creat a handy new line for the .csv file to paste in
+        # Go through all the pumps
+            # Number the pumps for convenience; Total extra priming added
+            # While the user wants more time priming
+                # Add this amount to the prime time; Keep track of all added
+            # Add to the old prime value
+        # Print the handy string so it can be copy and pasted into the .csv file
+
         i = 0
-        total_string = ""
+        # Creat a handy new line for the .csv file to paste in
+        total_string = "Prime,"
+        # Go through all the pumps
         for each_ingr in valid_ingr_list:
-            i += 1
-            print "More for Pump #", i, " Name: ", each_ingr, "?"
-            yesno = raw_input( "Enter [y/n]: " )
-            total_tiny = 0
+            i += 1 # Number the pumps for convenience
+            yesno = raw_input( "More for Pump #" + str(i) + " Name: " + str(each_ingr) + "? [y/n] " )
+            total_tiny = 0 # Total extra priming added
+            # While the user wants more time priming
             while yesno not in ["Y", "y", "Yes", "YES", "yes"]:
 #                ingr_pumps[each_ingr].prime(purge_values[each_ingr]/20)
-#                ingr_pumps[each_ingr].prime(0.025)
-#                total_tiny = total_tiny + 0.025
+                # Add this amount to the prime time
+                #ingr_pumps[each_ingr].prime(0.1)
+                #total_tiny = total_tiny + 0.1 # Keep track of all added
                 ingr_pumps[each_ingr].prime(float(yesno))
-                total_tiny = total_tiny + float(yesno)
-                print "More for Pump #", i, " Name: ", each_ingr, "?"
-                yesno = raw_input("Enter [y/n]: ")
-            print "Total extra priming for " + each_ingr + ": " + str(total_tiny)
-            total_string += str(total_tiny) + ","
-        print total_string
+                total_tiny = total_tiny + float(yesno) # Keep track of all added
+                yesno = raw_input("More for Pump #" + str(i) + " Name: " + str(each_ingr) + "? [y/n] ")
+            # print "Total extra priming for " + each_ingr + ": " + str(total_tiny)
+            total_string += str(total_tiny + purge_values[each_ingr] - 2.2) + "," # Add to the old prime value
+        print total_string # Print the handy string so it can be copy and pasted into the .csv file
 
     elif my_command in ["C", "c", "Calibrate", "calibrate"]:
         new_calibration_string = "Calibration,"
