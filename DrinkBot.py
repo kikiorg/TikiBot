@@ -11,7 +11,7 @@ from mifareauth import NFCReader
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
-#from Recipes import Drink_Recipes
+from Recipes import Drink_Recipes
 
 #############################################
 # To Do List for this file:                 #
@@ -30,7 +30,9 @@ from Motors import Motors
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
-# my_recipes = Drink_Recipes().get_recipes_from_file('TikiDrinks.csv')
+my_recipes = Drink_Recipes()
+my_recipes.get_recipes_from_file('TikiDrinks.csv')
+my_recipes.print_recipes()
 
 # Open the spreadsheet.
 myFile = open('TikiDrinks.csv', 'r')

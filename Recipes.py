@@ -79,7 +79,8 @@ class Drink_Recipes():
         # Remove these fake recipes from the list
         # Note: this leaves the data intact in the drinks[] list
         self.drink_names.remove("Calibration")
-        self.recipe_name.remove("Prime")
+        self.drink_names.remove("Prime")
+        return self
 
     #############################################################
     # This prints all the ingredients, not including 'Recipe'   #
