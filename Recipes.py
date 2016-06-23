@@ -121,7 +121,7 @@ class Drink_Recipes():
     # Make the drink!                                           #
     #############################################################
     def make_drink(self, my_drink):
-        print "******************** Making this drink  ********************", my_drink
+        print "********************   Making: ", my_drink, "   ********************"
         # Start all the pumps going
         for each_ingredient in self.drinks[my_drink]:
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
