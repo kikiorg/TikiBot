@@ -39,14 +39,20 @@ class Drink_Recipes():
         self.recipe_name = "Recipe" # Eventually the upper left cell -- the column name, and key for all drink names
         self.ingr_pumps = {} # List of the pumps themselves
         self.valid_ingr_list = [] # List of all the real ingredients that may be used
+        self.calibration_values = {}
+        self.prime_values = {}
 
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
-        myFile = open(recipe_file_name, 'r')
+        try:
+            myFile = open(recipe_file_name, 'r')
+        except IOError as my_error:
+            raise IOError("%s: %s" % (recipe_file_name, my_error.strerror))
+
         # Read the file into a Dictionary type -- this is useful for spreadsheet configurations of CSV data
         recipe_book = csv.DictReader(myFile)
 
-        # Grab a copy of all the ingredient names (which are the top row of the file, also known as the fieldnames in Dict land
+        # Grab a copy of all the ingredient names (aka the fieldnames)
         for each_ingredient in recipe_book.fieldnames:
             self.ingr_list.append(each_ingredient)
         # This is the upper left entry, the column title for all drink names, and the key for each drink name
@@ -59,10 +65,17 @@ class Drink_Recipes():
         #####################################
         # This is a list of drinks and each drink has a list of Key:Value pairs that are the ingredient:amount
         for each_drink in recipe_book:
-            self.drinks[each_drink[self.recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
-            self.drink_names.append(each_drink[self.recipe_name])  # Keep a list of all the drink names
-
             # Now go through all the ingredients for this drink, and append the amounts into the drink
+            if each_drink[self.recipe_name] in ["Calibration"]: # Pull out the Calibration list separately
+                self.calibration_values = {} # Note, override any previous Calibration lines
+                temp_list = self.calibration_values
+            elif each_drink[self.recipe_name] in ["Prime"]: # Pull out the Prime list separately
+                self.prime_values = {} # Note, override any previous Calibration lines
+                temp_list = self.prime_values
+            else:
+                self.drinks[each_drink[self.recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
+                self.drink_names.append(each_drink[self.recipe_name])  # Keep a list of all the drink names
+                temp_list = self.drinks[each_drink[self.recipe_name]]
             for each_ingredient in self.ingr_list:
                 # Append the ingredient amount to the recipe list
                 if each_drink[each_ingredient] is not '':
@@ -70,18 +83,18 @@ class Drink_Recipes():
                     # "Mai Tai" = each_drink[recipe_name] -- goes through every drink
                     # "Orgeat" = each_ingredient -- goes through all ingredients
                     # ".25oz" = each_drink[each_ingredient] -- goes through every amount for that drink
-                    self.drinks[each_drink[self.recipe_name]][each_ingredient] = float(each_drink[each_ingredient])
+                    try:
+                        temp_list[each_ingredient] = float(each_drink[each_ingredient])
+                    except ValueError:
+                        print each_drink[each_ingredient], " is not an amount in ounces! Please fix.  Setting to zero."
+                        temp_list[each_ingredient] = 0.0
                 else:
                     # The .csv file has nothing for this cell, so stick in a 0 for none dispensed
-                    self.drinks[each_drink[self.recipe_name]][each_ingredient] = 0.0
+                    temp_list[each_ingredient] = 0.0
 
         # Done getting the info from the file.
         myFile.close()
 
-        # Remove these fake recipes from the list
-        # Note: this leaves the data intact in the drinks[] list
-        self.drink_names.remove("Calibration")
-        self.drink_names.remove("Prime")
         return self
 
     #############################################
@@ -93,7 +106,7 @@ class Drink_Recipes():
         for each_motor in range(1, 13):
             each_ingredient = temp_ingr_list.next() # Go through all the ingredients by name
             # This is a calibration factor -- more info in Motors.dispense()
-            calibration_oz = float(self.drinks["Calibration"][each_ingredient])
+            calibration_oz = float(self.calibration_values[each_ingredient])
             self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
 
@@ -104,11 +117,19 @@ class Drink_Recipes():
     def print_full_recipes(self):
         for each_drink in self.drink_names:
             print "*** ", each_drink, " ***"
+            self.print_ingredients(self.drinks[each_drink])
             for each_ingredient in self.drinks[each_drink]:
                 # Skip the ingredients that are not used in this recipe
                 # Comment this out of you want empty entries to be printed
                 if self.drinks[each_drink][each_ingredient] is not '':
                     print each_ingredient + ': ', self.drinks[each_drink][each_ingredient]
+
+    def print_ingredients(self, my_list):
+        for each_ingredient in my_list:
+            # Skip the ingredients that are not used in this recipe
+            # Comment this out of you want empty entries to be printed
+            if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
+                print "def", each_ingredient + ': ', my_list[each_ingredient]
 
     #############################################################
     # Print the menu                                            #
