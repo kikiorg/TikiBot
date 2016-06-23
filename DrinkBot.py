@@ -42,10 +42,7 @@ my_drink = ""
 #############################################
 while True:
 
-    print "********************   Menu of drinks   ********************"
-
-    for each_drink in my_recipes.drink_names:
-        print each_drink
+    my_recipes.print_menu()
 
     logger = logging.getLogger("cardhandler").info
     RFID_reader = NFCReader(logger)

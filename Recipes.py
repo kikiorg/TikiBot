@@ -82,19 +82,6 @@ class Drink_Recipes():
         self.drink_names.remove("Prime")
         return self
 
-    #############################################################
-    # This prints all the ingredients, not including 'Recipe'   #
-    #############################################################
-    # Note: since the Calibration and Prime lines are not actually removed, these will also print
-    def print_recipes(self):
-        for each_drink in self.drink_names:
-            print each_drink
-            for each_ingredient in self.drinks[each_drink]:
-                # Skip the ingredients that are not used in this recipe
-                # Comment this out of you want empty entries to be printed
-                if self.drinks[each_drink][each_ingredient] is not '':
-                    print each_ingredient + ': ', self.drinks[each_drink][each_ingredient]
-
     #############################################
     #     Create pumps linked to ingredients    #
     #############################################
@@ -107,3 +94,25 @@ class Drink_Recipes():
             calibration_oz = float(self.drinks["Calibration"][each_ingredient])
             self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
+
+    #############################################################
+    # This prints all the ingredients, not including 'Recipe'   #
+    #############################################################
+    # Note: since the Calibration and Prime lines are not actually removed, these will also print
+    def print_full_recipes(self):
+        for each_drink in self.drink_names:
+            print "*** ", each_drink, " ***"
+            for each_ingredient in self.drinks[each_drink]:
+                # Skip the ingredients that are not used in this recipe
+                # Comment this out of you want empty entries to be printed
+                if self.drinks[each_drink][each_ingredient] is not '':
+                    print each_ingredient + ': ', self.drinks[each_drink][each_ingredient]
+
+    #############################################################
+    # Print the menu                                            #
+    #############################################################
+    def print_menu(self):
+        print "********************   Menu of drinks   ********************"
+        for each_drink in self.drink_names:
+            print each_drink
+
