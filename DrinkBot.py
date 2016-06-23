@@ -32,7 +32,8 @@ from Recipes import Drink_Recipes
 #############################################
 my_recipes = Drink_Recipes()
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
-my_recipes.print_recipes()
+# my_recipes.print_recipes()
+my_recipes.link_to_motors()
 
 # Open the spreadsheet.
 myFile = open('TikiDrinks.csv', 'r')
@@ -40,6 +41,7 @@ myFile = open('TikiDrinks.csv', 'r')
 # Read the file into a Dictionary type -- this is useful for spreadsheet configurations of CSV data
 recipe_book = csv.DictReader(myFile)
 
+"""
 # We are appending to all of these lists, so we need to create them as empty to start
 drinks = {}  # This is a list of drinks, which includes a list of key:value pairs of all the ingredient amounts
 drink_names = []  # This is simply a list of all the drink names -- the "menu" as it were
@@ -109,9 +111,9 @@ for each_motor in range(1, 13):
     each_ingredient = temp_ingr_list.next() # Go through all the ingredients by name
     # This is a calibration factor -- more info in Motors.dispense()
     calibration_oz = float(drinks["Calibration"][each_ingredient])
-    ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
+    # ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
     valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
-
+"""
 my_drink_ID = None
 my_drink = ""
 
@@ -122,7 +124,7 @@ while True:
 
     print "********************   Menu of drinks   ********************"
 
-    for each_drink in drink_names:
+    for each_drink in my_recipes.drink_names:
         print each_drink
 
     logger = logging.getLogger("cardhandler").info
@@ -192,16 +194,16 @@ while True:
     else:
         print "******************** Making this drink  ********************", my_drink
         # Start all the pumps going
-        for each_ingredient in drinks[my_drink]:
-            if float(drinks[my_drink][each_ingredient]) > 0.0:
-                print each_ingredient + ": " + drinks[my_drink][each_ingredient]
-                if each_ingredient in valid_ingr_list: # Some recipes might have ingredients not added to motors
-                    ingr_pumps[each_ingredient].dispense(float(drinks[my_drink][each_ingredient]))
+        for each_ingredient in my_recipes.drinks[my_drink]:
+            if float(my_recipes.drinks[my_drink][each_ingredient]) > 0.0:
+                print each_ingredient + ": ", my_recipes.drinks[my_drink][each_ingredient]
+                if each_ingredient in my_recipes.valid_ingr_list: # Some recipes might have ingredients not added to motors
+                    my_recipes.ingr_pumps[each_ingredient].dispense(float(my_recipes.drinks[my_drink][each_ingredient]))
                 else:
                     print "We don't have ", each_ingredient, " on a pump in this DrinkBot."
         # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
-        for each_ingredient in drinks[my_drink]:
-            if each_ingredient in valid_ingr_list and float(drinks[my_drink][each_ingredient]) > 0.0:
-                ingr_pumps[each_ingredient].wait_until_done()
+        for each_ingredient in my_recipes.drinks[my_drink]:
+            if each_ingredient in my_recipes.valid_ingr_list and float(my_recipes.drinks[my_drink][each_ingredient]) > 0.0:
+                my_recipes.ingr_pumps[each_ingredient].wait_until_done()
 
 
