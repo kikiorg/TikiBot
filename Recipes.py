@@ -116,3 +116,22 @@ class Drink_Recipes():
         for each_drink in self.drink_names:
             print each_drink
 
+
+    #############################################################
+    # Make the drink!                                           #
+    #############################################################
+    def make_drink(self, my_drink):
+        print "******************** Making this drink  ********************", my_drink
+        # Start all the pumps going
+        for each_ingredient in self.drinks[my_drink]:
+            if float(self.drinks[my_drink][each_ingredient]) > 0.0:
+                print each_ingredient + ": ", self.drinks[my_drink][each_ingredient]
+                if each_ingredient in self.valid_ingr_list: # Some recipes might have ingredients not added to motors
+                    self.ingr_pumps[each_ingredient].dispense(float(self.drinks[my_drink][each_ingredient]))
+                else:
+                    print "We don't have ", each_ingredient, " on a pump in this DrinkBot."
+        # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
+        for each_ingredient in self.drinks[my_drink]:
+            if each_ingredient in self.valid_ingr_list and float(self.drinks[my_drink][each_ingredient]) > 0.0:
+                self.ingr_pumps[each_ingredient].wait_until_done()
+

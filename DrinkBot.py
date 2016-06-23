@@ -109,7 +109,8 @@ while True:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     # Assert: a valid drink name has been generated
     else:
-        print "******************** Making this drink  ********************", my_drink
+        my_recipes.make_drink(my_drink)
+        print "******************** OLD Making this drink  ********************", my_drink
         # Start all the pumps going
         for each_ingredient in my_recipes.drinks[my_drink]:
             if float(my_recipes.drinks[my_drink][each_ingredient]) > 0.0:
