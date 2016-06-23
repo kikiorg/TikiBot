@@ -32,88 +32,8 @@ from Recipes import Drink_Recipes
 #############################################
 my_recipes = Drink_Recipes()
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
-# my_recipes.print_recipes()
 my_recipes.link_to_motors()
 
-# Open the spreadsheet.
-myFile = open('TikiDrinks.csv', 'r')
-
-# Read the file into a Dictionary type -- this is useful for spreadsheet configurations of CSV data
-recipe_book = csv.DictReader(myFile)
-
-"""
-# We are appending to all of these lists, so we need to create them as empty to start
-drinks = {}  # This is a list of drinks, which includes a list of key:value pairs of all the ingredient amounts
-drink_names = []  # This is simply a list of all the drink names -- the "menu" as it were
-ingr_list = []  # This is a list of all ingredients that we have hooked up by name
-
-# Grab a copy of all the ingredient names (which are the top row of the file, also known as the fieldnames in Dict land
-for each_ingredient in recipe_book.fieldnames:
-    ingr_list.append(each_ingredient)
-# This is the upper left entry.  Meaning, this is the title of the first column -- which is the drink names
-# If all goes well, this should be the word "Recipe"
-# I'm not hard coding the word "Recipe" in case this name changes in the file
-recipe_name = ingr_list[0]
-# The first row is all the ingredients, but the first entry is the first column title "Recipes"
-# This is a pesky exception, so to make it clean, we remove that column title 
-ingr_list.remove(recipe_name)
-
-#####################################
-# Create the list of drink recipes  #
-#####################################
-# This is a list of drinks and each drink has a list of Key:Value pairs that are the ingredient:amount
-for each_drink in recipe_book:
-    drinks[each_drink[recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
-    drink_names.append(each_drink[recipe_name])  # Keep a list of all the drink names
-
-    # Now go through all the ingredients for this drink, and append the amounts into the drink
-    for each_ingredient in ingr_list:
-        # Append the ingredient amount to the recipe list
-        if each_drink[each_ingredient] is not '':
-            # Example: drinks["Mai Tai]["Orgeat"] = ".25oz"
-            # "Mai Tai" = each_drink[recipe_name] -- goes through every drink
-            # "Orgeat" = each_ingredient -- goes through all ingredients
-            # ".25oz" = each_drink[each_ingredient] -- goes through every amount for that drink
-            drinks[each_drink[recipe_name]][each_ingredient] = each_drink[each_ingredient]
-        else:
-            # The .csv file has nothing for this cell, so stick in a 0 for none dispensed
-            drinks[each_drink[recipe_name]][each_ingredient] = 0
-
-# Done getting the info from the file.
-myFile.close()
-
-# Remove these fake recipes from the list
-# Note: this leaves the data intact in the drinks[] list
-drink_names.remove("Calibration")
-drink_names.remove("Prime")
-
-#############################################################
-# This prints all the ingredients, not including 'Recipe'   #
-#############################################################
-# Note: since the Calibration and Prime lines are not actually removed, these will also print
-def print_recipes():
-    for each_drink in drink_names:
-        print each_drink
-        for each_ingredient in drinks[each_drink]:
-            # Skip the ingredients that are not used in this recipe
-            # Comment this out of you want empty entries to be printed
-            if drinks[each_drink][each_ingredient] is not '':
-                print each_ingredient + ': ', drinks[each_drink][each_ingredient]
-
-#############################################
-#     Create pumps linked to ingredients    #
-#############################################
-ingr_pumps = {}
-valid_ingr_list = []
-temp_ingr_list = iter(ingr_list)
-# We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
-for each_motor in range(1, 13):
-    each_ingredient = temp_ingr_list.next() # Go through all the ingredients by name
-    # This is a calibration factor -- more info in Motors.dispense()
-    calibration_oz = float(drinks["Calibration"][each_ingredient])
-    # ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
-    valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
-"""
 my_drink_ID = None
 my_drink = ""
 
@@ -188,7 +108,7 @@ while True:
     if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
         print "I'm done!"
         break
-    elif my_drink not in drink_names:
+    elif my_drink not in my_recipes.drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     # Assert: a valid drink name has been generated
     else:
