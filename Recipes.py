@@ -14,10 +14,12 @@ from Motors import Motors
 #############################################
 # To Do List for this file:                 #
 #############################################
-# Log all drinks dispensed by date
-#   Ask the user at the start of each run what the event is
-#   Make a class for the logging of drinks
-#       You pass in a string, and it outputs a date and the string
+# Remove hard coded RFIDs
+#   add a column to the TikiDrinks.csv file for the RFID tags
+# Possibly integrate SetupBot.py into this file
+#   Calibrate as specialty "drink"
+#   Prime as specialty "drink"
+#   Note: SetupBot.py can still be separate program, just uses different aspects of this class.
 # Error checking:
 #   Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
 #   Check for the existence of the Prime line -- if it doesn't exist, then use defaults

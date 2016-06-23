@@ -10,20 +10,17 @@ sys.path.insert(0, 'pynfc/src')
 from mifareauth import NFCReader
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
-from Motors import Motors
 from Recipes import Drink_Recipes
 
 #############################################
 # To Do List for this file:                 #
 #############################################
+# Remove hard coded RFIDs
+#   add a column to the TikiDrinks.csv file for the RFID tags
 # Log all drinks dispensed by date
 #   Ask the user at the start of each run what the event is
 #   Make a class for the logging of drinks
 #       You pass in a string, and it outputs a date and the string
-# Error checking:
-#   Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
-#   Check for the existence of the Prime line -- if it doesn't exist, then use defaults
-#   Check for strings vs floats vs ints and handle the error
 # Constants: change any hard coded constants to global named constants
 # Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
 
