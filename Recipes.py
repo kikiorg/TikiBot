@@ -17,16 +17,17 @@ from yesno import yesno
 #############################################
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
-# Possibly integrate SetupBot.py into this file
-#   Calibrate as specialty "drink"
-#   Prime as specialty "drink"
-#   Note: SetupBot.py can still be separate program, just uses different aspects of this class.
+# DONE -- Possibly integrate SetupBot.py into this file
+#   DONE -- Calibrate as specialty "drink"
+#   DONE -- Prime as specialty "drink"
+#   DONE -- Note: SetupBot.py can still be separate program, just uses different aspects of this class.
 # Error checking:
-#   Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
-#   Check for the existence of the Prime line -- if it doesn't exist, then use defaults
+#   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
+#   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
 #   Check for strings vs floats vs ints and handle the error
+# ThreadMe -- add the wait for voltage stabilization to this function, instead of everywhere
 # Constants: change any hard coded constants to global named constants
-# Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
+# DONE -- Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
