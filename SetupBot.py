@@ -202,48 +202,9 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     elif my_command in ["G", "g", "global", "Global"]:
         my_recipes.quick_check_calibration()
     elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
-        if True:
-            my_recipes.tiny_prime()
-        else:
-            # Overview:
-            # Go through all the pumps and make sure each is primed
-            # Creat a handy new line for the .csv file to paste in
-            # Go through all the pumps
-                # Number the pumps for convenience; Total extra priming added
-                # While the user wants more time priming
-                    # Add this amount to the prime time; Keep track of all added
-                # Add to the old prime value
-            # Print the handy string so it can be copy and pasted into the .csv file
-
-            i = 0
-            # Creat a handy new line for the .csv file to paste in
-            total_string = "Prime,"
-            # Go through all the pumps
-            for each_ingr in my_recipes.valid_ingr_list:
-                i += 1 # Number the pumps for convenience
-                total_tiny = 0 # Total extra priming added
-                # While the user wants more time priming
-                while is_yes("More for Pump #" + str(i) + " Name: " + str(each_ingr) + "?" ):
-                    # Add this amount to the prime time
-                    my_recipes.ingr_pumps[each_ingr].prime(0.1)
-                    total_tiny = total_tiny + 0.1 # Keep track of all added
-                total_string += str(total_tiny + my_recipes.prime_values[each_ingr]) + "," # Add to the old prime value
-            print total_string # Print the handy string so it can be copy and pasted into the .csv file
-
+        my_recipes.tiny_prime()
     elif my_command in ["C", "c", "Calibrate", "calibrate"]:
-        new_calibration_string = "Calibration,"
-        if is_no(("Have all the pumps been primed?")):
-            is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-            my_recipes.prime_all_pumps()
-
-        i = 0
-        for each_ingr in my_recipes.valid_ingr_list:
-            i = i + 1
-            if is_yes(("Force calibrate Pump #" + str(i) + " [" + each_ingr + "]?")):
-                my_recipes.ingr_pumps[each_ingr].force_calibrate_pump()
-            new_calibration_string += str(ingr_pumps[each_ingr].calibration_oz) + ","
-        print new_calibration_string
-
+        my_recipes.calibrate()
     elif my_command in ["S", "s", "Shutdown", "shutdown"]:
         not_done = True
         step = 0
@@ -274,28 +235,28 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
             print "***", step, ")", steps_list[step]
 
             if step == 0:
-                #prime_all_pumps("reverse")
+                my_recipes.purge_all("reverse")
                 print "    Put hoses into rinse water."
             elif step == 1:
-                #prime_all_pumps()
-                #prime_all_pumps()
+                my_recipes.purge_all()
+                my_recipes.purge_all()
                 print "    Remove the hoses to allow air to enter."
             elif step == 2:
-                #prime_all_pumps()
+                my_recipes.purge_all()
                 print "    Put hoses into bleach water."
             elif step == 3:
-                #prime_all_pumps()
-                #prime_all_pumps()
+                my_recipes.purge_all()
+                my_recipes.purge_all()
                 print "    Remove the hoses to allow air to enter."
             elif step == 4:
-                #prime_all_pumps()
+                my_recipes.purge_all()
                 print "    Put hoses into rinse water."
             elif step == 5:
-                #prime_all_pumps()
-                #prime_all_pumps()
+                my_recipes.purge_all()
+                my_recipes.purge_all()
                 print "    Remove the hoses to allow air to enter"
             elif step == 6:
-                #prime_all_pumps()
+                my_recipes.purge_all()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
             my_step = raw_input("    Press Enter for next step, or step #, or CTRL-C to end) ")
             while not my_step == "" and not my_step.isdigit():

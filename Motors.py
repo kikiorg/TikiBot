@@ -250,9 +250,11 @@ class Motors():
         self.thread = ThreadMe(self.motor, prime_value, self.name)
 
     def reverse_purge(self, my_purge_seconds = purge_seconds_default):
+        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMeBackward(self.motor, my_purge_seconds, self.name)
     def forward_purge(self, my_purge_seconds = purge_seconds_default):
-        self.thread = ThreadMe(self.motor, Motors.purge_seconds_default, self.name)
+        time.sleep(Motors.current_spike_stabilze)
+        self.thread = ThreadMe(self.motor, my_purge_seconds, self.name)
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces):

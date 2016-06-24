@@ -138,6 +138,16 @@ class Drink_Recipes():
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
+    def purge_all(self, direction="forward"):
+        if direction in ["forward"]:
+            for each_ingr in self.valid_ingr_list:
+                self.ingr_pumps[each_ingr].forward_purge(self.prime_values[each_ingr])
+        else:
+            for each_ingr in self.valid_ingr_list:
+                self.ingr_pumps[each_ingr].reverse_purge(self.prime_values[each_ingr] * 1.25)
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].wait_until_done()
+
     # This dispenses 1.0oz for every pump -- should come out to 12oz or 1.5C
     def quick_check_calibration(self):
         for each_ingr in self.valid_ingr_list:
@@ -148,30 +158,36 @@ class Drink_Recipes():
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
     def tiny_prime(self):
-        # Overview:
-        # Go through all the pumps and make sure each is primed
-        # Creat a handy new line for the .csv file to paste in
-        # Go through all the pumps
-            # Number the pumps for convenience; Total extra priming added
-            # While the user wants more time priming
-                # Add this amount to the prime time; Keep track of all added
-            # Add to the old prime value
-        # Print the handy string so it can be copy and pasted into the .csv file
-
-        i = 0
+        pump_number = 0 # Use this to print the pump number
         # Creat a handy new line for the .csv file to paste in
         total_string = "Prime,"
         # Go through all the pumps
         for each_ingr in self.valid_ingr_list:
-            i += 1 # Number the pumps for convenience
+            pump_number += 1 # Number the pumps for convenience
             total_tiny = 0 # Total extra priming added
             # While the user wants more time priming
-            while self.my_yesno.is_yes("More for Pump #" + str(i) + " Name: " + str(each_ingr) + "?" ):
+            while self.my_yesno.is_yes("More for Pump #" + str(pump_number) + " Name: " + str(each_ingr) + "?" ):
                 # Add this amount to the prime time
                 self.ingr_pumps[each_ingr].prime(0.1)
                 total_tiny = total_tiny + 0.1 # Keep track of all added
             total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
         print total_string # Print the handy string so it can be copy and pasted into the .csv file
+
+    def calibrate(self):
+        new_calibration_string = "Calibration,"
+        if self.my_yesno.is_no(("Have all the pumps been primed?")):
+            self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
+            self.prime_all()
+
+        pump_number = 0
+        for each_ingr in self.valid_ingr_list:
+            pump_number += 1
+            if self.my_yesno.is_yes(("Force calibrate Pump #" + str(pump_number) + " [" + each_ingr + "]?")):
+                self.ingr_pumps[each_ingr].force_calibrate_pump()
+            new_calibration_string += str(self.ingr_pumps[each_ingr].calibration_oz) + ","
+        print new_calibration_string
+
+
 
     #############################################################
     # Print the menu                                            #

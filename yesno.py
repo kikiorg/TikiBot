@@ -12,7 +12,6 @@ class yesno():
 
     def is_yes(self, message = ""):
         yesno = raw_input(message + " [Y/n] ")
-        print self.valid_all
         while yesno not in self.valid_all:
             yesno = raw_input(message)
         return yesno in self.valid_yes_default
