@@ -25,9 +25,12 @@ class ThreadMe(threading.Thread):
         # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
 
     def run(self):
+        # The pump will have a current spike when it first starts up.
+        # This delay allows that current spike to settle to operating current.
+        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.FORWARD)
-        # print self.name + " Kiki dispensing now for", self.time, "seconds."
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
@@ -44,9 +47,12 @@ class ThreadMeBackward(threading.Thread):
         # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
 
     def run(self):
+        # The pump will have a current spike when it first starts up.
+        # This delay allows that current spike to settle to operating current.
+        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.BACKWARD)
-        # print self.name + " Kiki dispensing now for", self.time, "seconds."
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
@@ -148,12 +154,8 @@ class Motors():
     # We assume these are pumps that dispense about 2oz every 60 seconds.
     calibration_default = 2.0
     calibration_seconds = 60.0
-    # NOTE!!!  REMOVE THIS!!! Kiki
-    # If the calibration value for a pump is 0, then this pump is not calibrated
-    # not_calibrated = 0.0
     # This is how long it should take to fill the pump tubing to dispense -- no longer, so none is wasted
     prime_seconds_default = 13
-    # NOTE!!! I Don't think this is used!!! Kiki
     # Reverse purge a little longer to be sure the tube is completely purged
     purge_seconds_default = 17
     # The pumps spike in current for about this amount of time.
@@ -169,8 +171,6 @@ class Motors():
     next_pump_number = 0
     # Start with the bottom most Hat
     current_hat = hat_stack[0]
-    # Kiki remove this or fix it
-    calibration_string = ""
 
     def __init__(self, name, calibration_oz = calibration_default):
         # This is my sneaky code to iterate through all the motors as each is initialized
@@ -199,23 +199,10 @@ class Motors():
         #   Now the factor is calculated in one place: dispense, and if no calibration is provided, it uses a default
         self.calibration_oz = calibration_oz
 
-    # NOTE:  REMOVE THIS FUNCTION!!!! Kiki
-    # This returns the best calibration value.
-    # If the calibration was not set in the .csv file, then ask the user to calibrate the pump
+
     # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
     # then asks for the amount actually dispensed.
     # It then calculates a normalized 1oz dispense rate.
-    #def calibrate_pump(self, calibration_oz):
-    #    if calibration_oz == self.not_calibrated:
-    #        print "Pump " + self.name + " is not calibrated!  Using the default of ", calibration_default
-    #        self.calibration_oz = calibration_default
-    #    return self.calibration_oz
-
-        # This returns the best calibration value.
-        # If the calibration was not set in the .csv file, then ask the user to calibrate the pump
-        # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
-        # then asks for the amount actually dispensed.
-        # It then calculates a normalized 1oz dispense rate.
     def force_calibrate_pump(self):
         # Must assign some kind of calibration value before dispensing -- default is calibration_default
         print "Old calibration ounces: ", self.calibration_oz
@@ -246,14 +233,11 @@ class Motors():
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMe(self.motor, prime_value, self.name)
 
     def reverse_purge(self, my_purge_seconds = purge_seconds_default):
-        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMeBackward(self.motor, my_purge_seconds, self.name)
     def forward_purge(self, my_purge_seconds = purge_seconds_default):
-        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMe(self.motor, my_purge_seconds, self.name)
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
@@ -268,15 +252,8 @@ class Motors():
         if calibrated_time <= 0.0:
             raise LessThanZeroException(
                 self.name + ' - calibration:' + str(self.calibration_oz) + ' Must be >0 for motors to run!')
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        # print "Kiki Disepensing for this seconds: ", ounces * self.calibration, " name: ", self.name
-        # print "Kiki ounces: ", ounces , " calibration factor: ", self.calibration, " name: ", self.name
         self.thread = ThreadMe(self.motor, calibrated_time, self.name)
-        # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.
     # It causes the main program to wait until the pump has completed before it moves on to the next drink.

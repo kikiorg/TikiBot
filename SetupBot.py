@@ -35,19 +35,6 @@ my_recipes = Drink_Recipes()
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
 
-
-def is_yes(message):
-    yesno = raw_input(message + " [Y/n] ")
-    while yesno not in ["Y", "y", "YES", "yes", "Yes", "N", "n", "NO", "no", "No", ""]:
-        yesno = raw_input(message)
-    return yesno in ["Y", "y", "YES", "yes", "Yes", ""]
-
-def is_no(message):
-    yesno = raw_input(message + " [y/N] ")
-    while yesno not in ["Y", "y", "YES", "yes", "Yes", "N", "n", "NO", "no", "No", ""]:
-        yesno = raw_input(message)
-    return yesno in ["N", "n", "NO", "no", "No", ""]
-
 my_drink_ID = None
 my_command = ""
 

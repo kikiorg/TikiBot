@@ -31,7 +31,7 @@ my_recipes = Drink_Recipes()
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
 
-my_recipes.print_full_recipes()
+# my_recipes.print_full_recipes()
 
 my_drink_ID = None
 my_drink = ""
