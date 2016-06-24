@@ -10,6 +10,7 @@ from mifareauth import NFCReader
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
+from yesno import yesno
 
 #############################################
 # To Do List for this file:                 #
@@ -41,6 +42,7 @@ class Drink_Recipes():
         self.valid_ingr_list = [] # List of all the real ingredients that may be used
         self.calibration_values = {}
         self.prime_values = {}
+        self.my_yesno = yesno()
 
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
@@ -115,21 +117,61 @@ class Drink_Recipes():
     #############################################################
     # Note: since the Calibration and Prime lines are not actually removed, these will also print
     def print_full_recipes(self):
+        print ">>> Calibration <<<"
+        self.print_ingredients(self.calibration_values)
+        print ">>> Prime <<<"
+        self.print_ingredients(self.prime_values)
         for each_drink in self.drink_names:
             print "*** ", each_drink, " ***"
             self.print_ingredients(self.drinks[each_drink])
-            for each_ingredient in self.drinks[each_drink]:
-                # Skip the ingredients that are not used in this recipe
-                # Comment this out of you want empty entries to be printed
-                if self.drinks[each_drink][each_ingredient] is not '':
-                    print each_ingredient + ': ', self.drinks[each_drink][each_ingredient]
 
     def print_ingredients(self, my_list):
         for each_ingredient in my_list:
             # Skip the ingredients that are not used in this recipe
-            # Comment this out of you want empty entries to be printed
             if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
-                print "def", each_ingredient + ': ', my_list[each_ingredient]
+                print each_ingredient + ': ', my_list[each_ingredient]
+
+    # This primes every pump al at once.
+    def prime_all(self):
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr])
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].wait_until_done()
+
+    # This dispenses 1.0oz for every pump -- should come out to 12oz or 1.5C
+    def quick_check_calibration(self):
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].dispense(1.0)
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].wait_until_done()
+
+    # This is for calibrating the prime sequence
+    #   it prints out a new line that can be copy and pasted into the .csv file
+    def tiny_prime(self):
+        # Overview:
+        # Go through all the pumps and make sure each is primed
+        # Creat a handy new line for the .csv file to paste in
+        # Go through all the pumps
+            # Number the pumps for convenience; Total extra priming added
+            # While the user wants more time priming
+                # Add this amount to the prime time; Keep track of all added
+            # Add to the old prime value
+        # Print the handy string so it can be copy and pasted into the .csv file
+
+        i = 0
+        # Creat a handy new line for the .csv file to paste in
+        total_string = "Prime,"
+        # Go through all the pumps
+        for each_ingr in self.valid_ingr_list:
+            i += 1 # Number the pumps for convenience
+            total_tiny = 0 # Total extra priming added
+            # While the user wants more time priming
+            while self.my_yesno.is_yes("More for Pump #" + str(i) + " Name: " + str(each_ingr) + "?" ):
+                # Add this amount to the prime time
+                self.ingr_pumps[each_ingr].prime(0.1)
+                total_tiny = total_tiny + 0.1 # Keep track of all added
+            total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
+        print total_string # Print the handy string so it can be copy and pasted into the .csv file
 
     #############################################################
     # Print the menu                                            #

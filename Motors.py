@@ -146,7 +146,7 @@ atexit.register(turnOffMotors)
 
 class Motors():
     # We assume these are pumps that dispense about 2oz every 60 seconds.
-    peristaltic_2oz = 2.0
+    calibration_default = 2.0
     calibration_seconds = 60.0
     # NOTE!!!  REMOVE THIS!!! Kiki
     # If the calibration value for a pump is 0, then this pump is not calibrated
@@ -172,7 +172,7 @@ class Motors():
     # Kiki remove this or fix it
     calibration_string = ""
 
-    def __init__(self, name, calibration_oz = peristaltic_2oz):
+    def __init__(self, name, calibration_oz = calibration_default):
         # This is my sneaky code to iterate through all the motors as each is initialized
         # It goes through the 4 pumps for each hat
         if Motors.next_pump_number >= 4:
@@ -207,8 +207,8 @@ class Motors():
     # It then calculates a normalized 1oz dispense rate.
     #def calibrate_pump(self, calibration_oz):
     #    if calibration_oz == self.not_calibrated:
-    #        print "Pump " + self.name + " is not calibrated!  Using the default of ", peristaltic_2oz
-    #        self.calibration_oz = peristaltic_2oz
+    #        print "Pump " + self.name + " is not calibrated!  Using the default of ", calibration_default
+    #        self.calibration_oz = calibration_default
     #    return self.calibration_oz
 
         # This returns the best calibration value.
@@ -217,9 +217,9 @@ class Motors():
         # then asks for the amount actually dispensed.
         # It then calculates a normalized 1oz dispense rate.
     def force_calibrate_pump(self):
-        # Must assign some kind of calibration value before dispensing -- default is peristaltic_2oz
+        # Must assign some kind of calibration value before dispensing -- default is calibration_default
         print "Old calibration ounces: ", self.calibration_oz
-        self.dispense(Motors.peristaltic_2oz)
+        self.dispense(Motors.calibration_default)
         self.wait_until_done()
         amount_dispensed = raw_input("How much liquid was delivered [press Enter if exactly 2.0]? ")
         # This is where things get tricky: we now have to reverse engineer the actual ounces
@@ -230,9 +230,9 @@ class Motors():
         # now dispenses 2.7 in 60 seconds, so now it dispenses more
         # 2oz theory / 2oz actual = X
         if amount_dispensed is not "" and float(amount_dispensed) > 0.0:
-            self.calibration_oz = self.calibration_oz * (float(amount_dispensed) / Motors.peristaltic_2oz)
+            self.calibration_oz = self.calibration_oz * (float(amount_dispensed) / Motors.calibration_default)
             print "Adjusted amount for " + self.name + ":" + str(self.calibration_oz)
-            print "Factor: " + str(float(amount_dispensed) / Motors.peristaltic_2oz )
+            print "Factor: " + str(float(amount_dispensed) / Motors.calibration_default )
         return self.calibration_oz
 
     # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
