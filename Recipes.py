@@ -69,6 +69,7 @@ class Drink_Recipes():
         self.drink_names = []  # This is simply a list of all the drink names -- the "menu" as it were
         self.ingr_list = []  # List of all ingredients and their link to their respective pumps -- by csv column
         self.recipe_name = "Recipe" # Eventually the upper left cell -- the column name, and key for all drink names
+        self.total_vol_key = "Total" # The key to the total volume of each cocktail
         self.ingr_pumps = {} # List of the pumps themselves
         self.valid_ingr_list = [] # List of all the real ingredients that may be used
         self.calibration_values = {}
@@ -112,6 +113,7 @@ class Drink_Recipes():
                 self.drinks[each_drink[self.recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
                 self.drink_names.append(each_drink[self.recipe_name])  # Keep a list of all the drink names
                 temp_list = self.drinks[each_drink[self.recipe_name]]
+            total_volume = 0.0
             for each_ingredient in self.ingr_list:
                 # Append the ingredient amount to the recipe list
                 if each_drink[each_ingredient] is not '':
@@ -121,12 +123,14 @@ class Drink_Recipes():
                     # ".25oz" = each_drink[each_ingredient] -- goes through every amount for that drink
                     try:
                         temp_list[each_ingredient] = float(each_drink[each_ingredient])
+                        total_volume += float(each_drink[each_ingredient])
                     except ValueError:
                         print each_drink[each_ingredient], " is not an amount in ounces! Please fix.  Setting to zero."
                         temp_list[each_ingredient] = 0.0
                 else:
                     # The .csv file has nothing for this cell, so stick in a 0 for none dispensed
                     temp_list[each_ingredient] = 0.0
+                temp_list[self.total_vol_key] = total_volume
 
         # Done getting the info from the file.
         myFile.close()
@@ -246,18 +250,25 @@ class Drink_Recipes():
     #############################################################
     # Make the drink!                                           #
     #############################################################
-    def make_drink(self, my_drink):
-        print "********************   Making: ", my_drink, "   ********************"
+    def make_drink(self, my_drink, max_cocktail_volume = 4.0):
+        scaled_to_fit_glass = max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
+        print "********************   Making: ", my_drink, " scaled by ", scaled_to_fit_glass, "  ********************"
+        print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
+                " scaled by ", scaled_to_fit_glass, \
+                " max cocktail volume ", max_cocktail_volume
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.drinks[my_drink]:
             log_str += "," + str(self.drinks[my_drink][each_ingredient])
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
-                print each_ingredient + ": ", self.drinks[my_drink][each_ingredient]
                 if each_ingredient in self.valid_ingr_list: # Some recipes might have ingredients not added to motors
-                    self.ingr_pumps[each_ingredient].dispense(float(self.drinks[my_drink][each_ingredient]))
+                    ounces_to_dispense = float(self.drinks[my_drink][each_ingredient])
+                    ounces_to_dispense *= scaled_to_fit_glass
+                    print each_ingredient + ": ", ounces_to_dispense
+                    self.ingr_pumps[each_ingredient].dispense(ounces_to_dispense)
                 else:
-                    print "We don't have ", each_ingredient, " on a pump in this DrinkBot."
+                    if not each_ingredient in [self.total_vol_key]: # The total is the volume of the drink
+                        print "We don't have ", each_ingredient, " on a pump in this DrinkBot."
         # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
         for each_ingredient in self.drinks[my_drink]:
             if each_ingredient in self.valid_ingr_list and float(self.drinks[my_drink][each_ingredient]) > 0.0:

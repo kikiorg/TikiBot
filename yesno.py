@@ -23,9 +23,8 @@ class yesno():
         return yesno in self.valid_no_default
 
     def get_number(self, message = "Please enter a number: ", default_val = 0.0, int_only = False, neg_ok = False):
-        if int_only:
-            my_zero = 0
-        else:
+        my_zero = 0
+        if not int_only:
             my_zero = 0.0
         while True:
             try:

@@ -11,6 +11,7 @@ from mifareauth import NFCReader
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Recipes import Drink_Recipes
+from yesno import yesno
 
 #############################################
 # To Do List for this file:                 #
@@ -32,6 +33,10 @@ my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
 
 # my_recipes.print_full_recipes()
+my_yesno = yesno()
+percent_ice = 50
+cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
+max_cocktail_volume = cup_size * ( (100 - percent_ice) / 100) # Subtract out the ice
 
 my_drink_ID = None
 my_drink = ""
@@ -106,6 +111,6 @@ while True:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     # Assert: a valid drink name has been generated
     else:
-        my_recipes.make_drink(my_drink)
+        my_recipes.make_drink(my_drink, max_cocktail_volume)
 
 
