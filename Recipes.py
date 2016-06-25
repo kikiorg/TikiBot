@@ -189,7 +189,7 @@ class Drink_Recipes():
         log_str = "Checksum calibration: Checksum,"
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].dispense(1.0)
-            log_str += str(1.0) + "," # Add to the old prime value
+            log_str += "," + str(1.0) # Add to the old prime value
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
         self.logger.info(log_str)
@@ -215,19 +215,24 @@ class Drink_Recipes():
 
     def calibrate(self):
         new_calibration_string = "Calibration,"
-        if self.my_yesno.is_no(("Have all the pumps been primed?")):
+        if not self.my_yesno.is_yes("Have all the pumps been primed?"):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
             self.prime_all()
 
         pump_number = 0
+        log_str = ""
         for each_ingr in self.valid_ingr_list:
             pump_number += 1
             if self.my_yesno.is_yes(("Force calibrate Pump #" + str(pump_number) + " [" + each_ingr + "]?")):
-                self.ingr_pumps[each_ingr].force_calibrate_pump()
-            new_calibration_string += str(self.ingr_pumps[each_ingr].calibration_oz) + ","
+                amount_dispensed = self.ingr_pumps[each_ingr].force_calibrate_pump()
+                log_str += "," + str(amount_dispensed)
+            else:
+                # The pump was not calibrated, and so did not dispense any liquids
+                log_str += "," + str(0.0)
+            new_calibration_string += "," + str(self.ingr_pumps[each_ingr].calibration_oz)
         print new_calibration_string
-        self.logger.info("Calibration: {}".format(new_calibration_string))
-#        self.logger.info('Calibration: ' + new_calibration_string)
+        self.logger.info("Calibration string: {}".format(new_calibration_string))
+        self.logger.info("Calibration dispensed{}".format(log_str))
 
     #############################################################
     # Print the menu                                            #
@@ -246,7 +251,7 @@ class Drink_Recipes():
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.drinks[my_drink]:
-            log_str += str(self.drinks[my_drink][each_ingredient]) + ","
+            log_str += "," + str(self.drinks[my_drink][each_ingredient])
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 print each_ingredient + ": ", self.drinks[my_drink][each_ingredient]
                 if each_ingredient in self.valid_ingr_list: # Some recipes might have ingredients not added to motors
@@ -257,6 +262,6 @@ class Drink_Recipes():
         for each_ingredient in self.drinks[my_drink]:
             if each_ingredient in self.valid_ingr_list and float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
-        self.logger.info("{},{}".format(my_drink, log_str))
+        self.logger.info("{}{}".format(my_drink, log_str))
         # self.logger.info('Making drink: ' + my_drink + "," + my_log)
 

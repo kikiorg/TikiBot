@@ -22,7 +22,6 @@ class ThreadMe(threading.Thread):
         self.time = time
         self.name = name
         self.start()
-        # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
 
     def run(self):
         self.motor.setSpeed(255)
@@ -198,21 +197,35 @@ class Motors():
     def force_calibrate_pump(self):
         # Must assign some kind of calibration value before dispensing -- default is calibration_default
         print "Old calibration ounces: ", self.calibration_oz
-        self.dispense(Motors.calibration_default)
+        self.dispense(Motors.calibration_default) # Dispense a calibrated 2.0oz and see if it's correct.  If so, make no changes.
         self.wait_until_done()
-        amount_dispensed = raw_input("How much liquid was delivered [press Enter if exactly 2.0]? ")
-        # This is where things get tricky: we now have to reverse engineer the actual ounces
-        # Let's say, given the current calibration, 2oz should be 2oz:
-        # 2oz theory / 2oz actual = X * (formula) * 2oz / (formula) * 2oz
-        # Test this formula with numbers:
-        # last dispensed 2.5oz in 60 seconds, formula = 1oz/2.5oz*60sec = ~24sec
-        # now dispenses 2.7 in 60 seconds, so now it dispenses more
-        # 2oz theory / 2oz actual = X
-        if amount_dispensed is not "" and float(amount_dispensed) > 0.0:
-            self.calibration_oz = self.calibration_oz * (float(amount_dispensed) / Motors.calibration_default)
-            print "Adjusted amount for " + self.name + ":" + str(self.calibration_oz)
-            print "Factor: " + str(float(amount_dispensed) / Motors.calibration_default )
-        return self.calibration_oz
+        while True:
+            try:
+                answer = raw_input("How much liquid was delivered [press Enter if exactly 2.0]? ")
+                amount_dispensed = float(answer)
+                # while not amount_dispensed == "" and not amount_dispensed.isnumeric():
+                #    amount_dispensed = raw_input("How much liquid was delivered [press Enter if exactly 2.0]? ")
+                # This is where things get tricky: we now have to reverse engineer the actual ounces
+                # Let's say, given the current calibration, 2oz should be 2oz:
+                # 2oz theory / 2oz actual = X * (formula) * 2oz / (formula) * 2oz
+                # Test this formula with numbers:
+                # last dispensed 2.5oz in 60 seconds, formula = 1oz/2.5oz*60sec = ~24sec
+                # now dispenses 2.7 in 60 seconds, so now it dispenses more
+                # 2oz theory / 2oz actual = X
+                self.calibration_oz = self.calibration_oz * (float(amount_dispensed) / Motors.calibration_default)
+                print "Adjusted amount for " + self.name + ":" + str(self.calibration_oz)
+                print "Factor: " + str(float(amount_dispensed) / Motors.calibration_default)
+                break
+            except ValueError:
+                if answer == "":
+                    amount_dispensed = 2.0
+                    # Don't change the calibration value
+                    break
+                # else go back to the while True:
+
+        # Note: it's more useful to return the actual amount dispensed, not the calibration number, because
+        #   you can find that here: self.calibration_oz
+        return amount_dispensed
 
     # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
     # kick the pump by 1/10ths too.

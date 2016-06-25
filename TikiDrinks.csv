@@ -1,13 +1,13 @@
 Recipe,Dark Rum,Light Rum,Gold Rum,Curacao,Lemon Juice,Falernum,Orange Juice,Simple Syrup,Passionfruit Syrup,Lime Juice,Pineapple Juice,Orgeat,Angostura
 Calibration,1.769145,2.1,2.0425,1.9125,1.785,2.1147,1.98,1.9646,2.08,2.26765,2.121,1.745625,
 Prime,11.525,14.6,12.775,14.0,12.55,13.05,12.575,13.5,13.25,12.075,11.7,14.55,
-Mai Tai,2,0,2,1,0,0,1,0.5,0,2,0,0.5,0
-Tail-less Scorpion,0,0,0,0,1.6,0,3.1,0,0,0,1.6,0.8,0
-Scorpion,0,1.6,0,0,1.2,0,2.4,0,0,0,1.2,0.6,0
-Trader Vic Grog,4.5,0,0,0,2.3,0,0,0,2.3,0,2.3,0,0.2
-Pieces of Eight,0,2.1,0,0,2.1,0,0,0,2.1,0.7,0,0,0
-Hurricane,7,0,0,0,3.5,0,0,0,3.5,0,0,0,0
-Outrigger,0,0,3.5,1.8,1.8,0,0,0,0,0,0,0,0
-Chief Lapu Lapu,1.2,1.2,0,0,1.6,0,2.5,0.8,0.8,0,0,0,0
-Hawaiian Eye,0,1.2,2.3,0,0,1.2,0,1.2,0,1.2,0,0,0
+Mai Tai,1,,1,0.5,,,0.5,0.25,,1,,0.25,
+Tail-less Scorpion,,,,,1.5,,3,,,,1.5,0.75,
+Scorpion,,2,,,1.5,,3,,,,1.5,0.75,
+Trader Vic Grog,2,,,,1,,,,1,,1,,0.1
+Pieces of Eight,,1.5,,,1.5,,,,1.5,0.5,,,
+Hurricane,4,,,,2,,,,2,,,,
+Outrigger,,,1.5,0.75,0.75,,,,,,,,
+Chief Lapu Lapu,1.5,1.5,,,2,,3,1,1,,,,
+Hawaiian Eye,,0.5,1,,,0.5,,0.5,,0.5,,,
 test,0,0,0.05,0.05,0.05,0,0,0,0,0,0,0,0
