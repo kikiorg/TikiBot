@@ -14,19 +14,19 @@ from yesno import yesno
 #############################################
 # To Do List for this file:                 #
 #############################################
-# DONE -- Restructure Shutdown command:
+# DONE ALL -- Restructure Shutdown command:
 #   Instead of a set routine, this should have a menu of steps
 #   The user can press [Enter] to go ahead with the correct next step
 #   Or the user can enter a number to repeat or skip to a step.
 #   This will give a lot more control over shutdown, handling more contingencies
 #
-# Error checking:
+# DONE -- Error checking:
 #   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
 #   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
 #   DONE -- Check for strings vs floats vs ints and handle the error
-#   Standardize the above setting of the default -- make this a def
+#   DONE -- Standardize the above setting of the default -- make this a def
 # Constants: change any hard coded constants to global named constants
-# Integration: Possibly integrate this entire file into the original DrinkBot.py
+# DONE -- not doing this -- Integration: Possibly integrate this entire file into the original DrinkBot.py
 # DONE -- Make yesno into its own function, maybe yesno("message", "no") for default no -- don't duplicate effort
 
 #############################################

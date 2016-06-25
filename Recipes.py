@@ -13,9 +13,10 @@ from yesno import yesno
 #############################################
 # To Do List for this file:                 #
 #############################################
-# PRIORITY -- Ask for cup size, scale drinks, check for overflow of cup :)
-#   Ask for cup size at start, then scale each drink to fit in this cup size.
+# DONE -- PRIORITY -- Ask for cup size, scale drinks, check for overflow of cup :)
+#   DONE -- Ask for cup size at start, then scale each drink to fit in this cup size.
 # PRIORITY -- Manual override -- type in drink as well, in case idol is stolen
+#   Make the white card by the manual override -- this then allows the user (Sam) to type in the drink
 # Change the tubing for pineapple juice
 # Change out pump#1/Dark Rum -- running rough
 # Remove hard coded RFIDs
@@ -31,7 +32,7 @@ from yesno import yesno
 #   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
 #   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
 #   DONE -- Check for strings vs floats vs ints and handle the error
-#       make sure this function is used everywhere needed
+#       DONE -- make sure this function is used everywhere needed
 # DONE -- can't be done -- ThreadMe -- add the wait for voltage stabilization to this function, instead of everywhere
 # Constants: change any hard coded constants to global named constants
 # DONE -- Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
@@ -259,13 +260,13 @@ class Drink_Recipes():
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.drinks[my_drink]:
-            log_str += "," + str(self.drinks[my_drink][each_ingredient])
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 if each_ingredient in self.valid_ingr_list: # Some recipes might have ingredients not added to motors
                     ounces_to_dispense = float(self.drinks[my_drink][each_ingredient])
                     ounces_to_dispense *= scaled_to_fit_glass
                     print each_ingredient + ": ", ounces_to_dispense
                     self.ingr_pumps[each_ingredient].dispense(ounces_to_dispense)
+                    log_str += "," + str(ounces_to_dispense)
                 else:
                     if not each_ingredient in [self.total_vol_key]: # The total is the volume of the drink
                         print "We don't have ", each_ingredient, " on a pump in this DrinkBot."
@@ -274,5 +275,4 @@ class Drink_Recipes():
             if each_ingredient in self.valid_ingr_list and float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
         self.logger.info("{}{}".format(my_drink, log_str))
-        # self.logger.info('Making drink: ' + my_drink + "," + my_log)
 
