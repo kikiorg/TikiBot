@@ -21,3 +21,17 @@ class yesno():
         while yesno not in self.valid_all:
             yesno = raw_input(message)
         return yesno in self.valid_no_default
+
+    def get_float(self, message = "Please enter a number: ", default_val = 0.0, neg_ok = False):
+        while True:
+            try:
+                answer = raw_input(message)
+                my_number = float(answer)
+                if not neg_ok and my_number < 0.0:
+                    raise ValueError
+                break
+            except ValueError:
+                if answer == "":
+                    my_number = default_val
+                    break
+        return my_number

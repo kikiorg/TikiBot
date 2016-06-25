@@ -14,9 +14,7 @@ from yesno import yesno
 # To Do List for this file:                 #
 #############################################
 # PRIORITY -- Ask for cup size, scale drinks, check for overflow of cup :)
-#   Find maximum drink size for the entire recipe file
-#   Scale all drinks to this size
-#       Make a scale for each drink?
+#   Ask for cup size at start, then scale each drink to fit in this cup size.
 # PRIORITY -- Manual override -- type in drink as well, in case idol is stolen
 # Change the tubing for pineapple juice
 # Remove hard coded RFIDs
@@ -26,9 +24,9 @@ from yesno import yesno
 #   DONE -- Prime as specialty "drink"
 #   DONE -- Note: SetupBot.py can still be separate program, just uses different aspects of this class.
 # Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
-# Convert Prime values to ounces needed to prime each pump -- this is useful infor to have anyway!
+# Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
 # Error checking:
-#   Use a logger to record raised exceptions
+#   DONE -- Use a logger to record raised exceptions
 #   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
 #   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
 #   Check for strings vs floats vs ints and handle the error
@@ -214,7 +212,7 @@ class Drink_Recipes():
         self.logger.info("Tiny prime: {}".format(total_string))
 
     def calibrate(self):
-        new_calibration_string = "Calibration,"
+        new_calibration_string = "Calibration"
         if not self.my_yesno.is_yes("Have all the pumps been primed?"):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
             self.prime_all()

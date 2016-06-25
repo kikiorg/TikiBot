@@ -17,12 +17,12 @@ from Recipes import Drink_Recipes
 #############################################
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
-# Log all drinks dispensed by date
+# DONE -- Log all drinks dispensed by date
 #   Ask the user at the start of each run what the event is
-#   Make a class for the logging of drinks
-#       You pass in a string, and it outputs a date and the string
+#   DONE -- Make a class for the logging of drinks
+#       DONE -- You pass in a string, and it outputs a date and the string
 # Constants: change any hard coded constants to global named constants
-# Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
+# DONE -- Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
