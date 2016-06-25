@@ -200,7 +200,7 @@ class Motors():
         print "Old calibration ounces: ", self.calibration_oz
         self.dispense(Motors.calibration_default) # Dispense a calibrated 2.0oz and see if it's correct.  If so, make no changes.
         self.wait_until_done()
-        amount_dispensed = self.my_yesno.get_float(message="How much liquid was delivered [press Enter if exactly 2.0]? : ", default_val=2.0)
+        amount_dispensed = self.my_yesno.get_number(message="How much liquid was delivered [press Enter if exactly 2.0]? : ", default_val=2.0)
 
         # This is where things get tricky: we now have to reverse engineer the actual ounces
         # Let's say, given the current calibration, 2oz should be 2oz:

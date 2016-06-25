@@ -17,6 +17,7 @@ from yesno import yesno
 #   Ask for cup size at start, then scale each drink to fit in this cup size.
 # PRIORITY -- Manual override -- type in drink as well, in case idol is stolen
 # Change the tubing for pineapple juice
+# Change out pump#1/Dark Rum -- running rough
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
 # DONE -- Possibly integrate SetupBot.py into this file
@@ -29,7 +30,8 @@ from yesno import yesno
 #   DONE -- Use a logger to record raised exceptions
 #   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
 #   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
-#   Check for strings vs floats vs ints and handle the error
+#   DONE -- Check for strings vs floats vs ints and handle the error
+#       make sure this function is used everywhere needed
 # DONE -- can't be done -- ThreadMe -- add the wait for voltage stabilization to this function, instead of everywhere
 # Constants: change any hard coded constants to global named constants
 # DONE -- Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort

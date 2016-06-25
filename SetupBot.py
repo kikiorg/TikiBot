@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, 'pynfc/src')
 
 from Recipes import Drink_Recipes
+from yesno import yesno
 
 #############################################
 # To Do List for this file:                 #
@@ -34,6 +35,7 @@ from Recipes import Drink_Recipes
 my_recipes = Drink_Recipes("SetupBot.py")
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
+my_yesno = yesno()
 
 my_drink_ID = None
 my_command = ""
@@ -57,7 +59,6 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     print
     my_command = raw_input("Please enter your command: ")
 
-    # my_drink = raw_input("Enter Drink Name:  ")
     if my_command in ["P", "p", "prime", "Prime"]:
         my_recipes.prime_all()
     elif my_command in ["G", "g", "global", "Global"]:
@@ -119,13 +120,14 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
             elif step == 6:
                 my_recipes.purge_all()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
-            my_step = raw_input("    Press Enter for next step, or step #, or CTRL-C to end) ")
-            while not my_step == "" and not my_step.isdigit():
-                my_step = raw_input("    Press Enter for next step, or step #, or CTRL-C to end) ")
-            if my_step == "":
-                step += 1
-            else: # ASSERT my_step.isdigit():
-                step = int(my_step)
+            # my_yesno = yesno()
+            step = my_yesno.get_number("    Press Enter for next step, or step #, or CTRL-C to end) ", int_only = True, default_val = (step + 1))
+            #while not my_step == "" and not my_step.isdigit():
+            #    my_step = raw_input("    Press Enter for next step, or step #, or CTRL-C to end) ")
+            #if my_step == "":
+            #    step += 1
+            #else: # ASSERT my_step.isdigit():
+            #    step = int(my_step)
             if step >= len(steps_list) - 1:
                 not_done = False
 

@@ -22,12 +22,19 @@ class yesno():
             yesno = raw_input(message)
         return yesno in self.valid_no_default
 
-    def get_float(self, message = "Please enter a number: ", default_val = 0.0, neg_ok = False):
+    def get_number(self, message = "Please enter a number: ", default_val = 0.0, int_only = False, neg_ok = False):
+        if int_only:
+            my_zero = 0
+        else:
+            my_zero = 0.0
         while True:
             try:
                 answer = raw_input(message)
-                my_number = float(answer)
-                if not neg_ok and my_number < 0.0:
+                if int_only:
+                    my_number = int(answer)
+                else:
+                    my_number = float(answer)
+                if not neg_ok and my_number < my_zero:
                     raise ValueError
                 break
             except ValueError:
