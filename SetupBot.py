@@ -31,7 +31,7 @@ from Recipes import Drink_Recipes
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
-my_recipes = Drink_Recipes()
+my_recipes = Drink_Recipes("SetupBot.py")
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
 
@@ -61,7 +61,7 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     if my_command in ["P", "p", "prime", "Prime"]:
         my_recipes.prime_all()
     elif my_command in ["G", "g", "global", "Global"]:
-        my_recipes.quick_check_calibration()
+        my_recipes.checksum_calibration()
     elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
         my_recipes.tiny_prime()
     elif my_command in ["C", "c", "Calibrate", "calibrate"]:

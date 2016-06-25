@@ -3,10 +3,8 @@
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
 import csv
-import logging
 import sys
 sys.path.insert(0, 'pynfc/src')
-from mifareauth import NFCReader
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
@@ -15,25 +13,57 @@ from yesno import yesno
 #############################################
 # To Do List for this file:                 #
 #############################################
+# PRIORITY -- Ask for cup size, scale drinks, check for overflow of cup :)
+#   Find maximum drink size for the entire recipe file
+#   Scale all drinks to this size
+#       Make a scale for each drink?
+# PRIORITY -- Manual override -- type in drink as well, in case idol is stolen
+# Change the tubing for pineapple juice
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
 # DONE -- Possibly integrate SetupBot.py into this file
 #   DONE -- Calibrate as specialty "drink"
 #   DONE -- Prime as specialty "drink"
 #   DONE -- Note: SetupBot.py can still be separate program, just uses different aspects of this class.
+# Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
+# Convert Prime values to ounces needed to prime each pump -- this is useful infor to have anyway!
 # Error checking:
+#   Use a logger to record raised exceptions
 #   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
 #   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
 #   Check for strings vs floats vs ints and handle the error
-# ThreadMe -- add the wait for voltage stabilization to this function, instead of everywhere
+# DONE -- can't be done -- ThreadMe -- add the wait for voltage stabilization to this function, instead of everywhere
 # Constants: change any hard coded constants to global named constants
 # DONE -- Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
+# Look into Jira and Confluence
+
+
+#############################################
+# Setup log file to log all drinks served   #
+#############################################
+import logging
+
+def setup_custom_logger(name):
+    file_handler = logging.FileHandler('DrinkLog.txt')
+    formatter = logging.Formatter(fmt='%(asctime)s %(name)s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    file_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(file_handler)
+
+    # Uncomment if you want all logs to go to stdout
+    #screen_handler = logging.StreamHandler(stream=sys.stdout)
+    #screen_handler.setFormatter(formatter)
+    #logger.addHandler(screen_handler)
+    return logger
+
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
 class Drink_Recipes():
-    def __init__(self):
+    def __init__(self, parent_name = ""):
         # Initialize all member variables:
         self.drinks = {}  # This is a list of all drinks -- key:value pairs of all the ingredient amounts
         self.drink_names = []  # This is simply a list of all the drink names -- the "menu" as it were
@@ -44,6 +74,9 @@ class Drink_Recipes():
         self.calibration_values = {}
         self.prime_values = {}
         self.my_yesno = yesno()
+        self.logger = setup_custom_logger("Recipes.py:" + parent_name + " ")
+
+        self.logger.info('Starting up.')
 
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
@@ -134,12 +167,14 @@ class Drink_Recipes():
 
     # This primes every pump al at once.
     def prime_all(self):
+        self.logger.info('Prime all')
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr])
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
     def purge_all(self, direction="forward"):
+        self.logger.info("Purge all {}".format(direction))
         if direction in ["forward"]:
             for each_ingr in self.valid_ingr_list:
                 self.ingr_pumps[each_ingr].forward_purge(self.prime_values[each_ingr])
@@ -150,11 +185,14 @@ class Drink_Recipes():
             self.ingr_pumps[each_ingr].wait_until_done()
 
     # This dispenses 1.0oz for every pump -- should come out to 12oz or 1.5C
-    def quick_check_calibration(self):
+    def checksum_calibration(self):
+        log_str = "Checksum calibration: Checksum,"
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].dispense(1.0)
+            log_str += str(1.0) + "," # Add to the old prime value
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
+        self.logger.info(log_str)
 
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
@@ -173,6 +211,7 @@ class Drink_Recipes():
                 total_tiny = total_tiny + 0.1 # Keep track of all added
             total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
         print total_string # Print the handy string so it can be copy and pasted into the .csv file
+        self.logger.info("Tiny prime: {}".format(total_string))
 
     def calibrate(self):
         new_calibration_string = "Calibration,"
@@ -187,8 +226,8 @@ class Drink_Recipes():
                 self.ingr_pumps[each_ingr].force_calibrate_pump()
             new_calibration_string += str(self.ingr_pumps[each_ingr].calibration_oz) + ","
         print new_calibration_string
-
-
+        self.logger.info("Calibration: {}".format(new_calibration_string))
+#        self.logger.info('Calibration: ' + new_calibration_string)
 
     #############################################################
     # Print the menu                                            #
@@ -205,7 +244,9 @@ class Drink_Recipes():
     def make_drink(self, my_drink):
         print "********************   Making: ", my_drink, "   ********************"
         # Start all the pumps going
+        log_str = ""
         for each_ingredient in self.drinks[my_drink]:
+            log_str += str(self.drinks[my_drink][each_ingredient]) + ","
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 print each_ingredient + ": ", self.drinks[my_drink][each_ingredient]
                 if each_ingredient in self.valid_ingr_list: # Some recipes might have ingredients not added to motors
@@ -216,4 +257,6 @@ class Drink_Recipes():
         for each_ingredient in self.drinks[my_drink]:
             if each_ingredient in self.valid_ingr_list and float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
+        self.logger.info("{},{}".format(my_drink, log_str))
+        # self.logger.info('Making drink: ' + my_drink + "," + my_log)
 

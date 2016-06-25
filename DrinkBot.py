@@ -27,7 +27,7 @@ from Recipes import Drink_Recipes
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
-my_recipes = Drink_Recipes()
+my_recipes = Drink_Recipes("DrinkBot.py")
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
 
@@ -58,11 +58,10 @@ while True:
     my_drink = "test all"
     if my_drink_ID == "dc0a723b": # The sample card that came with the device
         print "Found the large white sample card"
-        my_drink = "Exit" # This is the test drink name --Kiki crossing fingers!!!
+        my_drink = "test"
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
         print "Found Charlotte's Clipper card"
         my_drink = "Pieces of Eight"
-        my_drink = "test"
     elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
         print "Found Kiki's Clipper card"
         my_drink = "Prime"
@@ -73,7 +72,6 @@ while True:
     elif my_drink_ID == "0496a589ba578c":  # tiny little RFID tag -- tapes to black bottle opener
         print "Found the tiny rectangular card"
         my_drink = "Outrigger"
-
     elif my_drink_ID == "1cbfdba1":  # tiny little RFID tag -- tapes to black bottle opener
         print "Found the brown Hawaiin idol"
         my_drink = "Hawaiian Eye"

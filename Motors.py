@@ -25,10 +25,6 @@ class ThreadMe(threading.Thread):
         # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
 
     def run(self):
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.FORWARD)
         time.sleep(self.time)
@@ -47,10 +43,6 @@ class ThreadMeBackward(threading.Thread):
         # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
 
     def run(self):
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.BACKWARD)
         time.sleep(self.time)
@@ -233,11 +225,20 @@ class Motors():
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMe(self.motor, prime_value, self.name)
 
     def reverse_purge(self, my_purge_seconds = purge_seconds_default):
+        # The pump will have a current spike when it first starts up.
+        # This delay allows that current spike to settle to operating current.
+        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMeBackward(self.motor, my_purge_seconds, self.name)
     def forward_purge(self, my_purge_seconds = purge_seconds_default):
+        # The pump will have a current spike when it first starts up.
+        # This delay allows that current spike to settle to operating current.
+        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         self.thread = ThreadMe(self.motor, my_purge_seconds, self.name)
 
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
@@ -252,8 +253,13 @@ class Motors():
         if calibrated_time <= 0.0:
             raise LessThanZeroException(
                 self.name + ' - calibration:' + str(self.calibration_oz) + ' Must be >0 for motors to run!')
+        # The pump will have a current spike when it first starts up.
+        # This delay allows that current spike to settle to operating current.
+        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
         self.thread = ThreadMe(self.motor, calibrated_time, self.name)
+        # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.
     # It causes the main program to wait until the pump has completed before it moves on to the next drink.
