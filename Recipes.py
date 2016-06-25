@@ -170,6 +170,9 @@ class Drink_Recipes():
             if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
                 print each_ingredient + ': ', my_list[each_ingredient]
 
+    def log(self, message ):
+        self.logger.info( message )
+
     # This primes every pump al at once.
     def prime_all(self):
         self.logger.info('Prime all')

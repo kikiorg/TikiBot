@@ -34,9 +34,14 @@ my_recipes.link_to_motors()
 
 # my_recipes.print_full_recipes()
 my_yesno = yesno()
-percent_ice = 50
+percent_ice = 55.0
 cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
-max_cocktail_volume = cup_size * ( (100 - percent_ice) / 100) # Subtract out the ice
+max_cocktail_volume = cup_size * ( (100.0 - percent_ice) / 100.0) # Subtract out the ice
+#print "Cup:", cup_size, " max cocktail volume:", max_cocktail_volume, " percent cocktail:", 100.0 * (100.0 - percent_ice) / 100.0, "%"
+format_str = "Cup: {f[0]} max cocktail volume: {f[1]} percent cocktail: {f[2]}%"
+format_list = [cup_size, max_cocktail_volume,  (100.0 * (100.0 - percent_ice) / 100.0)]
+print format_str.format(f=format_list)
+my_recipes.log( format_str.format(f=format_list) )
 
 my_drink_ID = None
 my_drink = ""
@@ -54,8 +59,7 @@ while True:
     my_drink_ID = RFID_reader._card_uid
 
     if not RFID_reader._card_uid == None:
-        print "********************    Remove idol!    ********************"
-        print "Here's the ID: ", my_drink_ID
+        print "********************    ID found:", my_drink_ID, "    ********************"
     else: # Keyboard interrupt
         print # This keeps the next few lines from printing after the CTRL-C
 
@@ -64,6 +68,10 @@ while True:
     if my_drink_ID == "dc0a723b": # The sample card that came with the device
         print "Found the large white sample card"
         my_drink = "test"
+        my_drink = raw_input("Enter a drink from the menu: ")
+        while my_drink not in my_recipes.drink_names:
+            print "Invalid drink name!"
+            my_drink = raw_input("Enter a drink from the menu: ")
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
         print "Found Charlotte's Clipper card"
         my_drink = "Pieces of Eight"
