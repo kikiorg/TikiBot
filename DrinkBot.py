@@ -34,7 +34,8 @@ my_recipes.link_to_motors()
 
 # my_recipes.print_full_recipes()
 my_yesno = yesno()
-percent_ice = 55.0
+percent_ice = 80.0
+print "Red cup = 18; clear cup = 9"
 cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
 max_cocktail_volume = cup_size * ( (100.0 - percent_ice) / 100.0) # Subtract out the ice
 #print "Cup:", cup_size, " max cocktail volume:", max_cocktail_volume, " percent cocktail:", 100.0 * (100.0 - percent_ice) / 100.0, "%"

@@ -215,7 +215,7 @@ class Drink_Recipes():
             # While the user wants more time priming
             while self.my_yesno.is_yes("More for Pump #" + str(pump_number) + " Name: " + str(each_ingr) + "?" ):
                 # Add this amount to the prime time
-                self.ingr_pumps[each_ingr].prime(0.1)
+                self.ingr_pumps[each_ingr].prime(1.0)
                 total_tiny = total_tiny + 0.1 # Keep track of all added
             total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
         print total_string # Print the handy string so it can be copy and pasted into the .csv file
