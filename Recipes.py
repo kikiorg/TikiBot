@@ -25,10 +25,11 @@ from yesno import yesno
 # Constants: change any hard coded constants to global named constants
 # Look into Jira and Confluence
 # ---------- Issues foudn during Bob benefit
-# Tiny Prime needs log line telling which ingredients were primed
-# Prime for ingredients that have run out
+# DONE -- Tiny Prime needs log line telling which ingredients were primed
+# Tiny Prime becomes Calibrate Prime -- prime by 90% then Tiny Prime
+# Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
-# DONE -- round the numbers to 2 decimal places, egads!
+#   Alternately, pulse the mouth lights when ingredients might run out
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
@@ -36,7 +37,14 @@ from yesno import yesno
 #   Note: possibly use white card for setup/manual override
 #       Make SetUp a class
 # Manual dispensing of drinks allows for typing drink number from the menu -- easier
+#   Allow pressing [Enter} to go back to scanning
+#   Note above: running setup, then repriming the pump cancels the light pulsing to check ingredients.
+#   Note: acquire the amounts for each bottle from Sam/Katherine
+# Make checklist of things for setup -- including making sure the bottle sizes are entered!
+#   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
+#   Possibly keep track of amounts dispensed and add those on each time the program runs.
 # (Make up a poster for Kiki describing the technical details of what she did)
+# DONE -- round the numbers to 2 decimal places, egads!
 # DONE -- Separate log file for all the drinks, separate from the command file, logging all commands executed
 # DONE -- Log File did not include 0.0 ingredients
 # DONE -- weird bug with Mai Tai -- answer: the ingredients were dispensed out of order.
@@ -227,6 +235,7 @@ class Drink_Recipes():
         pump_number = 0 # Use this to print the pump number
         # Creat a handy new line for the .csv file to paste in
         total_string = "Prime,"
+        tiny_str = "Tiny prime, "
         # Go through all the pumps
         for each_ingr in self.valid_ingr_list:
             pump_number += 1 # Number the pumps for convenience
@@ -238,8 +247,10 @@ class Drink_Recipes():
                 total_tiny = total_tiny + 0.1 # Keep track of all added
             # total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
             total_string += "{0:.2f},".format((total_tiny + self.prime_values[each_ingr]))  # Add to the old prime value
+            tiny_str += "{0:.2f},".format((total_tiny))  # Show which ingredients needed tiny priming
         print total_string # Print the handy string so it can be copy and pasted into the .csv file
         self.command_log.info("Tiny prime: {}".format(total_string))
+        self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
 
     def calibrate(self):
         new_calibration_string = "Calibration"
