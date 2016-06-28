@@ -2,7 +2,11 @@
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
-import csv
+#############################################
+# DrinkBot:                                 #
+#############################################
+# This class reads the RFIDs and dispenses drinks:
+#############################################
 
 import logging
 import sys
@@ -14,18 +18,6 @@ from Recipes import Drink_Recipes
 from yesno import yesno
 
 #############################################
-# To Do List for this file:                 #
-#############################################
-# Remove hard coded RFIDs
-#   add a column to the TikiDrinks.csv file for the RFID tags
-# DONE -- Log all drinks dispensed by date
-#   Ask the user at the start of each run what the event is
-#   DONE -- Make a class for the logging of drinks
-#       DONE -- You pass in a string, and it outputs a date and the string
-# Constants: change any hard coded constants to global named constants
-# DONE -- Make yesno into its own function, maybe yesno("no") for default no -- don't duplicate effort
-
-#############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
 my_recipes = Drink_Recipes("DrinkBot.py")
@@ -34,8 +26,7 @@ my_recipes.link_to_motors()
 
 # my_recipes.print_full_recipes()
 my_yesno = yesno()
-percent_ice = 80.0
-print "Red cup = 18; clear cup = 9"
+percent_ice = 55.0
 cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
 max_cocktail_volume = cup_size * ( (100.0 - percent_ice) / 100.0) # Subtract out the ice
 #print "Cup:", cup_size, " max cocktail volume:", max_cocktail_volume, " percent cocktail:", 100.0 * (100.0 - percent_ice) / 100.0, "%"
@@ -71,6 +62,8 @@ while True:
         my_drink = "test"
         my_drink = raw_input("Enter a drink from the menu: ")
         while my_drink not in my_recipes.drink_names:
+            if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
+                break
             print "Invalid drink name!"
             my_drink = raw_input("Enter a drink from the menu: ")
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card

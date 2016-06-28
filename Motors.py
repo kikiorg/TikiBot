@@ -3,6 +3,16 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
+#############################################
+# Motors class:                             #
+#############################################
+# This class handles the motors:
+#   It addresses and connects with the RasPi Hats
+#   Executes all the turning on and off of the pumps using threading
+#   It handles priming and calibrating functions for a single pump
+# This class is the hardware interface with the rest of the code
+#############################################
+
 # Needed to sleep-wait for pump to finish dispensing.
 import time
 # Needed to assure all pumps have been turned off if the program ends.

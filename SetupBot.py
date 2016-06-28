@@ -2,7 +2,19 @@
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
-import csv
+#############################################
+# SetupBot:                                 #
+#############################################
+# This class executes the setup procedures:
+#   It's really just a big while loop that prompts the user for each setup command
+#
+#   [C]alibrate -- calibrate all the pumps
+#   [G]lobal calibration check -- dispense 1oz for every pump; should be 12oz total
+#   [P]rime -- prime all pumps
+#   [T]iny Prime -- do small, incremental priming of each pump to calibrate the priming sequence
+#   [S]hutdown full phase -- this includes all steps needed for the shutdown procedure
+#       The user can step through them in order, or skip around by choosing the step number
+#############################################
 
 import logging
 import sys
@@ -10,24 +22,6 @@ sys.path.insert(0, 'pynfc/src')
 
 from Recipes import Drink_Recipes
 from yesno import yesno
-
-#############################################
-# To Do List for this file:                 #
-#############################################
-# DONE ALL -- Restructure Shutdown command:
-#   Instead of a set routine, this should have a menu of steps
-#   The user can press [Enter] to go ahead with the correct next step
-#   Or the user can enter a number to repeat or skip to a step.
-#   This will give a lot more control over shutdown, handling more contingencies
-#
-# DONE -- Error checking:
-#   DONE -- Check for the existence of the Calibration line -- if it doesn't exist, then use defaults
-#   DONE -- Check for the existence of the Prime line -- if it doesn't exist, then use defaults
-#   DONE -- Check for strings vs floats vs ints and handle the error
-#   DONE -- Standardize the above setting of the default -- make this a def
-# Constants: change any hard coded constants to global named constants
-# DONE -- not doing this -- Integration: Possibly integrate this entire file into the original DrinkBot.py
-# DONE -- Make yesno into its own function, maybe yesno("message", "no") for default no -- don't duplicate effort
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
@@ -86,14 +80,6 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
         print "*** Executing:"
 
         while not_done:
-            # Print the instructions
-            #i = 0
-            #for each_step in steps_list:
-            #    if i != step:
-            #        print i, ")", each_step
-            #    else:
-            #        print "X )", each_step
-            #    i += 1
             print "***", step, ")", steps_list[step]
 
             if step == 0:
@@ -120,14 +106,8 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
             elif step == 6:
                 my_recipes.purge_all()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
-            # my_yesno = yesno()
             step = my_yesno.get_number("    Press Enter for next step, or step #, or CTRL-C to end) ", int_only = True, default_val = (step + 1))
-            #while not my_step == "" and not my_step.isdigit():
-            #    my_step = raw_input("    Press Enter for next step, or step #, or CTRL-C to end) ")
-            #if my_step == "":
-            #    step += 1
-            #else: # ASSERT my_step.isdigit():
-            #    step = int(my_step)
+
             if step >= len(steps_list) - 1:
                 not_done = False
 

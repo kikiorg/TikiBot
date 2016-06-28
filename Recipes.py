@@ -2,6 +2,18 @@
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
+#############################################
+# Recipes class:                            #
+#############################################
+# This class handles everything having to do with the recipes:
+#   Read the recipe file
+#   Connect all the ingredients to motor controllers
+#   Execute all the setup procedures, including priming and calibrating
+#   Execute the making of drinks
+# It does not include directly addressing the motors (Motors.py) nor the RFID reader (DrinkBot.py)
+# It does not interact with the user (SetupBot.py/DrinkBot.py)
+#############################################
+
 import csv
 import sys
 sys.path.insert(0, 'pynfc/src')
@@ -16,21 +28,23 @@ from yesno import yesno
 #############################################
 # Blurb of documentation at the top of each file saying what each one does
 # Documentation pass -- make it really pretty, claen up stuff, be succint
-# Change the tubing for pineapple juice
-# Change out pump#1/Dark Rum -- running rough
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
 # Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
 # Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
 # Constants: change any hard coded constants to global named constants
+# ---------- Real world issues
+# Change the tubing for pineapple juice
+# Change out pump#1/Dark Rum -- running rough
+# Install the USB ports
 # Look into Jira and Confluence
 # ---------- Issues found during Bob benefit
 # DONE -- Tiny Prime needs log line telling which ingredients were primed
-# Tiny Prime becomes Calibrate Prime -- prime by 90% then Tiny Prime
+# DONE -- Tiny Prime becomes Calibrate Prime -- prime by 90% then Tiny Prime
 # Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
 #   Alternately, pulse the mouth lights when ingredients might run out
-# Combine DrinkLog.csv and CommandLog.csv -- make DrinkLog.csv not .csv -- maybe DispenseLog.csv
+# DONE -- Combine DrinkLog.csv and CommandLog.csv -- make DrinkLog.csv not .csv -- maybe DispenseLog.csv
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
@@ -75,17 +89,11 @@ class Drink_Recipes():
         self.dispense_log = self.setup_each_loggers(("DispenseLog file"),
                                                     filename="DispenseLog.csv",
                                                     fmt='%(asctime)s, %(message)s')
-
-        #self.command_log = None
-        #self.dispense_log = None
-        #self.setup_loggers("Recipes.py:" + parent_name + " ")
-
         self.command_log.info('Starting up.')
 
     #############################################
     # Setup log file to log all drinks served   #
     #############################################
-
     def setup_each_loggers(self, name, filename = "CommandLog.txt",
                            fmt='%(asctime)s, %(name)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S'):
         file_handler = logging.FileHandler(filename)
@@ -102,37 +110,9 @@ class Drink_Recipes():
 
         return new_logger
 
-    def setup_loggers(self, name):
-        #file_handler = logging.FileHandler('CommandLog.txt')
-        #formatter = logging.Formatter(fmt='%(asctime)s, %(name)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        #file_handler.setFormatter(formatter)
-        #self.command_log = logging.getLogger(name)
-        #self.command_log.setLevel(logging.INFO)
-        #self.command_log.addHandler(file_handler)
-        self.command_log = self.setup_each_loggers(name, filename = "CommandLog.csv",
-                           fmt='%(asctime)s, %(name)s, %(message)s')
-
-        # Uncomment if you want all logs also to go to stdout
-        # screen_handler = logging.StreamHandler(stream=sys.stdout)
-        # screen_handler.setFormatter(formatter)
-        # command_log.addHandler(screen_handler)
-
-
-        #file_handler = logging.FileHandler('DispenseLog.csv')
-        #formatter = logging.Formatter(fmt='%(asctime)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        #file_handler.setFormatter(formatter)
-        #self.dispense_log = logging.getLogger(name)
-        #self.dispense_log.setLevel(logging.INFO)
-        #self.dispense_log.addHandler(file_handler)
-        self.dispense_log = self.setup_each_loggers(name, filename="CommandLog.csv",
-                                                   fmt='%(asctime)s, %(name)s, %(message)s')
-
-
-        # Uncomment if you want all logs also to go to stdout
-        # screen_handler = logging.StreamHandler(stream=sys.stdout)
-        # screen_handler.setFormatter(formatter)
-        # dispense_log.addHandler(screen_handler)
-
+    #####################################
+    # Create the list of drink recipes  #
+    #####################################
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
         try:
@@ -151,10 +131,8 @@ class Drink_Recipes():
         # The first row is all the ingredients, not a drink recipe.
         self.ingr_list.remove(self.recipe_name)
 
-        #####################################
-        # Create the list of drink recipes  #
-        #####################################
-        # This is a list of drinks and each drink has a list of Key:Value pairs that are the ingredient:amount
+        ### List of drinks ###
+        # Each drink has a list of Key:Value pairs that are the ingredient:amount
         for each_drink in recipe_book:
             # Now go through all the ingredients for this drink, and append the amounts into the drink
             if each_drink[self.recipe_name] in ["Calibration"]: # Pull out the Calibration list separately
@@ -168,6 +146,8 @@ class Drink_Recipes():
                 self.drink_names.append(each_drink[self.recipe_name])  # Keep a list of all the drink names
                 temp_list = self.drinks[each_drink[self.recipe_name]]
             total_volume = 0.0
+
+            ### Go through every ingredient ###
             for each_ingredient in self.ingr_list:
                 # Append the ingredient amount to the recipe list
                 if each_drink[each_ingredient] is not '':
@@ -226,6 +206,9 @@ class Drink_Recipes():
     def log(self, message ):
         self.command_log.info( message )
 
+    #############################################
+    #                Prime pumps                #
+    #############################################
     # This primes every pump al at once.
     def prime_all(self, percent = 100):
         self.command_log.info('Prime all')
@@ -234,6 +217,9 @@ class Drink_Recipes():
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
+    #############################################
+    #                Purge pumps                #
+    #############################################
     def purge_all(self, direction="forward"):
         self.command_log.info("Purge all {}".format(direction))
         if direction in ["forward"]:
@@ -245,6 +231,9 @@ class Drink_Recipes():
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
+    #############################################
+    #         Global Checksum prime test        #
+    #############################################
     # This dispenses 1.0oz for every pump -- should come out to 12oz or 1.5C
     def checksum_calibration(self):
         log_str = "" # Keep track of all liquids dispensed in the log
@@ -257,6 +246,9 @@ class Drink_Recipes():
         self.command_log.info("Executing Checksum,{}".format( log_str ))
         self.dispense_log.info("Checksum,{}".format( log_str ))
 
+    #############################################
+    #       Tiny Prime: calibrate priming       #
+    #############################################
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
     def tiny_prime(self):
@@ -287,6 +279,10 @@ class Drink_Recipes():
         self.command_log.info("Tiny prime: {}".format(total_string))
         self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
 
+    #############################################
+    #              Calibrate pumps              #
+    #############################################
+    # The tedius process of calibrating every single dang pump by hand
     def calibrate(self):
         new_calibration_string = "Calibration"
         if not self.my_yesno.is_yes("Have all the pumps been primed?"):
@@ -312,7 +308,7 @@ class Drink_Recipes():
         self.dispense_log.info("Calibrated{}".format(log_str))
 
     #############################################################
-    # Print the menu                                            #
+    #                     Print the menu                        #
     #############################################################
     def print_menu(self):
         print "********************   Menu of drinks   ********************"
@@ -321,7 +317,7 @@ class Drink_Recipes():
 
 
     #############################################################
-    # Make the drink!                                           #
+    #                       Make the drink!                     #
     #############################################################
     def make_drink(self, my_drink, max_cocktail_volume = 4.0):
         scaled_to_fit_glass = max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]

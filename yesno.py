@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-# Very cute little class that gets a yes or no from the user
+##############################################################
+#  Very cute little class that gets a yes or no from the user #
+##############################################################
 
 class yesno():
     valid_all = ["Y", "y", "YES", "yes", "Yes", "N", "n", "NO", "no", "No", ""]
