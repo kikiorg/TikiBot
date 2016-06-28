@@ -26,8 +26,13 @@ from yesno import yesno
 #############################################
 # To Do List for this file:                 #
 #############################################
-# Blurb of documentation at the top of each file saying what each one does
-# Documentation pass -- make it really pretty, claen up stuff, be succint
+# DONE -- Blurb of documentation at the top of each file saying what each one does
+# Documentation pass -- make it really pretty, claen up stuff, be succinct
+#   DONE -- Recipes.py
+#   Motors.py
+#   DrinkBot.py
+#   SetupBot.py
+#   DONE -- yesno.py
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
 # Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
@@ -38,13 +43,14 @@ from yesno import yesno
 # Change out pump#1/Dark Rum -- running rough
 # Install the USB ports
 # Look into Jira and Confluence
+# Make checklist of things for setup -- including making sure the bottle sizes are entered!
+#   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
+#   Possibly keep track of amounts dispensed and add those on each time the program runs.
+# (Make up a poster for Kiki describing the technical details of what she did)
 # ---------- Issues found during Bob benefit
-# DONE -- Tiny Prime needs log line telling which ingredients were primed
-# DONE -- Tiny Prime becomes Calibrate Prime -- prime by 90% then Tiny Prime
 # Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
 #   Alternately, pulse the mouth lights when ingredients might run out
-# DONE -- Combine DrinkLog.csv and CommandLog.csv -- make DrinkLog.csv not .csv -- maybe DispenseLog.csv
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
@@ -55,16 +61,8 @@ from yesno import yesno
 #   Allow pressing [Enter} to go back to scanning
 #   Note above: running setup, then repriming the pump cancels the light pulsing to check ingredients.
 #   Note: acquire the amounts for each bottle from Sam/Katherine
-# Make checklist of things for setup -- including making sure the bottle sizes are entered!
-#   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
-#   Possibly keep track of amounts dispensed and add those on each time the program runs.
-# (Make up a poster for Kiki describing the technical details of what she did)
-# DONE -- round the numbers to 2 decimal places, egads!
-# DONE -- Separate log file for all the drinks, separate from the command file, logging all commands executed
-# DONE -- Log File did not include 0.0 ingredients
 # DONE -- weird bug with Mai Tai -- answer: the ingredients were dispensed out of order.
 #   Bug is fixed for the future, but old log file still has error (I'm not going to bother telling anyone :) )
-# DONE -- Comma after each entry in the log file, so the CSV formats nicely in a spreadsheet
 
 
 #############################################
@@ -80,12 +78,18 @@ class Drink_Recipes():
         self.total_vol_key = "Total" # The key to the total volume of each cocktail
         self.ingr_pumps = {} # List of the pumps themselves
         self.valid_ingr_list = [] # List of all the real ingredients that may be used
-        self.calibration_values = {}
-        self.prime_values = {}
-        self.my_yesno = yesno()
+        self.calibration_values = {} # These are the factors to multiply to make a perfect 1oz
+        self.prime_values = {} # This is how much fluid is needed to exactly fill the tubing
+        self.my_yesno = yesno() # Used to ask the user yes/no questions
+        # These two are loggers, logging all the infos
+        # command_log logs all the commands that are executed -- it's comprehensive.
+        # It's test so you can just admire it in a ext editor.
         self.command_log = self.setup_each_loggers(("Recipes.py:" + parent_name + " "),
                                                    filename="CommandLog.txt",
                                                    fmt='%(asctime)s, %(name)s, %(message)s')
+        # dispense_log logs all events that actually dispense liquids
+        #   This log is meant for things like producing graphs, watching for ingredients running low,
+        #   and general data geeking.  This is hwy it is a .csv file -- to be used in a spreadsheet
         self.dispense_log = self.setup_each_loggers(("DispenseLog file"),
                                                     filename="DispenseLog.csv",
                                                     fmt='%(asctime)s, %(message)s')
@@ -113,6 +117,7 @@ class Drink_Recipes():
     #####################################
     # Create the list of drink recipes  #
     #####################################
+    # This opens the file and snarfs it into a list drinks with a list of ingredients
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
         try:
@@ -174,6 +179,7 @@ class Drink_Recipes():
     #############################################
     #     Create pumps linked to ingredients    #
     #############################################
+    # This goes through all the ingredients and attaches then to a motor/pump
     def link_to_motors(self):
         temp_ingr_list = iter(self.ingr_list)
         # We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
@@ -184,10 +190,10 @@ class Drink_Recipes():
             self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
 
-    #############################################################
-    # This prints all the ingredients, not including 'Recipe'   #
-    #############################################################
-    # Note: since the Calibration and Prime lines are not actually removed, these will also print
+    ##############################################################################
+    # This prints all the drinks and their ingredients, not including 'Recipe'   #
+    ##############################################################################
+    # Print the Calibration and Prime lines, then all the drinks
     def print_full_recipes(self):
         print ">>> Calibration <<<"
         self.print_ingredients(self.calibration_values)
@@ -203,8 +209,8 @@ class Drink_Recipes():
             if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
                 print each_ingredient + ': ', my_list[each_ingredient]
 
-    def log(self, message ):
-        self.command_log.info( message )
+    #def log(self, message ):
+    #    self.command_log.info( message )
 
     #############################################
     #                Prime pumps                #
@@ -234,7 +240,7 @@ class Drink_Recipes():
     #############################################
     #         Global Checksum prime test        #
     #############################################
-    # This dispenses 1.0oz for every pump -- should come out to 12oz or 1.5C
+    # This dispenses 1.0oz for every pump -- should come out to 12oz or 1.5 cups
     def checksum_calibration(self):
         log_str = "" # Keep track of all liquids dispensed in the log
         for each_ingr in self.valid_ingr_list:
@@ -325,7 +331,6 @@ class Drink_Recipes():
         print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
                 " scaled by {0:.2f}".format(scaled_to_fit_glass), \
                 " max cocktail volume ", max_cocktail_volume
-                # " scaled by ", scaled_to_fit_glass, \
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.valid_ingr_list:

@@ -24,39 +24,24 @@ from yesno import yesno
 
 class ThreadMe(threading.Thread):
     # motor = which motor by ref; time = actual time to run; name = name assigned to pump
-    def __init__(self, motor, time, name):
+    def __init__(self, motor, time, name, forwards = True):
         # I need only the motor, not the whole list for this.
         # Passing the name, though, assures the key and name match
         super(ThreadMe, self).__init__()
         self.motor = motor
         self.time = time
         self.name = name
+        self.forwards = forwards
         self.start()
 
     def run(self):
         self.motor.setSpeed(255)
-        self.motor.run(Adafruit_MotorHAT.FORWARD)
+        if self.forwards:
+            self.motor.run(Adafruit_MotorHAT.FORWARD)
+        else:
+            self.motor.run(Adafruit_MotorHAT.BACKWARD)
         time.sleep(self.time)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
-
-class ThreadMeBackward(threading.Thread):
-    # motor = which motor by ref; time = actual time to run; name = name assigned to pump
-    def __init__(self, motor, time, name):
-        # I need only the motor, not the whole list for this.
-        # Passing the name, though, assures the key and name match
-        super(ThreadMeBackward, self).__init__()
-        self.motor = motor
-        self.time = time
-        self.name = name
-        self.start()
-        # self.join() # Oops, this immediately stops the main thread and waits for your thread to finish
-
-    def run(self):
-        self.motor.setSpeed(255)
-        self.motor.run(Adafruit_MotorHAT.BACKWARD)
-        time.sleep(self.time)
-        self.motor.run(Adafruit_MotorHAT.RELEASE)
-
 
 #############################
 #  NOTES: PUMP CALIBRATION  #
@@ -247,7 +232,7 @@ class Motors():
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
         time.sleep(Motors.current_spike_stabilze)
-        self.thread = ThreadMeBackward(self.motor, my_purge_seconds, self.name)
+        self.thread = ThreadMe(self.motor, my_purge_seconds, self.name, forwards = False)
     def forward_purge(self, my_purge_seconds = purge_seconds_default):
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.

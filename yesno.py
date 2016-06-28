@@ -12,18 +12,22 @@ class yesno():
     def __init__(self):
         return
 
+    # Get a yes/no answer from the user, defaulting to Yes
     def is_yes(self, message = ""):
         yesno = raw_input(message + " [Y/n] ")
         while yesno not in self.valid_all:
             yesno = raw_input(message)
         return yesno in self.valid_yes_default
 
+    # Get a yes/no answer from the user, defaulting to Yes
     def is_no(self, message = ""):
         yesno = raw_input(message + " [y/N] ")
         while yesno not in self.valid_all:
             yesno = raw_input(message)
         return yesno in self.valid_no_default
 
+    # Get a number from the user, forcing them if they enter not a number
+    #   This can get integers only or floats (see default values in the parameters)
     def get_number(self, message = "Please enter a number: ", default_val = 0.0, int_only = False, neg_ok = False):
         my_zero = 0
         if not int_only:
