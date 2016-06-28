@@ -174,39 +174,75 @@
 2016-06-25 07:49:56 Recipes.py:SetupBot.py  Purge all forward
 2016-06-25 07:50:12 Recipes.py:SetupBot.py  Purge all forward
 2016-06-25 07:50:49 Recipes.py:SetupBot.py  Purge all forward
-2016-06-27 14:34:05 Recipes.py:DrinkBot.py  Starting up.
-2016-06-27 14:34:08 Recipes.py:DrinkBot.py  Cup: 18.0 max cocktail volume: 3.6 percent cocktail: 20.0%
-2016-06-27 14:34:49 Recipes.py:DrinkBot.py  Mai Tai,0.8,0.2,0.4,0.4,0.2,0.8,0.8
-2016-06-27 14:37:36 Recipes.py:DrinkBot.py  Starting up.
-2016-06-27 14:37:38 Recipes.py:DrinkBot.py  Cup: 18.0 max cocktail volume: 3.6 percent cocktail: 20.0%
-2016-06-27 14:38:11 Recipes.py:DrinkBot.py  Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
-2016-06-27 14:54:07, Starting up.
-2016-06-27 14:54:09, Cup: 18.0 max cocktail volume: 3.6 percent cocktail: 20.0%
-2016-06-27 14:54:43, Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
-2016-06-27 14:54:43, Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
-2016-06-27 14:58:28, Starting up.
-2016-06-27 14:58:32, Cup: 18.0 max cocktail volume: 3.6 percent cocktail: 20.0%
-2016-06-27 14:59:06, Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
-2016-06-27 14:59:06, Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
-2016-06-27 14:59:33, Starting up.
-2016-06-27 14:59:35, Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
-2016-06-27 14:59:47, Mai Tai,0.222222222222,0.0,0.222222222222,0.111111111111,0.0,0.0,0.111111111111,0.0555555555556,0.0,0.222222222222,0.0,0.0555555555556
-2016-06-27 14:59:47, Mai Tai,0.222222222222,0.0,0.222222222222,0.111111111111,0.0,0.0,0.111111111111,0.0555555555556,0.0,0.222222222222,0.0,0.0555555555556
-2016-06-27 15:15:24, Starting up.
-2016-06-27 15:15:25, Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
-2016-06-27 15:15:38, Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
-2016-06-27 15:15:38, Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
-2016-06-27 15:18:39, Starting up.
-2016-06-27 15:18:39, Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
-2016-06-27 15:18:52, Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
-2016-06-27 15:18:52, Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
-2016-06-27 15:18:59, Starting up.
-2016-06-27 15:19:03, Prime all
-2016-06-27 15:20:35, Tiny prime: Prime,11.93,15.30,12.78,14.00,12.75,13.05,12.77,13.50,13.25,12.07,11.70,15.65,
-2016-06-27 15:24:05, Starting up.
-2016-06-27 15:24:06, Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
-2016-06-27 15:24:24, Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
-2016-06-27 15:24:24, Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
-2016-06-27 15:34:42, Starting up.
-2016-06-27 15:35:04, Tiny prime: Prime,11.93,14.90,12.78,14.00,12.55,13.05,12.77,13.50,13.65,12.07,11.70,16.15,
-2016-06-27 15:35:04, Tiny prime (pumps): Tiny prime, 0.40,0.30,0.00,0.00,0.00,0.00,0.20,0.00,0.40,0.00,0.00,1.60,
+2016-06-27 14:54:07, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 14:54:09, Recipes.py:DrinkBot.py , Cup: 18.0 max cocktail volume: 3.6 percent cocktail: 20.0%
+2016-06-27 14:54:43, Recipes.py:DrinkBot.py , Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
+2016-06-27 14:54:43, Recipes.py:DrinkBot.py , Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
+2016-06-27 14:58:28, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 14:58:32, Recipes.py:DrinkBot.py , Cup: 18.0 max cocktail volume: 3.6 percent cocktail: 20.0%
+2016-06-27 14:59:06, Recipes.py:DrinkBot.py , Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
+2016-06-27 14:59:06, Recipes.py:DrinkBot.py , Mai Tai,0.8,0.8,0.8,0.4,0.4,0.4,0.4,0.2,0.2,0.8,0.8,0.2
+2016-06-27 14:59:33, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 14:59:35, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 14:59:47, Recipes.py:DrinkBot.py , Mai Tai,0.222222222222,0.0,0.222222222222,0.111111111111,0.0,0.0,0.111111111111,0.0555555555556,0.0,0.222222222222,0.0,0.0555555555556
+2016-06-27 14:59:47, Recipes.py:DrinkBot.py , Mai Tai,0.222222222222,0.0,0.222222222222,0.111111111111,0.0,0.0,0.111111111111,0.0555555555556,0.0,0.222222222222,0.0,0.0555555555556
+2016-06-27 15:15:24, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 15:15:25, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 15:15:38, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 15:15:38, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 15:18:39, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 15:18:39, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 15:18:52, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 15:18:52, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 15:18:59, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 15:19:03, Recipes.py:SetupBot.py , Prime all
+2016-06-27 15:20:35, Recipes.py:SetupBot.py , Tiny prime: Prime,11.93,15.30,12.78,14.00,12.75,13.05,12.77,13.50,13.25,12.07,11.70,15.65,
+2016-06-27 15:24:05, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 15:24:06, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 15:24:24, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 15:24:24, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 15:34:42, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 15:35:04, Recipes.py:SetupBot.py , Tiny prime: Prime,11.93,14.90,12.78,14.00,12.55,13.05,12.77,13.50,13.65,12.07,11.70,16.15,
+2016-06-27 15:35:04, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.40,0.30,0.00,0.00,0.00,0.00,0.20,0.00,0.40,0.00,0.00,1.60,
+2016-06-27 19:06:24, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:07:43, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:07:52, Recipes.py:SetupBot.py , Prime all
+2016-06-27 19:08:28, Recipes.py:SetupBot.py , Tiny prime: Prime,12.03,15.20,12.97,14.00,12.55,13.05,12.97,13.50,13.25,12.07,12.00,14.85,
+2016-06-27 19:08:28, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.50,0.60,0.20,0.00,0.00,0.00,0.40,0.00,0.00,0.00,0.30,0.30,
+2016-06-27 19:11:07, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:11:13, Recipes.py:SetupBot.py , Prime all
+2016-06-27 19:11:41, Recipes.py:SetupBot.py , Tiny prime: Prime,11.83,14.90,12.78,14.00,12.55,13.05,12.57,13.50,13.25,12.07,12.10,14.55,
+2016-06-27 19:11:41, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.30,0.30,0,0,0,0,0,0,0,0,0.40,0,
+2016-06-27 19:33:47, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:33:47, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:34:06, Recipes.py:SetupBot.py , Tiny prime: Prime,11.53,14.60,12.78,14.00,12.55,13.05,12.57,13.50,13.25,12.07,11.70,14.55,
+2016-06-27 19:34:06, Recipes.py:SetupBot.py , Tiny prime: Prime,11.53,14.60,12.78,14.00,12.55,13.05,12.57,13.50,13.25,12.07,11.70,14.55,
+2016-06-27 19:34:06, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0,0,0,0,0,0,0,0,0,0,0,0,
+2016-06-27 19:34:06, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0,0,0,0,0,0,0,0,0,0,0,0,
+2016-06-27 19:34:16, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 19:34:16, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 19:34:20, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 19:34:20, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 19:34:34, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 19:34:34, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 19:34:34, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 19:34:34, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 19:40:21, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:40:26, Recipes.py:SetupBot.py , Prime all
+2016-06-27 19:40:55, Recipes.py:SetupBot.py , Tiny prime: Prime,11.93,15.20,12.78,14.00,12.55,13.05,12.57,13.50,13.25,12.38,12.00,14.85,
+2016-06-27 19:40:55, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.40,0.60,0,0,0,0,0,0,0,0.30,0.30,0.30,
+2016-06-27 19:43:04, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 19:43:17, Recipes.py:SetupBot.py , Tiny prime: Prime,11.83,14.60,12.78,14.00,12.55,13.05,12.57,13.50,13.25,12.07,11.70,14.55,
+2016-06-27 19:43:17, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.30,0,0,0,0,0,0,0,0,0,0,0,
+2016-06-27 20:03:17, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 20:03:27, Recipes.py:SetupBot.py , Tiny prime: Prime,11.83,14.60,12.78,14.00,12.55,13.05,12.57,13.50,13.25,12.07,11.70,14.55,
+2016-06-27 20:03:27, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.30,0,0,0,0,0,0,0,0,0,0,0,
+2016-06-27 20:04:06, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 20:04:08, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 20:04:23, Recipes.py:DrinkBot.py , Mai Tai,0.22,0.00,0.22,0.11,0.00,0.00,0.11,0.06,0.00,0.22,0.00,0.06
+2016-06-27 20:05:12, Recipes.py:DrinkBot.py , Starting up.
+2016-06-27 20:05:14, Recipes.py:DrinkBot.py , Cup: 5.0 max cocktail volume: 1.0 percent cocktail: 20.0%
+2016-06-27 20:05:34, Recipes.py:DrinkBot.py , Hawaiian Eye,0.00,0.17,0.33,0.00,0.00,0.17,0.00,0.17,0.00,0.17,0.00,0.00
+2016-06-27 20:05:54, Recipes.py:SetupBot.py , Starting up.
+2016-06-27 20:06:07, Recipes.py:SetupBot.py , Tiny prime: Prime,12.03,14.60,12.78,14.00,12.55,13.05,12.77,13.50,13.25,12.07,11.70,14.55,
+2016-06-27 20:06:07, Recipes.py:SetupBot.py , Tiny prime (pumps): Tiny prime, 0.50,0,0,0,0,0,0.20,0,0,0,0,0,

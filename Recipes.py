@@ -30,7 +30,7 @@ from yesno import yesno
 # Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
 #   Alternately, pulse the mouth lights when ingredients might run out
-# Combine DrinkLog.txt and CommandLog.txt -- make DrinkLog.csv not .txt -- maybe DispenseLog.csv
+# Combine DrinkLog.csv and CommandLog.csv -- make DrinkLog.csv not .csv -- maybe DispenseLog.csv
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
@@ -69,9 +69,16 @@ class Drink_Recipes():
         self.calibration_values = {}
         self.prime_values = {}
         self.my_yesno = yesno()
-        self.command_log = None
-        self.drink_log = None
-        self.setup_loggers("Recipes.py:" + parent_name + " ")
+        self.command_log = self.setup_each_loggers(("Recipes.py:" + parent_name + " "),
+                                                   filename="CommandLog.txt",
+                                                   fmt='%(asctime)s, %(name)s, %(message)s')
+        self.dispense_log = self.setup_each_loggers(("DispenseLog file"),
+                                                    filename="DispenseLog.csv",
+                                                    fmt='%(asctime)s, %(message)s')
+
+        #self.command_log = None
+        #self.dispense_log = None
+        #self.setup_loggers("Recipes.py:" + parent_name + " ")
 
         self.command_log.info('Starting up.')
 
@@ -79,13 +86,31 @@ class Drink_Recipes():
     # Setup log file to log all drinks served   #
     #############################################
 
-    def setup_loggers(self, name):
-        file_handler = logging.FileHandler('CommandLog.txt')
-        formatter = logging.Formatter(fmt='%(asctime)s, %(name)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    def setup_each_loggers(self, name, filename = "CommandLog.txt",
+                           fmt='%(asctime)s, %(name)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S'):
+        file_handler = logging.FileHandler(filename)
+        formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
         file_handler.setFormatter(formatter)
-        self.command_log = logging.getLogger(name)
-        self.command_log.setLevel(logging.INFO)
-        self.command_log.addHandler(file_handler)
+        new_logger = logging.getLogger(name)
+        new_logger.setLevel(logging.INFO)
+        new_logger.addHandler(file_handler)
+
+        # Uncomment if you want all logs also to go to stdout
+        # screen_handler = logging.StreamHandler(stream=sys.stdout)
+        # screen_handler.setFormatter(formatter)
+        # new_logger.addHandler(screen_handler)
+
+        return new_logger
+
+    def setup_loggers(self, name):
+        #file_handler = logging.FileHandler('CommandLog.txt')
+        #formatter = logging.Formatter(fmt='%(asctime)s, %(name)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        #file_handler.setFormatter(formatter)
+        #self.command_log = logging.getLogger(name)
+        #self.command_log.setLevel(logging.INFO)
+        #self.command_log.addHandler(file_handler)
+        self.command_log = self.setup_each_loggers(name, filename = "CommandLog.csv",
+                           fmt='%(asctime)s, %(name)s, %(message)s')
 
         # Uncomment if you want all logs also to go to stdout
         # screen_handler = logging.StreamHandler(stream=sys.stdout)
@@ -93,18 +118,20 @@ class Drink_Recipes():
         # command_log.addHandler(screen_handler)
 
 
-        file_handler = logging.FileHandler('DrinkLog.txt')
-        formatter = logging.Formatter(fmt='%(asctime)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-        file_handler.setFormatter(formatter)
-        self.drink_log = logging.getLogger(name)
-        self.drink_log.setLevel(logging.INFO)
-        self.drink_log.addHandler(file_handler)
+        #file_handler = logging.FileHandler('DispenseLog.csv')
+        #formatter = logging.Formatter(fmt='%(asctime)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        #file_handler.setFormatter(formatter)
+        #self.dispense_log = logging.getLogger(name)
+        #self.dispense_log.setLevel(logging.INFO)
+        #self.dispense_log.addHandler(file_handler)
+        self.dispense_log = self.setup_each_loggers(name, filename="CommandLog.csv",
+                                                   fmt='%(asctime)s, %(name)s, %(message)s')
 
 
         # Uncomment if you want all logs also to go to stdout
         # screen_handler = logging.StreamHandler(stream=sys.stdout)
         # screen_handler.setFormatter(formatter)
-        # drink_log.addHandler(screen_handler)
+        # dispense_log.addHandler(screen_handler)
 
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
@@ -228,7 +255,7 @@ class Drink_Recipes():
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
         self.command_log.info("Executing Checksum,{}".format( log_str ))
-        self.drink_log.info("Checksum,{}".format( log_str ))
+        self.dispense_log.info("Checksum,{}".format( log_str ))
 
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
@@ -282,7 +309,7 @@ class Drink_Recipes():
         print new_calibration_string
         self.command_log.info("Calibration string: {}".format(new_calibration_string))
         self.command_log.info("Calibration dispensed{}".format(log_str))
-        self.drink_log.info("Calibrated{}".format(log_str))
+        self.dispense_log.info("Calibrated{}".format(log_str))
 
     #############################################################
     # Print the menu                                            #
@@ -319,5 +346,5 @@ class Drink_Recipes():
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
         self.command_log.info("{}{}".format(my_drink, log_str))
-        self.drink_log.info("{}{}".format(my_drink, log_str))
+        self.dispense_log.info("{}{}".format(my_drink, log_str))
 
