@@ -24,12 +24,13 @@ from yesno import yesno
 # Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
 # Constants: change any hard coded constants to global named constants
 # Look into Jira and Confluence
-# ---------- Issues foudn during Bob benefit
+# ---------- Issues found during Bob benefit
 # DONE -- Tiny Prime needs log line telling which ingredients were primed
 # Tiny Prime becomes Calibrate Prime -- prime by 90% then Tiny Prime
 # Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
 #   Alternately, pulse the mouth lights when ingredients might run out
+# Combine DrinkLog.txt and CommandLog.txt -- make DrinkLog.csv not .txt -- maybe DispenseLog.csv
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
@@ -199,10 +200,10 @@ class Drink_Recipes():
         self.command_log.info( message )
 
     # This primes every pump al at once.
-    def prime_all(self):
+    def prime_all(self, percent = 100):
         self.command_log.info('Prime all')
         for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr])
+            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr] * percent/100)
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
@@ -232,6 +233,10 @@ class Drink_Recipes():
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
     def tiny_prime(self):
+        percent = 90
+        if self.my_yesno.is_yes("Prime the pumps at {} percent?".format(percent)):
+            self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
+            self.prime_all(percent)
         pump_number = 0 # Use this to print the pump number
         # Creat a handy new line for the .csv file to paste in
         total_string = "Prime,"
@@ -247,7 +252,10 @@ class Drink_Recipes():
                 total_tiny = total_tiny + 0.1 # Keep track of all added
             # total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
             total_string += "{0:.2f},".format((total_tiny + self.prime_values[each_ingr]))  # Add to the old prime value
-            tiny_str += "{0:.2f},".format((total_tiny))  # Show which ingredients needed tiny priming
+            if total_tiny == 0.0:
+                tiny_str += "{},".format(int(total_tiny))  # Show which ingredients needed tiny priming
+            else:
+                tiny_str += "{0:.2f},".format(total_tiny)  # Show which ingredients needed tiny priming
         print total_string # Print the handy string so it can be copy and pasted into the .csv file
         self.command_log.info("Tiny prime: {}".format(total_string))
         self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
