@@ -35,9 +35,11 @@ from yesno import yesno
 #   DONE -- yesno.py
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
-# Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
 # Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
 # Constants: change any hard coded constants to global named constants
+# Refactor:
+#   Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
+#   DONE -- combine ThreadMe/ThreadMeBackwards
 # ---------- Real world issues
 # Change the tubing for pineapple juice
 # Change out pump#1/Dark Rum -- running rough
@@ -80,6 +82,7 @@ class Drink_Recipes():
         self.valid_ingr_list = [] # List of all the real ingredients that may be used
         self.calibration_values = {} # These are the factors to multiply to make a perfect 1oz
         self.prime_values = {} # This is how much fluid is needed to exactly fill the tubing
+        self.primeOz_values = {} # This is how much fluid is needed to exactly fill the tubing
         self.my_yesno = yesno() # Used to ask the user yes/no questions
         # These two are loggers, logging all the infos
         # command_log logs all the commands that are executed -- it's comprehensive.
@@ -143,8 +146,11 @@ class Drink_Recipes():
             if each_drink[self.recipe_name] in ["Calibration"]: # Pull out the Calibration list separately
                 self.calibration_values = {} # Note, override any previous Calibration lines
                 temp_list = self.calibration_values
-            elif each_drink[self.recipe_name] in ["Prime"]: # Pull out the Prime list separately
-                self.prime_values = {} # Note, override any previous Calibration lines
+            #elif each_drink[self.recipe_name] in ["Prime"]:  # Pull out the Prime list separately
+            #    self.prime_values = {}  # Note, override any previous Calibration lines
+            #    temp_list = self.prime_values
+            elif each_drink[self.recipe_name] in ["Prime"]:  # Pull out the Prime list separately
+                self.prime_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.prime_values
             else:
                 self.drinks[each_drink[self.recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
@@ -216,10 +222,21 @@ class Drink_Recipes():
     #                Prime pumps                #
     #############################################
     # This primes every pump al at once.
-    def prime_all(self, percent = 100):
+    def primeOLD_all(self, percent = 100):
         self.command_log.info('Prime all')
         for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr] * percent/100)
+            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr] * percent/100.0)
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].wait_until_done()
+
+    #############################################
+    #                PrimeOz pumps                #
+    #############################################
+    # This primes every pump al at once.
+    def prime_all(self, percent = 100.0):
+        self.command_log.info('Prime all')
+        for each_ingr in self.valid_ingr_list:
+            self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0)
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
@@ -258,7 +275,8 @@ class Drink_Recipes():
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
     def tiny_prime(self):
-        percent = 90
+        percent = 90.0
+        increment = 1.0 # Increment by 1%
         if self.my_yesno.is_yes("Prime the pumps at {} percent?".format(percent)):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
             self.prime_all(percent)
@@ -270,13 +288,14 @@ class Drink_Recipes():
         for each_ingr in self.valid_ingr_list:
             pump_number += 1 # Number the pumps for convenience
             total_tiny = 0 # Total extra priming added
-            # While the user wants more time priming
+            # While the user wants more ounces of priming
             while self.my_yesno.is_yes("More for Pump #" + str(pump_number) + " Name: " + str(each_ingr) + "?" ):
-                # Add this amount to the prime time
-                self.ingr_pumps[each_ingr].prime(0.1)
-                total_tiny = total_tiny + 0.1 # Keep track of all added
-            # total_string += str(total_tiny + self.prime_values[each_ingr]) + "," # Add to the old prime value
-            total_string += "{0:.2f},".format((total_tiny + self.prime_values[each_ingr]))  # Add to the old prime value
+                # Add this amount to the prime ounces
+                self.ingr_pumps[each_ingr].dispense(increment / 100 * self.prime_values[each_ingr])
+                # Keep track of all added
+                total_tiny = total_tiny +  increment / 100 * self.prime_values[each_ingr]
+            # Add to the old prime value
+            total_string += "{0:.2f},".format((total_tiny + self.prime_values[each_ingr] * percent / 100.0))
             if total_tiny == 0.0:
                 tiny_str += "{},".format(int(total_tiny))  # Show which ingredients needed tiny priming
             else:

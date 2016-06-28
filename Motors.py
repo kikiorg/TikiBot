@@ -22,6 +22,12 @@ import atexit
 import threading
 from yesno import yesno
 
+#############################################
+# ThreadMe class:                             #
+#############################################
+# This class allows the pumps to all run ath the same time.
+# If we didn't, it would take a very long time to make one cocktail!
+#############################################
 class ThreadMe(threading.Thread):
     # motor = which motor by ref; time = actual time to run; name = name assigned to pump
     def __init__(self, motor, time, name, forwards = True):
@@ -87,28 +93,15 @@ class HatNotConnected(Exception):
 #   two boards, until they come in         #
 ############################################
 
-# self.__modulations = (nfc.nfc_modulation * len(mods))()
-# for i in range(len(mods)):
-#    self.__modulations[i].nmt = mods[i][0]
-#    self.__modulations[i].nbr = mods[i][1]
-
 hat_stack = []
-# bottom hat is default address 0x60
-# Board 0: Address = 0x60 Offset = binary 0000 (no jumpers required)
+# bottom Hat: Board 0: Address = 0x60 Offset = binary 0000 (no jumpers required)
+# middle Hat: Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
+# top Hat: Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
 hat_stack.append(Adafruit_MotorHAT(addr=0x60))
-
-# middle hat has A0 jumper closed, so its address 0x61.
-# Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
 hat_stack.append(Adafruit_MotorHAT(addr=0x61))
-# hat_stack[1] = Adafruit_MotorHAT(addr=0x61)
-
-# top hat has A1 jumper closed, so its address 0x62.
-# Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
 hat_stack.append(Adafruit_MotorHAT(addr=0x62))
-# hat_stack[2] = Adafruit_MotorHAT(addr=0x62)
 
 all_hats = Adafruit_MotorHAT(addr=0x70)  # Not used, but should address all hats at once
-
 
 # Quick test of all motors -- this turns them all on for one second
 def test_all_motors():
@@ -120,7 +113,6 @@ def test_all_motors():
             time.sleep(1)
             hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
 
-
 # Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
 # recommended for auto-disabling motors on shutdown!
 def turnOffMotors():
@@ -131,10 +123,8 @@ def turnOffMotors():
         hat_stack[2].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
         # Motors.top_hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
 
-
 # recommended for auto-disabling motors on shutdown!
 atexit.register(turnOffMotors)
-
 
 class Motors():
     # We assume these are pumps that dispense about 2oz every 60 seconds.
