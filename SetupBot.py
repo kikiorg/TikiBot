@@ -83,28 +83,28 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
             print "***", step, ")", steps_list[step]
 
             if step == 0:
-                my_recipes.purge_all("reverse")
+                my_recipes.prime_all(forwards = False)
                 print "    Put hoses into rinse water."
             elif step == 1:
-                my_recipes.purge_all()
-                my_recipes.purge_all()
+                my_recipes.prime_all()
+                my_recipes.prime_all()
                 print "    Remove the hoses to allow air to enter."
             elif step == 2:
-                my_recipes.purge_all()
+                my_recipes.prime_all()
                 print "    Put hoses into bleach water."
             elif step == 3:
-                my_recipes.purge_all()
-                my_recipes.purge_all()
+                my_recipes.prime_all()
+                my_recipes.prime_all()
                 print "    Remove the hoses to allow air to enter."
             elif step == 4:
-                my_recipes.purge_all()
+                my_recipes.prime_all()
                 print "    Put hoses into rinse water."
             elif step == 5:
-                my_recipes.purge_all()
-                my_recipes.purge_all()
+                my_recipes.prime_all()
+                my_recipes.prime_all()
                 print "    Remove the hoses to allow air to enter"
             elif step == 6:
-                my_recipes.purge_all()
+                my_recipes.prime_all()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
             step = my_yesno.get_number("    Press Enter for next step, or step #, or CTRL-C to end) ", int_only = True, default_val = (step + 1))
 

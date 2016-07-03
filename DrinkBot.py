@@ -17,23 +17,21 @@ from mifareauth import NFCReader
 from Recipes import Drink_Recipes
 from yesno import yesno
 
+# my_recipes.print_full_recipes()
+my_yesno = yesno()
+percent_ice = 55.0
+cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
+max_cocktail_volume = cup_size * ( (100.0 - percent_ice) / 100.0) # Subtract out the ice
+format_str = "Cup: {f[0]} max cocktail volume: {f[1]} percent cocktail: {f[2]}%"
+format_list = [cup_size, max_cocktail_volume,  (100.0 * (100.0 - percent_ice) / 100.0)]
+print format_str.format(f=format_list)
+
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
 my_recipes = Drink_Recipes("DrinkBot.py")
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
 my_recipes.link_to_motors()
-
-# my_recipes.print_full_recipes()
-my_yesno = yesno()
-percent_ice = 55.0
-cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
-max_cocktail_volume = cup_size * ( (100.0 - percent_ice) / 100.0) # Subtract out the ice
-#print "Cup:", cup_size, " max cocktail volume:", max_cocktail_volume, " percent cocktail:", 100.0 * (100.0 - percent_ice) / 100.0, "%"
-format_str = "Cup: {f[0]} max cocktail volume: {f[1]} percent cocktail: {f[2]}%"
-format_list = [cup_size, max_cocktail_volume,  (100.0 * (100.0 - percent_ice) / 100.0)]
-print format_str.format(f=format_list)
-my_recipes.log( format_str.format(f=format_list) )
 
 my_drink_ID = None
 my_drink = ""

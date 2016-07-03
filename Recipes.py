@@ -27,19 +27,32 @@ from yesno import yesno
 # To Do List for this file:                 #
 #############################################
 # DONE -- Blurb of documentation at the top of each file saying what each one does
-# Documentation pass -- make it really pretty, claen up stuff, be succinct
+# Documentation pass -- make it really pretty, clean up stuff, be succinct
 #   DONE -- Recipes.py
 #   Motors.py
 #   DrinkBot.py
 #   SetupBot.py
 #   DONE -- yesno.py
+# *** Generalize the Motors class!
+#   Make the Motors class for all types of motors used with the RasPi Hats
+#   Make a subclass for Pumps
+#   Suggest a subclass for Stepper Motors
+#   Better logging
+#       Debug levels and stuff
+# *** Generalize the Recipes class!
+#   Make this for anyone making a DrinkBot
+#       This means that calibration stuff and prime stuff need to be generated within the code
+#   Better logging
+#       Debug levels and stuff
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
-# Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
 # Constants: change any hard coded constants to global named constants
+# DONE -- Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
+#   This will allow for the next item:
 # Refactor:
 #   Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
 #   DONE -- combine ThreadMe/ThreadMeBackwards
+# Check again that the stabilizing current wait can't be put into Threading...
 # ---------- Real world issues
 # Change the tubing for pineapple juice
 # Change out pump#1/Dark Rum -- running rough
@@ -84,6 +97,12 @@ class Drink_Recipes():
         self.prime_values = {} # This is how much fluid is needed to exactly fill the tubing
         self.primeOz_values = {} # This is how much fluid is needed to exactly fill the tubing
         self.my_yesno = yesno() # Used to ask the user yes/no questions
+
+        ############ LED effects
+        self.smoke_effects = None
+        self.LED_red = None
+        self.LED_dispense = None
+
         # These two are loggers, logging all the infos
         # command_log logs all the commands that are executed -- it's comprehensive.
         # It's test so you can just admire it in a ext editor.
@@ -195,6 +214,10 @@ class Drink_Recipes():
             calibration_oz = float(self.calibration_values[each_ingredient])
             self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
+        self.smoke_effects = Motors("smoke effects")  # Create the smoke effects -- fan into the dry ice container
+        self.LED_red = Motors( "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        self.LED_dispense = Motors("LED dispense")  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        self.LED_red.turn_on_effect(False)  # The red light should always be on when the DrinkBot is on
 
     ##############################################################################
     # This prints all the drinks and their ingredients, not including 'Recipe'   #
@@ -215,37 +238,23 @@ class Drink_Recipes():
             if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
                 print each_ingredient + ': ', my_list[each_ingredient]
 
-    #def log(self, message ):
-    #    self.command_log.info( message )
-
     #############################################
     #                Prime pumps                #
     #############################################
     # This primes every pump al at once.
-    def primeOLD_all(self, percent = 100):
-        self.command_log.info('Prime all')
+    def prime_all(self, percent = 100.0, forwards = True):
+        self.command_log.info('Prime all ' + ("forwards" if forwards else "reverse"))
         for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr] * percent/100.0)
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].wait_until_done()
-
-    #############################################
-    #                PrimeOz pumps                #
-    #############################################
-    # This primes every pump al at once.
-    def prime_all(self, percent = 100.0):
-        self.command_log.info('Prime all')
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0)
+            self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0, forwards)
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
 
     #############################################
     #                Purge pumps                #
     #############################################
-    def purge_all(self, direction="forward"):
-        self.command_log.info("Purge all {}".format(direction))
-        if direction in ["forward"]:
+    def purge_allOLD(self, forwards = True):
+        self.command_log.info("Purge all {}".format(forwards))
+        if forwards:
             for each_ingr in self.valid_ingr_list:
                 self.ingr_pumps[each_ingr].forward_purge(self.prime_values[each_ingr])
         else:
@@ -262,7 +271,6 @@ class Drink_Recipes():
         log_str = "" # Keep track of all liquids dispensed in the log
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].dispense(1.0)
-            # log_str += "," + str(1.0) # Add to the old prime value
             log_str += ",{0:.2f}".format(1.0)
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
@@ -350,6 +358,9 @@ class Drink_Recipes():
         print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
                 " scaled by {0:.2f}".format(scaled_to_fit_glass), \
                 " max cocktail volume ", max_cocktail_volume
+        # Turn on LEDs and smoke before drink starts to dispense
+        self.smoke_effects.turn_on_effect(forwards = False)
+        self.LED_dispense.ramp_effect(ramp_up = True)
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.valid_ingr_list:
@@ -365,6 +376,10 @@ class Drink_Recipes():
         for each_ingredient in self.valid_ingr_list:
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
+        # Turn off LED and smoke effects once drink has finished dispensing
+        self.smoke_effects.turn_off_effect()
+        self.LED_dispense.ramp_effect(ramp_up = False)
+
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))
 
