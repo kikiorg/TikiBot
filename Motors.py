@@ -12,7 +12,7 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 #############################################
 # This class handles the motors:
 #   It addresses and connects with the RasPi Hats
-#   Executes all the turning on and off of the pumps using threading
+#   Executes all the turning on and off of the motors using threading
 #   It handles priming and calibrating functions for a single pump
 # This class is the hardware interface with the rest of the code
 #############################################
@@ -26,33 +26,6 @@ import atexit
 # Allows motors to run concurrently
 import threading
 from yesno import yesno
-
-#############################################
-# ThreadMe class:                           #
-#############################################
-# This class allows the pumps to all run at the same time.
-# If we didn't, it would take a very long time to make one cocktail!
-#############################################
-class ThreadMe(threading.Thread):
-    # motor = which motor by ref; time = actual time to run; name = name assigned to pump
-    def __init__(self, motor, time, name, forwards = True):
-        # I need only the motor, not the whole list for this.
-        # Passing the name, though, assures the key and name match
-        super(ThreadMe, self).__init__()
-        self.motor = motor
-        self.time = time
-        self.name = name
-        self.forwards = forwards
-        self.start()
-
-    def run(self):
-        self.motor.setSpeed(255)
-        if self.forwards:
-            self.motor.run(Adafruit_MotorHAT.FORWARD)
-        else:
-            self.motor.run(Adafruit_MotorHAT.BACKWARD)
-        time.sleep(self.time)
-        self.motor.run(Adafruit_MotorHAT.RELEASE)
 
 # Notes for pump calibration:
 
@@ -145,10 +118,10 @@ class Motors():
         self.name = name
         self.thread = None
         self.motor = self.get_next_motor()
-        # Each pump should dispense 2oz in 60 seconds (is should dispense calibration_default in calibration_seconds)
+        # Each motor should dispense 2oz in 60 seconds (is should dispense calibration_default in calibration_seconds)
         # But, of course, they vary.
-        # This is the actual amount this particular pump dispenses in calibration_seconds
-        #   See .dispense for the Magic of Math for how it uses this numbers to calibrate the pump
+        # This is the actual amount this particular motor dispenses in calibration_seconds
+        #   See .dispense for the Magic of Math for how it uses this numbers to calibrate the motor
         self.calibration_oz = calibration_oz
 
         # recommended for auto-disabling motors on shutdown
@@ -245,7 +218,7 @@ class Motors():
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
         time.sleep(Motors.current_spike_stabilze)
-        self.thread = ThreadMe(self.motor, prime_value, self.name)
+        self.thread = ThreadMotor(self.motor, prime_value, self.name)
 
     ############################################
     # Dispense calibrated ounces               #
@@ -267,7 +240,7 @@ class Motors():
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
         time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        self.thread = ThreadMe(self.motor, calibrated_time, self.name, forwards)
+        self.thread = Motors.ThreadMotor(self.motor, calibrated_time, self.name, forwards)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     ##############################################
@@ -275,7 +248,7 @@ class Motors():
     ##############################################
     # Treat motor as output
     def run_effect(self, time = 5, forwards = True):
-        self.thread = ThreadMe(self.motor, time, self.name, forwards)
+        self.thread = Motors.ThreadMotor(self.motor, time, self.name, forwards)
 
     ############################################
     # Turn effect on and leave it on           #
@@ -301,9 +274,9 @@ class Motors():
     # Ramp the effect up or down using PWM     #
     ############################################
     # Treat motor as output
-    def ramp_effect(self, ramp_up = True, forwards = True):
+    def ramp_effect(self, ramp_up = True, forwards = True, step = 2):
         print "Ramping {} effect: {}".format("up" if ramp_up else "down", self.name)
-        for i in range(0 if ramp_up else 255, 255 if ramp_up else -1, 2 if ramp_up else -2):
+        for i in range(0 if ramp_up else 255, 255 if ramp_up else -1, step if ramp_up else (-step)):
             self.motor.setSpeed(i)
             self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
         if not ramp_up:
@@ -315,9 +288,36 @@ class Motors():
     # Wait until threading is done             #
     ############################################
     # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.
-    # It causes the main program to wait until the pump has completed before it moves on to the next drink.
+    # It causes the main program to wait until the motor has completed before it moves on to the next drink.
     # The upshot is that you have to separate the .join() function from the .start() function, so all
-    # pumps get started first. If you .start() then immediately .join(), then the pumps will run one after the other
-    # instead of all at once.  .join() must be run for every pump *after* all the pumps have started.
+    # motors get started first. If you .start() then immediately .join(), then the motors will run one after the other
+    # instead of all at once.  .join() must be run for every motor *after* all the motors have started.
     def wait_until_done(self):
         self.thread.join()
+
+
+    #############################################
+    # ThreadMotor class:                           #
+    #############################################
+    # This class allows the motors to all run at the same time.
+    # If we didn't, it would take a very long time to make one cocktail!
+    #############################################
+    class ThreadMotor(threading.Thread):
+        # motor = which motor by ref; time = actual time to run; name = name assigned to motor
+        def __init__(self, motor, time, name, forwards = True):
+            # I need only the motor, not the whole list for this.
+            # Passing the name, though, assures the key and name match
+            super(Motors.ThreadMotor, self).__init__()
+            self.motor = motor
+            self.time = time
+            self.name = name
+            self.forwards = forwards
+            self.start()
+        def run(self):
+            self.motor.setSpeed(255)
+            if self.forwards:
+                self.motor.run(Adafruit_MotorHAT.FORWARD)
+            else:
+                self.motor.run(Adafruit_MotorHAT.BACKWARD)
+            time.sleep(self.time)
+            self.motor.run(Adafruit_MotorHAT.RELEASE)
