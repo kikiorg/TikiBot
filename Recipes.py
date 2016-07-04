@@ -365,7 +365,7 @@ class Drink_Recipes():
                 " max cocktail volume ", max_cocktail_volume
         # Turn on LEDs and smoke before drink starts to dispense
         self.smoke_fan.turn_on_effect(forwards = False)
-        self.smoke_effects.run_effect(time = self.dryice_raise_lower_time, forwards = False)
+        self.smoke_effects.run_effect(time=self.dryice_raise_lower_time, forwards=False)
         self.LED_dispense.ramp_effect(ramp_up = True)
         # Start all the pumps going
         log_str = ""
