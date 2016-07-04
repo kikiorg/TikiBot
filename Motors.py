@@ -261,7 +261,11 @@ class Motors():
         self.thread = ThreadMe(self.motor, calibrated_time, self.name, forwards)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
-    # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
+    # Turn effect on and leave it on
+    def run_effect(self, time = 5, forwards = True):
+        self.thread = ThreadMe(self.motor, time, self.name, forwards)
+
+    # Turn effect on and leave it on
     def turn_on_effect(self, forwards = True):
         print "Effect has been turned on: {}".format(self.name)
         self.motor.setSpeed(255)

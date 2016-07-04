@@ -101,6 +101,8 @@ class Drink_Recipes():
         self.my_yesno = yesno() # Used to ask the user yes/no questions
 
         ############ LED effects
+        self.dryice_raise_lower_time = 3
+        self.smoke_fan = None
         self.smoke_effects = None
         self.LED_red = None
         self.LED_dispense = None
@@ -216,9 +218,10 @@ class Drink_Recipes():
             calibration_oz = float(self.calibration_values[each_ingredient])
             self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
-        self.smoke_effects = Motors("smoke effects")  # Create the smoke effects -- fan into the dry ice container
+        self.smoke_fan = Motors("smoke fan")  # Create the smoke effects -- fan into the dry ice container
         self.LED_red = Motors( "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
         self.LED_dispense = Motors("LED dispense")  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        self.smoke_effects = Motors("smoke effects")  # Create the smoke effects -- fan into the dry ice container
         self.LED_red.turn_on_effect(False)  # The red light should always be on when the DrinkBot is on
 
     ##############################################################################
@@ -361,7 +364,8 @@ class Drink_Recipes():
                 " scaled by {0:.2f}".format(scaled_to_fit_glass), \
                 " max cocktail volume ", max_cocktail_volume
         # Turn on LEDs and smoke before drink starts to dispense
-        self.smoke_effects.turn_on_effect(forwards = False)
+        self.smoke_fan.turn_on_effect(forwards = False)
+        self.smoke_effects.run_effect(time = self.dryice_raise_lower_time, forwards = False)
         self.LED_dispense.ramp_effect(ramp_up = True)
         # Start all the pumps going
         log_str = ""
@@ -378,8 +382,11 @@ class Drink_Recipes():
         for each_ingredient in self.valid_ingr_list:
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
+        self.smoke_effects.wait_until_done()
         # Turn off LED and smoke effects once drink has finished dispensing
-        self.smoke_effects.turn_off_effect()
+        self.smoke_effects.run_effect(time = self.dryice_raise_lower_time, forwards = True)
+        self.smoke_effects.wait_until_done()
+        self.smoke_fan.turn_off_effect()
         self.LED_dispense.ramp_effect(ramp_up = False)
 
         self.command_log.info("{}{}".format(my_drink, log_str))
