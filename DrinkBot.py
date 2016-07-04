@@ -44,8 +44,13 @@ while True:
     my_recipes.print_menu()
 
     logger = logging.getLogger("cardhandler").info
+    # my_drink = raw_input("Enter a drink from the menu: ")
     RFID_reader = NFCReader(logger)
-    RFID_reader.run(True) # True waits until the reader has no card before it begins reading
+    try:
+        RFID_reader.run(True) # True waits until the reader has no card before it begins reading
+    except:
+        raise IOError ("No RFID reader!  Is it plugged in?")
+
     my_drink_ID = RFID_reader._card_uid
 
     if not RFID_reader._card_uid == None:

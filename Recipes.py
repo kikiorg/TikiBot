@@ -27,6 +27,8 @@ from yesno import yesno
 # To Do List for this file:                 #
 #############################################
 # DONE -- Blurb of documentation at the top of each file saying what each one does
+# LEDs don't go off if there's an error -- the atexit function was moved into the Motors class -- check on this
+# If the NFC reader is not plugged in, we get a segfault
 # Documentation pass -- make it really pretty, clean up stuff, be succinct
 #   DONE -- Recipes.py
 #   Motors.py

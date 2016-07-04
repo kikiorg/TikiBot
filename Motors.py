@@ -1,4 +1,10 @@
 #!/usr/bin/python
+
+import sys
+sys.path.insert(1, "Adafruit-Motor-HAT-Python-Library")
+
+
+
 from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
@@ -99,22 +105,24 @@ class Motors():
     # middle Hat: Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
     # top Hat: Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
 
-    hat_stack.append(Adafruit_MotorHAT(addr=0x60))
-    hat_stack.append(Adafruit_MotorHAT(addr=0x61))
-    hat_stack.append(Adafruit_MotorHAT(addr=0x62))
-    hat_stack.append(Adafruit_MotorHAT(addr=0x64))
-    """
+    #hat_stack.append(Adafruit_MotorHAT(addr=0x60))
+    #hat_stack.append(Adafruit_MotorHAT(addr=0x61))
+    #hat_stack.append(Adafruit_MotorHAT(addr=0x62))
+    #hat_stack.append(Adafruit_MotorHAT(addr=0x64))
+
     for Hat_address in range(0x60, 0x70):
         try:
             temp_hat = Adafruit_MotorHAT(Hat_address)
-            print "Adding Hat_address: ", Hat_address
+        except IOError as error_msg:
+            #raise IOError (error_msg.message + ' happens at % Motors.py')
+            #print "No Hat at address: ", Hat_address
+            pass
+        else:
+            print "Found Hat_address: 0x{0:x}".format(Hat_address)
             hat_stack.append(temp_hat)
-        except:
-            print "No Hat at address: ", Hat_address
-    """
+
     all_hats = Adafruit_MotorHAT(addr=0x70)  # Not used, but should address all hats at once
 
-    print "I'm adding some code"
     # Ok, this is sneaky.  We have (possibly) 3 Hats, each with 4 possible pump controllers.
     # As I create more and more ingredient pumps, I want to iterate through all the pumps available.
     # I'm going to use a class variable to iterate through them.
