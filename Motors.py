@@ -85,7 +85,7 @@ class Motors():
             #print "No Hat at address: ", Hat_address
             pass
         else:
-            print "Found Hat_address: 0x{0:x}".format(temp_hat._i2caddr)
+            # print "Found Hat_address: 0x{0:x}".format(temp_hat._i2caddr)
             hat_stack.append(temp_hat)
     ############################################
     # Sequential initializing of all the motors on all valid Hats
@@ -240,22 +240,17 @@ class Motors():
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
         time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        self.thread = Motors.ThreadMotor(self.motor, calibrated_time, self.name, forwards)
-        # print "Finished dispensing ", ounces, " of ", self.name, "."
+        #self.thread = Motors.ThreadMotorNEW(self.thread_ramp_run, self.motor, self.name, ramp_up, forwards, step)
+        #self.thread = Motors.ThreadMotorNEW(self.thread_for_time_run, self.motor, time, forwards)
 
-    ##############################################
-    # Run effect for a certain amount of seconds #
-    ##############################################
-    # Treat motor as output
-    def run_effect(self, time = 5, forwards = True):
-        self.thread = Motors.ThreadMotor(self.motor, time, self.name, forwards)
+        self.thread = Motors.ThreadMotorNEW(self.thread_for_time_run, self.motor, calibrated_time, forwards)
+        # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     ############################################
     # Turn effect on and leave it on           #
     ############################################
     # Treat motor as output
     def turn_on_effect(self, forwards = True):
-        print "Effect has been turned on: {}".format(self.name)
         self.motor.setSpeed(255)
         if forwards:
             self.motor.run(Adafruit_MotorHAT.FORWARD)
@@ -268,21 +263,20 @@ class Motors():
     # Treat motor as output
     def turn_off_effect(self):
         self.motor.run(Adafruit_MotorHAT.RELEASE)
-        print "Effect has been turned off: {}".format(self.name)
 
-    ############################################
-    # Ramp the effect up or down using PWM     #
-    ############################################
+    ######################################################
+    # Thread: Run effect for a certain amount of seconds #
+    ######################################################
     # Treat motor as output
-    def ramp_effect(self, ramp_up = True, forwards = True, step = 2):
-        print "Ramping {} effect: {}".format("up" if ramp_up else "down", self.name)
-        for i in range(0 if ramp_up else 255, 255 if ramp_up else -1, step if ramp_up else (-step)):
-            self.motor.setSpeed(i)
-            self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
-        if not ramp_up:
-            self.motor.run(Adafruit_MotorHAT.RELEASE)
-        print "Done ramping effect: {}".format(self.name)
+    def thread_effect_for_time(self, time = 5, forwards = True):
+        self.thread = Motors.ThreadMotorNEW(self.thread_for_time_run, self.motor, time, forwards)
 
+    ####################################################
+    # Thread: Ramp the effect up or down using PWM     #
+    ####################################################
+    # Treat motor as output
+    def thread_effect_ramp(self, ramp_up = True, forwards = True, step = 2):
+        self.thread = Motors.ThreadMotorNEW(self.thread_ramp_run, self.motor, self.name, ramp_up, forwards, step)
 
     ############################################
     # Wait until threading is done             #
@@ -297,12 +291,12 @@ class Motors():
 
 
     #############################################
-    # ThreadMotor class:                           #
+    # ThreadMotor class:                        #
     #############################################
     # This class allows the motors to all run at the same time.
     # If we didn't, it would take a very long time to make one cocktail!
     #############################################
-    class ThreadMotor(threading.Thread):
+    class ThreadMotorOLD(threading.Thread):
         # motor = which motor by ref; time = actual time to run; name = name assigned to motor
         def __init__(self, motor, time, name, forwards = True):
             # I need only the motor, not the whole list for this.
@@ -321,3 +315,52 @@ class Motors():
                 self.motor.run(Adafruit_MotorHAT.BACKWARD)
             time.sleep(self.time)
             self.motor.run(Adafruit_MotorHAT.RELEASE)
+
+    ############################################
+    # Run the motor for a certain time         #
+    ############################################
+    # Function to be used with threading
+    def thread_for_time_run(self, motor, run_time, forwards = True):
+        motor.setSpeed(255)
+        if forwards:
+            motor.run(Adafruit_MotorHAT.FORWARD)
+        else:
+            motor.run(Adafruit_MotorHAT.BACKWARD)
+        time.sleep(run_time)
+        motor.run(Adafruit_MotorHAT.RELEASE)
+
+    ############################################
+    # Ramp the motor speed up -- like a fade   #
+    ############################################
+    # Function to be used with threading
+    def thread_ramp_run(self, motor, name, ramp_up = True, forwards = True, step = 2):
+        # Slowly raise or lower the speed of the motor.
+        # The wait is simply how long the loop takes.
+        for i in range(0 if ramp_up else 255, 255 if ramp_up else -1, step if ramp_up else (-step)):
+            motor.setSpeed(i)
+            motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
+        if not ramp_up:
+            motor.run(Adafruit_MotorHAT.RELEASE)
+
+
+    #############################################
+    # ThreadMotor class:                        #
+    #############################################
+    # This class allows the motors to all run at the same time.
+    # If we didn't, it would take a very long time to make one cocktail!
+    #############################################
+    class ThreadMotorNEW(threading.Thread):
+        # motor = which motor by ref; time = actual time to run; name = name assigned to motor
+        def __init__(self, my_function, *my_args):
+            # I need only the motor, not the whole list for this.
+            # Passing the name, though, assures the key and name match
+            super(Motors.ThreadMotorNEW, self).__init__()
+            self.thread_function = my_function
+            self.function_args = my_args
+            self.start()
+
+        # Run the assigned function in a thread
+        def run(self):
+            self.thread_function(*self.function_args)
+
+
