@@ -126,18 +126,27 @@ class Drink_Recipes():
         self.command_log.info('Starting up.')
         self.dispense_log.info('Starting up.')
 
-        percent_ice = 55.0
+        self.max_cocktail_volume = self.get_cup_size()
+
+
+    ########################################################################################
+    # Ask the user what cup size -- NOTE: ACTUAL VOLUME eg 16oz cups hold 18oz to the top  #
+    ########################################################################################
+    def get_cup_size(self, percent_ice = 55.0):
         cup_size = self.my_yesno.get_number("What cup size (in ounces) is provided? ")
         self.max_cocktail_volume = cup_size * ((100.0 - percent_ice) / 100.0)  # Subtract out the ice
-        format_str = "Cup: {f[0]} - max cocktail volume: {f[1]} - percent cocktail: {f[2]}% - percent ice: {f[2]}%"
-        format_list = [cup_size, self.max_cocktail_volume, (100.0 * (100.0 - percent_ice) / 100.0), percent_ice]
+        # Report to the operator -- to the screen, and to both log files
+        format_str = "Cup: {f[0]} - max cocktail volume: {f[1]} - percent cocktail: {f[2]}% - percent ice: {f[3]}%"
+        format_list = [cup_size, self.max_cocktail_volume, (100.0 - percent_ice), percent_ice]
         print format_str.format(f=format_list)
-
         self.command_log.info(format_str.format(f=format_list))
         format_str = format_str.replace(":",",")
         format_str = format_str.replace(" -",",")
         self.dispense_log.info(format_str.format(f=format_list))
         #self.dispense_log.info("Cup,{f[0]}, max cocktail volume, {f[1]}, percent cocktail, {f[2]}%, percent ice, {f[2]}".format(f=format_list))
+
+        return self.max_cocktail_volume
+
 
     #############################################
     # Setup log file to log all drinks served   #
