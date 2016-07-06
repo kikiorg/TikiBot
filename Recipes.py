@@ -29,9 +29,10 @@ from yesno import yesno
 # Critical path:
 #   DONE -- Prime individual pumps -- when ingredients run out
 #   DONE -- Setup.py is its own class, activated with white card
-#   Re-enter cup size, and other factors in Setup
+#   DONE -- Re-enter cup size, and other factors in Setup
+#   Remove hard coded RFIDs
+#       add a column to the TikiDrinks.csv file for the RFID tags
 # ---------
-# DONE -- Blurb of documentation at the top of each file saying what each one does
 # LEDs don't go off if there's an error -- the atexit function was moved into the Motors class -- check on this
 # If the NFC reader is not plugged in, we get a segfault
 # Documentation pass -- make it really pretty, clean up stuff, be succinct
@@ -51,8 +52,6 @@ from yesno import yesno
 #       This means that calibration stuff and prime stuff need to be generated within the code
 #   Better logging
 #       Debug levels and stuff
-# Remove hard coded RFIDs
-#   add a column to the TikiDrinks.csv file for the RFID tags
 # Constants: change any hard coded constants to global named constants
 # Refactor:
 #   DrinkBot.py
@@ -69,17 +68,17 @@ from yesno import yesno
 #   Possibly keep track of amounts dispensed and add those on each time the program runs.
 # (Make up a poster for Kiki describing the technical details of what she did)
 # ---------- Issues found during Bob benefit
-# Reprime for ingredients that have run out
+# DONE -- Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
 #   Alternately, pulse the mouth lights when ingredients might run out
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
 #   DrinkBot
-#   Note: possibly use white card for setup/manual override
-#       Make SetUp a class
+#   DONE -- Note: possibly use white card for setup/manual override
+#   DONE --     Make SetUp a class
 # Manual dispensing of drinks allows for typing drink number from the menu -- easier
-#   Allow pressing [Enter} to go back to scanning
+#   DONE -- Allow pressing [Enter] to go back to scanning
 #   Note above: running setup, then repriming the pump cancels the light pulsing to check ingredients.
 #   Note: acquire the amounts for each bottle from Sam/Katherine
 # DONE -- weird bug with Mai Tai -- answer: the ingredients were dispensed out of order.
