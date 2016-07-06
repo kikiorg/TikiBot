@@ -26,6 +26,11 @@ from yesno import yesno
 #############################################
 # To Do List for this file:                 #
 #############################################
+# Critical path:
+#   Prime individual pumps -- when ingredients run out
+#   Setup.py is its own class, activated with white card
+#   Re-enter cup size, and other factors in Setup
+# ---------
 # DONE -- Blurb of documentation at the top of each file saying what each one does
 # LEDs don't go off if there's an error -- the atexit function was moved into the Motors class -- check on this
 # If the NFC reader is not plugged in, we get a segfault
@@ -49,16 +54,15 @@ from yesno import yesno
 # Remove hard coded RFIDs
 #   add a column to the TikiDrinks.csv file for the RFID tags
 # Constants: change any hard coded constants to global named constants
-# DONE -- Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
-#   This will allow for the next item:
 # Refactor:
-#   Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
-#   DONE -- combine ThreadMe/ThreadMeBackwards
+#   DrinkBot.py
+#   Setup.py
+#   Recipes.py -- generalize this to open the recipes, not deal with RFID stuff
 # Check again that the stabilizing current wait can't be put into Threading...
 # ---------- Real world issues
 # Change the tubing for pineapple juice
 # Change out pump#1/Dark Rum -- running rough
-# Install the USB ports
+# DONE 1 -- 3 more: Install the USB ports
 # Look into Jira and Confluence
 # Make checklist of things for setup -- including making sure the bottle sizes are entered!
 #   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
@@ -247,12 +251,28 @@ class Drink_Recipes():
     #                Prime pumps                #
     #############################################
     # This primes every pump al at once.
-    def prime_all(self, percent = 100.0, forwards = True):
-        self.command_log.info('Prime all ' + ("forwards" if forwards else "reverse"))
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0, forwards)
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].wait_until_done()
+    def prime(self, percent = 100.0, forwards = True, one_pump = None):
+        if one_pump != None:
+            if one_pump in self.valid_ingr_list:
+                print "Priming: {}".format(one_pump)
+            else:
+                try:
+                    pump_num = int(one_pump)
+                    one_pump = self.valid_ingr_list[pump_num - 1]
+                    print "Priming by number: {}".format(one_pump)
+                except:
+                    print "Invalid pump: {}".format(one_pump)
+                    return
+            self.ingr_pumps[one_pump].dispense(self.prime_values[one_pump] * percent/100.0, forwards)
+            self.ingr_pumps[one_pump].wait_until_done()
+        elif one_pump == None:
+            self.command_log.info('Prime all ' + ("forwards" if forwards else "reverse"))
+            for each_ingr in self.valid_ingr_list:
+                self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0, forwards)
+            for each_ingr in self.valid_ingr_list:
+                self.ingr_pumps[each_ingr].wait_until_done()
+        else:
+            print "Pump {} is invalid for priming.".format(one_pump)
 
     #############################################
     #                Purge pumps                #
@@ -292,7 +312,7 @@ class Drink_Recipes():
         increment = 1.0 # Increment by 1%
         if self.my_yesno.is_yes("Prime the pumps at {} percent?".format(percent)):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-            self.prime_all(percent)
+            self.prime(percent)
         pump_number = 0 # Use this to print the pump number
         # Creat a handy new line for the .csv file to paste in
         total_string = "Prime,"
@@ -325,7 +345,7 @@ class Drink_Recipes():
         new_calibration_string = "Calibration"
         if not self.my_yesno.is_yes("Have all the pumps been primed?"):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-            self.prime_all()
+            self.prime()
 
         pump_number = 0
         log_str = ""
@@ -382,12 +402,16 @@ class Drink_Recipes():
         for each_ingredient in self.valid_ingr_list:
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
+        # These should be done before the ingredients
+        # However, wait so they are not threaded with themselves below
         self.smoke_effects.wait_until_done()
+        self.LED_dispense.wait_until_done()
         # Turn off LED and smoke effects once drink has finished dispensing
+        self.LED_dispense.thread_effect_ramp(ramp_up = False)
         self.smoke_effects.thread_effect_for_time(time = self.dryice_raise_lower_time, forwards = True)
         self.smoke_effects.wait_until_done()
         self.smoke_fan.turn_off_effect()
-        self.LED_dispense.thread_effect_ramp(ramp_up = False)
+        self.LED_dispense.wait_until_done()
 
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))

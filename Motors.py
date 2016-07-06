@@ -225,25 +225,20 @@ class Motors():
     ############################################
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces, forwards = True):
-        # Formala: 1oz / actual oz dispensed in 60 seconds = time for 1oz / 60 seconds -- solve for time for 1oz
-        #          1oz / calibration_oz = X / Motors.calibration_seconds
-        # Or:      time for one ounce = 1oz / actual oz dispensed in 60 seconds * 60 seconds
-        #          calibrated_time = 1oz / calibration_oz * Motors.calibration_seconds
+        # Formala:       1oz / actual oz dispensed in 60 seconds = time for 1oz / 60 seconds
+        #                1oz / calibration_oz = X / Motors.calibration_seconds
+        # Solve for X:   time for one ounce = 1oz / actual oz dispensed in 60 seconds * 60 seconds
+        #                calibrated_time = 1oz / calibration_oz * Motors.calibration_seconds
         # Multiply X times ounces for the actual time for those calibrated ounces
         calibrated_time = float(float(ounces) / self.calibration_oz * Motors.calibration_seconds)
         # Note: this should always be true, but being safe here!
         if calibrated_time <= 0.0:
             raise LessThanZeroException(
                 self.name + ' - calibration:' + str(self.calibration_oz) + ' Must be >0 for motors to run!')
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        # Delay to stabilize the current spike on motor startup.
         time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        #self.thread = Motors.ThreadMotorNEW(self.thread_ramp_run, self.motor, self.name, ramp_up, forwards, step)
-        #self.thread = Motors.ThreadMotorNEW(self.thread_for_time_run, self.motor, time, forwards)
-
-        self.thread = Motors.ThreadMotorNEW(self.thread_for_time_run, self.motor, calibrated_time, forwards)
+        self.thread = Motors.ThreadMotor(self.thread_for_time_run, self.motor, calibrated_time, forwards)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     ############################################
@@ -269,14 +264,14 @@ class Motors():
     ######################################################
     # Treat motor as output
     def thread_effect_for_time(self, time = 5, forwards = True):
-        self.thread = Motors.ThreadMotorNEW(self.thread_for_time_run, self.motor, time, forwards)
+        self.thread = Motors.ThreadMotor(self.thread_for_time_run, self.motor, time, forwards)
 
     ####################################################
     # Thread: Ramp the effect up or down using PWM     #
     ####################################################
     # Treat motor as output
     def thread_effect_ramp(self, ramp_up = True, forwards = True, step = 2):
-        self.thread = Motors.ThreadMotorNEW(self.thread_ramp_run, self.motor, self.name, ramp_up, forwards, step)
+        self.thread = Motors.ThreadMotor(self.thread_ramp_run, self.motor, self.name, ramp_up, forwards, step)
 
     ############################################
     # Wait until threading is done             #
@@ -288,33 +283,6 @@ class Motors():
     # instead of all at once.  .join() must be run for every motor *after* all the motors have started.
     def wait_until_done(self):
         self.thread.join()
-
-
-    #############################################
-    # ThreadMotor class:                        #
-    #############################################
-    # This class allows the motors to all run at the same time.
-    # If we didn't, it would take a very long time to make one cocktail!
-    #############################################
-    class ThreadMotorOLD(threading.Thread):
-        # motor = which motor by ref; time = actual time to run; name = name assigned to motor
-        def __init__(self, motor, time, name, forwards = True):
-            # I need only the motor, not the whole list for this.
-            # Passing the name, though, assures the key and name match
-            super(Motors.ThreadMotor, self).__init__()
-            self.motor = motor
-            self.time = time
-            self.name = name
-            self.forwards = forwards
-            self.start()
-        def run(self):
-            self.motor.setSpeed(255)
-            if self.forwards:
-                self.motor.run(Adafruit_MotorHAT.FORWARD)
-            else:
-                self.motor.run(Adafruit_MotorHAT.BACKWARD)
-            time.sleep(self.time)
-            self.motor.run(Adafruit_MotorHAT.RELEASE)
 
     ############################################
     # Run the motor for a certain time         #
@@ -342,19 +310,18 @@ class Motors():
         if not ramp_up:
             motor.run(Adafruit_MotorHAT.RELEASE)
 
-
     #############################################
     # ThreadMotor class:                        #
     #############################################
     # This class allows the motors to all run at the same time.
     # If we didn't, it would take a very long time to make one cocktail!
     #############################################
-    class ThreadMotorNEW(threading.Thread):
+    class ThreadMotor(threading.Thread):
         # motor = which motor by ref; time = actual time to run; name = name assigned to motor
         def __init__(self, my_function, *my_args):
             # I need only the motor, not the whole list for this.
             # Passing the name, though, assures the key and name match
-            super(Motors.ThreadMotorNEW, self).__init__()
+            super(Motors.ThreadMotor, self).__init__()
             self.thread_function = my_function
             self.function_args = my_args
             self.start()

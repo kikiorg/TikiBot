@@ -43,6 +43,7 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     print "[G]lobal calibration check: "
     print "    This dispenses all pumps for 1oz -- more like a fast checksum"
     print "[P]rime -- prime all pumps"
+    print "[B]ottle reprime -- prime one bottle"
     print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
     print "[S]hutdown full phase -- this includes these steps:"
     print "    Reverse liquids -- then wait"
@@ -54,7 +55,15 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
     my_command = raw_input("Please enter your command: ")
 
     if my_command in ["P", "p", "prime", "Prime"]:
-        my_recipes.prime_all()
+        my_recipes.prime()
+    elif my_command in ["B","b","Bottle","bottle"]:
+        pump_num = 0
+        for each_ingr in my_recipes.valid_ingr_list:
+            pump_num += 1
+            print "{} - {}".format(pump_num, each_ingr)
+        my_pump = raw_input("Please enter the name or pump number to prime:")
+        my_recipes.prime(one_pump=my_pump)
+
     elif my_command in ["G", "g", "global", "Global"]:
         my_recipes.checksum_calibration()
     elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
@@ -83,28 +92,28 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
             print "***", step, ")", steps_list[step]
 
             if step == 0:
-                my_recipes.prime_all(forwards = False)
+                my_recipes.prime(forwards = False)
                 print "    Put hoses into rinse water."
             elif step == 1:
-                my_recipes.prime_all()
-                my_recipes.prime_all()
+                my_recipes.prime()
+                my_recipes.prime()
                 print "    Remove the hoses to allow air to enter."
             elif step == 2:
-                my_recipes.prime_all()
+                my_recipes.prime()
                 print "    Put hoses into bleach water."
             elif step == 3:
-                my_recipes.prime_all()
-                my_recipes.prime_all()
+                my_recipes.prime()
+                my_recipes.prime()
                 print "    Remove the hoses to allow air to enter."
             elif step == 4:
-                my_recipes.prime_all()
+                my_recipes.prime()
                 print "    Put hoses into rinse water."
             elif step == 5:
-                my_recipes.prime_all()
-                my_recipes.prime_all()
+                my_recipes.prime()
+                my_recipes.prime()
                 print "    Remove the hoses to allow air to enter"
             elif step == 6:
-                my_recipes.prime_all()
+                my_recipes.prime()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
             step = my_yesno.get_number("    Press Enter for next step, or step #, or CTRL-C to end) ", int_only = True, default_val = (step + 1))
 
