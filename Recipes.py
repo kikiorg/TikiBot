@@ -27,8 +27,8 @@ from yesno import yesno
 # To Do List for this file:                 #
 #############################################
 # Critical path:
-#   Prime individual pumps -- when ingredients run out
-#   Setup.py is its own class, activated with white card
+#   DONE -- Prime individual pumps -- when ingredients run out
+#   DONE -- Setup.py is its own class, activated with white card
 #   Re-enter cup size, and other factors in Setup
 # ---------
 # DONE -- Blurb of documentation at the top of each file saying what each one does
@@ -124,6 +124,20 @@ class Drink_Recipes():
                                                     filename="DispenseLog.csv",
                                                     fmt='%(asctime)s, %(message)s')
         self.command_log.info('Starting up.')
+        self.dispense_log.info('Starting up.')
+
+        percent_ice = 55.0
+        cup_size = self.my_yesno.get_number("What cup size (in ounces) is provided? ")
+        self.max_cocktail_volume = cup_size * ((100.0 - percent_ice) / 100.0)  # Subtract out the ice
+        format_str = "Cup: {f[0]} - max cocktail volume: {f[1]} - percent cocktail: {f[2]}% - percent ice: {f[2]}%"
+        format_list = [cup_size, self.max_cocktail_volume, (100.0 * (100.0 - percent_ice) / 100.0), percent_ice]
+        print format_str.format(f=format_list)
+
+        self.command_log.info(format_str.format(f=format_list))
+        format_str = format_str.replace(":",",")
+        format_str = format_str.replace(" -",",")
+        self.dispense_log.info(format_str.format(f=format_list))
+        #self.dispense_log.info("Cup,{f[0]}, max cocktail volume, {f[1]}, percent cocktail, {f[2]}%, percent ice, {f[2]}".format(f=format_list))
 
     #############################################
     # Setup log file to log all drinks served   #
@@ -377,12 +391,12 @@ class Drink_Recipes():
     #############################################################
     #                       Make the drink!                     #
     #############################################################
-    def make_drink(self, my_drink, max_cocktail_volume = 4.0):
-        scaled_to_fit_glass = max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
+    def make_drink(self, my_drink):
+        scaled_to_fit_glass = self.max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
         print "********************   Making: ", my_drink, " scaled by {0:.2f}".format(scaled_to_fit_glass), "  ********************"
         print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
                 " scaled by {0:.2f}".format(scaled_to_fit_glass), \
-                " max cocktail volume ", max_cocktail_volume
+                " max cocktail volume ", self.max_cocktail_volume
         # Turn on LEDs and smoke before drink starts to dispense
         self.smoke_fan.turn_on_effect(forwards = False)
         self.smoke_effects.thread_effect_for_time(time=self.dryice_raise_lower_time, forwards=False)

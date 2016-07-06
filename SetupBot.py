@@ -82,12 +82,12 @@ class Setup:
         while self.my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit", "Quit", "q", "Q"]:
 
             print "List of commands: "
-            print "[C]alibrate: "
+            print "[P]rime -- prime all pumps"
+            print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
+            print "[B]ottle reprime -- prime a new bottle if it ran out"
             print "[G]lobal calibration check: "
             print "    This dispenses all pumps for 1oz -- more like a fast checksum"
-            print "[P]rime -- prime all pumps"
-            print "[B]ottle reprime -- prime one bottle"
-            print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
+            print "[C]alibrate: "
             print "[S]hutdown full phase -- this includes these steps:"
             print "    Reverse liquids -- then wait"
             print "    Prime 2x with water -- then wait, purge with air, wait"

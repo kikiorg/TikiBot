@@ -20,12 +20,6 @@ from yesno import yesno
 
 # my_recipes.print_full_recipes()
 my_yesno = yesno()
-percent_ice = 55.0
-cup_size = my_yesno.get_number("What cup size (in ounces) is provided? ")
-max_cocktail_volume = cup_size * ( (100.0 - percent_ice) / 100.0) # Subtract out the ice
-format_str = "Cup: {f[0]} max cocktail volume: {f[1]} percent cocktail: {f[2]}%"
-format_list = [cup_size, max_cocktail_volume,  (100.0 * (100.0 - percent_ice) / 100.0)]
-print format_str.format(f=format_list)
 
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
@@ -120,7 +114,7 @@ while True:
     elif my_drink in ["S", "s", "Setup", "setup"]:
         pass
     else:
-        my_recipes.make_drink(my_drink, max_cocktail_volume)
+        my_recipes.make_drink(my_drink)
 
 
 
