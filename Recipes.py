@@ -404,14 +404,14 @@ class Drink_Recipes():
                 self.ingr_pumps[each_ingredient].wait_until_done()
         # These should be done before the ingredients
         # However, wait so they are not threaded with themselves below
+        self.smoke_fan.turn_off_effect() # The fan takes a long time to stop, so turn off right away
         self.smoke_effects.wait_until_done()
         self.LED_dispense.wait_until_done()
-        # Turn off LED and smoke effects once drink has finished dispensing
+        # Close up the effects -- ramp down the dispense light, reel up the dry ice, turn off the fan
         self.LED_dispense.thread_effect_ramp(ramp_up = False)
         self.smoke_effects.thread_effect_for_time(time = self.dryice_raise_lower_time, forwards = True)
-        self.smoke_effects.wait_until_done()
-        self.smoke_fan.turn_off_effect()
         self.LED_dispense.wait_until_done()
+        self.smoke_effects.wait_until_done()
 
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))

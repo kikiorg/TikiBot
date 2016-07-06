@@ -12,6 +12,7 @@ import logging
 import sys
 sys.path.insert(0, 'pynfc/src')
 from mifareauth import NFCReader
+from SetupBot import Setup
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Recipes import Drink_Recipes
@@ -59,12 +60,17 @@ while True:
     if my_drink_ID == "dc0a723b": # The sample card that came with the device
         print "Found the large white sample card"
         my_drink = "test"
-        my_drink = raw_input("Enter a drink from the menu: ")
-        while my_drink not in my_recipes.drink_names:
+        my_drink = raw_input("Enter a drink from the menu, or [S]etup to enter setup mode: ")
+        while my_drink not in my_recipes.drink_names + ["S", "s", "Setup", "setup"]:
             if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
                 break
             print "Invalid drink name!"
             my_drink = raw_input("Enter a drink from the menu: ")
+        if my_drink in ["S", "s", "Setup", "setup"]:
+            print "Setup mode..."
+            my_setup = Setup(my_recipes)
+            my_setup.setup_menu()
+
     elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
         print "Found Charlotte's Clipper card"
         my_drink = "Pieces of Eight"
@@ -111,7 +117,10 @@ while True:
     elif my_drink not in my_recipes.drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     # Assert: a valid drink name has been generated
+    elif my_drink in ["S", "s", "Setup", "setup"]:
+        pass
     else:
         my_recipes.make_drink(my_drink, max_cocktail_volume)
+
 
 
