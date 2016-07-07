@@ -32,6 +32,19 @@ from yesno import yesno
 #   DONE -- Re-enter cup size, and other factors in Setup
 #   Remove hard coded RFIDs
 #       add a column to the TikiDrinks.csv file for the RFID tags
+# LEDs:
+#	Attach to volcano
+#	Solder new wires
+#	Conneectors
+#	Red in mouth -- on all the time
+#	Red at top -- on all the time
+#	White inside -- on while dispensing 
+# Connector for all wiring
+# Power box
+# Cut hole in white teapot
+#	Piping for the smoke
+# RFID flap -- perfect it
+# Enlarge tube manifold holes onto the bolt mounting
 # ---------
 # LEDs don't go off if there's an error -- the atexit function was moved into the Motors class -- check on this
 # If the NFC reader is not plugged in, we get a segfault
@@ -104,9 +117,9 @@ class Drink_Recipes():
         self.my_yesno = yesno() # Used to ask the user yes/no questions
 
         ############ LED effects
-        self.dryice_raise_lower_time = 3
+        # self.dryice_raise_lower_time = 3
         self.smoke_fan = None
-        self.smoke_effects = None
+        # self.smoke_effects = None
         self.LED_red = None
         self.LED_dispense = None
 
@@ -247,7 +260,7 @@ class Drink_Recipes():
         self.smoke_fan = Motors("smoke fan")  # Create the smoke effects -- fan into the dry ice container
         self.LED_red = Motors( "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
         self.LED_dispense = Motors("LED dispense")  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        self.smoke_effects = Motors("smoke effects")  # Create the smoke effects -- fan into the dry ice container
+        # self.smoke_effects = Motors("smoke effects")  # Create the smoke effects -- fan into the dry ice container
         self.LED_red.turn_on_effect(False)  # The red light should always be on when the DrinkBot is on
 
     ##############################################################################
@@ -407,7 +420,7 @@ class Drink_Recipes():
                 " max cocktail volume ", self.max_cocktail_volume
         # Turn on LEDs and smoke before drink starts to dispense
         self.smoke_fan.turn_on_effect(forwards = False)
-        self.smoke_effects.thread_effect_for_time(time=self.dryice_raise_lower_time, forwards=False)
+        # self.smoke_effects.thread_effect_for_time(time=self.dryice_raise_lower_time, forwards=False)
         self.LED_dispense.thread_effect_ramp(ramp_up = True)
         # Start all the pumps going
         log_str = ""
@@ -427,13 +440,13 @@ class Drink_Recipes():
         # These should be done before the ingredients
         # However, wait so they are not threaded with themselves below
         self.smoke_fan.turn_off_effect() # The fan takes a long time to stop, so turn off right away
-        self.smoke_effects.wait_until_done()
+        # self.smoke_effects.wait_until_done()
         self.LED_dispense.wait_until_done()
         # Close up the effects -- ramp down the dispense light, reel up the dry ice, turn off the fan
         self.LED_dispense.thread_effect_ramp(ramp_up = False)
-        self.smoke_effects.thread_effect_for_time(time = self.dryice_raise_lower_time, forwards = True)
+        # self.smoke_effects.thread_effect_for_time(time = self.dryice_raise_lower_time, forwards = True)
         self.LED_dispense.wait_until_done()
-        self.smoke_effects.wait_until_done()
+        # self.smoke_effects.wait_until_done()
 
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))
