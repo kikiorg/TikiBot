@@ -26,41 +26,59 @@ from yesno import yesno
 #############################################
 # To Do List for this file:                 #
 #############################################
-# DONE -- Blurb of documentation at the top of each file saying what each one does
-# Documentation pass -- make it really pretty, claen up stuff, be succinct
+# Critical path:
+#   DONE -- Prime individual pumps -- when ingredients run out
+#   DONE -- Setup.py is its own class, activated with white card
+#   DONE -- Re-enter cup size, and other factors in Setup
+#   Remove hard coded RFIDs
+#       add a column to the TikiDrinks.csv file for the RFID tags
+# ---------
+# LEDs don't go off if there's an error -- the atexit function was moved into the Motors class -- check on this
+# If the NFC reader is not plugged in, we get a segfault
+# Documentation pass -- make it really pretty, clean up stuff, be succinct
 #   DONE -- Recipes.py
 #   Motors.py
 #   DrinkBot.py
 #   SetupBot.py
 #   DONE -- yesno.py
-# Remove hard coded RFIDs
-#   add a column to the TikiDrinks.csv file for the RFID tags
-# Convert Prime values to ounces needed to prime each pump -- this is useful info to have anyway!
+# *** Generalize the Motors class!
+#   Make the Motors class for all types of motors used with the RasPi Hats
+#   Make a subclass for Pumps
+#   Suggest a subclass for Stepper Motors
+#   Better logging
+#       Debug levels and stuff
+# *** Generalize the Recipes class!
+#   Make this for anyone making a DrinkBot
+#       This means that calibration stuff and prime stuff need to be generated within the code
+#   Better logging
+#       Debug levels and stuff
 # Constants: change any hard coded constants to global named constants
 # Refactor:
-#   Prime/Purge/Forward Purge/Reverse Purge -- consolidate these! Refactor
-#   DONE -- combine ThreadMe/ThreadMeBackwards
+#   DrinkBot.py
+#   Setup.py
+#   Recipes.py -- generalize this to open the recipes, not deal with RFID stuff
+# Check again that the stabilizing current wait can't be put into Threading...
 # ---------- Real world issues
 # Change the tubing for pineapple juice
 # Change out pump#1/Dark Rum -- running rough
-# Install the USB ports
+# DONE 1 -- 3 more: Install the USB ports
 # Look into Jira and Confluence
 # Make checklist of things for setup -- including making sure the bottle sizes are entered!
 #   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
 #   Possibly keep track of amounts dispensed and add those on each time the program runs.
 # (Make up a poster for Kiki describing the technical details of what she did)
 # ---------- Issues found during Bob benefit
-# Reprime for ingredients that have run out
+# DONE -- Reprime for ingredients that have run out
 # Pulse the pump when the ingredient might run out
 #   Alternately, pulse the mouth lights when ingredients might run out
 # Make a shell script that sets up everything:
 #   Setup
 #   Move log files so new log files are fresh
 #   DrinkBot
-#   Note: possibly use white card for setup/manual override
-#       Make SetUp a class
+#   DONE -- Note: possibly use white card for setup/manual override
+#   DONE --     Make SetUp a class
 # Manual dispensing of drinks allows for typing drink number from the menu -- easier
-#   Allow pressing [Enter} to go back to scanning
+#   DONE -- Allow pressing [Enter] to go back to scanning
 #   Note above: running setup, then repriming the pump cancels the light pulsing to check ingredients.
 #   Note: acquire the amounts for each bottle from Sam/Katherine
 # DONE -- weird bug with Mai Tai -- answer: the ingredients were dispensed out of order.
@@ -84,6 +102,13 @@ class Drink_Recipes():
         self.prime_values = {} # This is how much fluid is needed to exactly fill the tubing
         self.primeOz_values = {} # This is how much fluid is needed to exactly fill the tubing
         self.my_yesno = yesno() # Used to ask the user yes/no questions
+
+        ############ LED effects
+        self.smoke_fan = None
+        self.LED_red = None
+        self.LED_dispense = None
+        self.smoke_fan2 = None
+
         # These two are loggers, logging all the infos
         # command_log logs all the commands that are executed -- it's comprehensive.
         # It's test so you can just admire it in a ext editor.
@@ -97,6 +122,29 @@ class Drink_Recipes():
                                                     filename="DispenseLog.csv",
                                                     fmt='%(asctime)s, %(message)s')
         self.command_log.info('Starting up.')
+        self.dispense_log.info('Starting up.')
+
+        self.max_cocktail_volume = self.get_cup_size()
+
+
+    ########################################################################################
+    # Ask the user what cup size -- NOTE: ACTUAL VOLUME eg 16oz cups hold 18oz to the top  #
+    ########################################################################################
+    def get_cup_size(self, percent_ice = 55.0):
+        cup_size = self.my_yesno.get_number("What cup size (in ounces) is provided? ")
+        self.max_cocktail_volume = cup_size * ((100.0 - percent_ice) / 100.0)  # Subtract out the ice
+        # Report to the operator -- to the screen, and to both log files
+        format_str = "Cup: {f[0]} - max cocktail volume: {f[1]} - percent cocktail: {f[2]}% - percent ice: {f[3]}%"
+        format_list = [cup_size, self.max_cocktail_volume, (100.0 - percent_ice), percent_ice]
+        print format_str.format(f=format_list)
+        self.command_log.info(format_str.format(f=format_list))
+        format_str = format_str.replace(":",",")
+        format_str = format_str.replace(" -",",")
+        self.dispense_log.info(format_str.format(f=format_list))
+        #self.dispense_log.info("Cup,{f[0]}, max cocktail volume, {f[1]}, percent cocktail, {f[2]}%, percent ice, {f[2]}".format(f=format_list))
+
+        return self.max_cocktail_volume
+
 
     #############################################
     # Setup log file to log all drinks served   #
@@ -195,6 +243,17 @@ class Drink_Recipes():
             calibration_oz = float(self.calibration_values[each_ingredient])
             self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
+        # self.smoke_fan = Motors("smoke fan")  # Create the smoke effects -- fan into the dry ice container
+        # self.LED_red = Motors( "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.LED_dispense = Motors( "LED dispense" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.smoke_fan2 = Motors("smoke fan2")  # Create the smoke effects -- fan into the dry ice container
+        self.LED_dispense = Motors("LED dispense",force_motor_number = 3, force_next_Hat = True)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.smoke_fan = Motors("LED dispense",force_motor_number = 4)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+
+        # self.smoke_fan.turn_on_effect()  # Make sure the fan is off
+        # self.smoke_fan2.turn_on_effect()  # Make sure the fan is off
+        # self.LED_red.turn_on_effect()  # The red light should always be on when the DrinkBot is on
+        # self.LED_dispense.turn_on_effect()  # Make sure the white light is off
 
     ##############################################################################
     # This prints all the drinks and their ingredients, not including 'Recipe'   #
@@ -215,37 +274,39 @@ class Drink_Recipes():
             if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
                 print each_ingredient + ': ', my_list[each_ingredient]
 
-    #def log(self, message ):
-    #    self.command_log.info( message )
-
     #############################################
     #                Prime pumps                #
     #############################################
     # This primes every pump al at once.
-    def primeOLD_all(self, percent = 100):
-        self.command_log.info('Prime all')
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].prime(self.prime_values[each_ingr] * percent/100.0)
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].wait_until_done()
-
-    #############################################
-    #                PrimeOz pumps                #
-    #############################################
-    # This primes every pump al at once.
-    def prime_all(self, percent = 100.0):
-        self.command_log.info('Prime all')
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0)
-        for each_ingr in self.valid_ingr_list:
-            self.ingr_pumps[each_ingr].wait_until_done()
+    def prime(self, percent = 100.0, forwards = True, one_pump = None):
+        if one_pump != None:
+            if one_pump in self.valid_ingr_list:
+                print "Priming: {}".format(one_pump)
+            else:
+                try:
+                    pump_num = int(one_pump)
+                    one_pump = self.valid_ingr_list[pump_num - 1]
+                    print "Priming by number: {}".format(one_pump)
+                except:
+                    print "Invalid pump: {}".format(one_pump)
+                    return
+            self.ingr_pumps[one_pump].dispense(self.prime_values[one_pump] * percent/100.0, forwards)
+            self.ingr_pumps[one_pump].wait_until_done()
+        elif one_pump == None:
+            self.command_log.info('Prime all ' + ("forwards" if forwards else "reverse"))
+            for each_ingr in self.valid_ingr_list:
+                self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0, forwards)
+            for each_ingr in self.valid_ingr_list:
+                self.ingr_pumps[each_ingr].wait_until_done()
+        else:
+            print "Pump {} is invalid for priming.".format(one_pump)
 
     #############################################
     #                Purge pumps                #
     #############################################
-    def purge_all(self, direction="forward"):
-        self.command_log.info("Purge all {}".format(direction))
-        if direction in ["forward"]:
+    def purge_allOLD(self, forwards = True):
+        self.command_log.info("Purge all {}".format(forwards))
+        if forwards:
             for each_ingr in self.valid_ingr_list:
                 self.ingr_pumps[each_ingr].forward_purge(self.prime_values[each_ingr])
         else:
@@ -262,7 +323,6 @@ class Drink_Recipes():
         log_str = "" # Keep track of all liquids dispensed in the log
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].dispense(1.0)
-            # log_str += "," + str(1.0) # Add to the old prime value
             log_str += ",{0:.2f}".format(1.0)
         for each_ingr in self.valid_ingr_list:
             self.ingr_pumps[each_ingr].wait_until_done()
@@ -279,7 +339,7 @@ class Drink_Recipes():
         increment = 1.0 # Increment by 1%
         if self.my_yesno.is_yes("Prime the pumps at {} percent?".format(percent)):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-            self.prime_all(percent)
+            self.prime(percent)
         pump_number = 0 # Use this to print the pump number
         # Creat a handy new line for the .csv file to paste in
         total_string = "Prime,"
@@ -312,7 +372,7 @@ class Drink_Recipes():
         new_calibration_string = "Calibration"
         if not self.my_yesno.is_yes("Have all the pumps been primed?"):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-            self.prime_all()
+            self.prime()
 
         pump_number = 0
         log_str = ""
@@ -344,12 +404,17 @@ class Drink_Recipes():
     #############################################################
     #                       Make the drink!                     #
     #############################################################
-    def make_drink(self, my_drink, max_cocktail_volume = 4.0):
-        scaled_to_fit_glass = max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
+    def make_drink(self, my_drink):
+        scaled_to_fit_glass = self.max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
         print "********************   Making: ", my_drink, " scaled by {0:.2f}".format(scaled_to_fit_glass), "  ********************"
         print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
                 " scaled by {0:.2f}".format(scaled_to_fit_glass), \
-                " max cocktail volume ", max_cocktail_volume
+                " max cocktail volume ", self.max_cocktail_volume
+        # Turn on LEDs and smoke before drink starts to dispense
+        # self.smoke_fan.turn_on_effect()
+        # self.smoke_fan2.turn_on_effect()
+        # self.LED_dispense.thread_effect_ramp(ramp_up = True)
+        self.LED_dispense.turn_on_effect()
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.valid_ingr_list:
@@ -365,6 +430,16 @@ class Drink_Recipes():
         for each_ingredient in self.valid_ingr_list:
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 self.ingr_pumps[each_ingredient].wait_until_done()
+        # These should be done before the ingredients
+        # However, wait so they are not threaded with themselves below
+        # self.smoke_fan.turn_off_effect() # The fan takes a long time to stop, so turn off right away
+        # self.smoke_fan2.turn_off_effect() # The fan takes a long time to stop, so turn off right away
+        # self.LED_dispense.wait_until_done()
+        # Close up the effects -- ramp down the dispense light, reel up the dry ice, turn off the fan
+        # self.LED_dispense.thread_effect_ramp(ramp_up = False)
+         #self.LED_dispense.wait_until_done()
+        self.LED_dispense.turn_off_effect() # The fan takes a long time to stop, so turn off right away
+
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))
 
