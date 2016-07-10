@@ -114,10 +114,10 @@ class Motors():
     ############################################
     # This gives each motor a name, and a calibration value, and initializes a member for the thread
     # This gets the next motor in line of all the Hats
-    def __init__(self, name, calibration_oz = calibration_default):
+    def __init__(self, name, calibration_oz = calibration_default, force_motor_number = 0, force_next_Hat = False):
         self.name = name
         self.thread = None
-        self.motor = self.get_next_motor()
+        self.motor = self.get_next_motor(force_motor_number, force_next_Hat)
         # Each motor should dispense 2oz in 60 seconds (is should dispense calibration_default in calibration_seconds)
         # But, of course, they vary.
         # This is the actual amount this particular motor dispenses in calibration_seconds
@@ -133,19 +133,26 @@ class Motors():
     ############################################
     # Go through all motors, then switch to the next Hat, in order
     # Note: override this for other classes of motors, eg Stepper Motors
-    def get_next_motor(self):
-        Motors.next_motor_number += 1
-        if Motors.next_motor_number > Motors.motors_on_each_Hat:
-            # Reset the motor number
-            Motors.next_motor_number = 1
-            # Move to the next Hat
-            try:
+    def get_next_motor(self, force_motor_number = 0, force_next_Hat = False):
+        if force_motor_number > 0 and force_motor_number <= Motors.motors_on_each_Hat:
+            print "FORCED MOTOR: ", force_motor_number
+            if force_next_Hat:
+                print "FORCED NEW HAT: ", force_next_Hat
                 Motors.current_hat = Motors.hat_cycle.next()
-                # print "i2caddr: {0:0x}".format(Motors.current_hat._i2caddr)
-            except:
-                raise HatNotConnected("Attempt to address more Hats than exist")
-                return None
-        return Motors.current_hat.getMotor(Motors.next_motor_number)
+            return Motors.current_hat.getMotor(force_motor_number)
+        else:
+            Motors.next_motor_number += 1
+            if Motors.next_motor_number > Motors.motors_on_each_Hat:
+                # Reset the motor number
+                Motors.next_motor_number = 1
+                # Move to the next Hat
+                try:
+                    Motors.current_hat = Motors.hat_cycle.next()
+                    # print "i2caddr: {} motor#: {}".format(Motors.current_hat._i2caddr, Motors.next_motor_number)
+                except:
+                    raise HatNotConnected("Attempt to address more Hats than exist with name {}".format(self.name))
+                    return None
+            return Motors.current_hat.getMotor(Motors.next_motor_number)
 
     #############################################
     # Run each motor for 1sec for testing
@@ -247,6 +254,7 @@ class Motors():
     # Treat motor as output
     def turn_on_effect(self, forwards = True):
         self.motor.setSpeed(255)
+        # print "Effect turned on: {} going: {}".format(self.name, "forwards" if forwards else "backwards")
         if forwards:
             self.motor.run(Adafruit_MotorHAT.FORWARD)
         else:
@@ -257,6 +265,7 @@ class Motors():
     ############################################
     # Treat motor as output
     def turn_off_effect(self):
+        # print "Effect turned off: {}".format(self.name)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
     ######################################################
