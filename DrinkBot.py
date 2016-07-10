@@ -40,7 +40,7 @@ while True:
 
     logger = logging.getLogger("cardhandler").info
     RFID_reader = NFCReader(logger)
-    RFID_reader.run(True) # True waits until the reader has no card before it begins reading
+    RFID_reader.run(wait_for_clear = True, delay_for_clear = 5) # True waits until the reader has no card before it begins reading
 
     my_drink_ID = RFID_reader._card_uid
 
