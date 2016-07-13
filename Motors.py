@@ -99,10 +99,10 @@ class Motors():
     ############################################
     # Pump calibration constants
     # We assume these are pumps that dispense about 2oz every 60 seconds.
-    calibration_default = 2.0
-    calibration_seconds = 60.0
+    # calibration_default = 2.0
+    # calibration_seconds = 60.0
     # This is how long it should take to fill the pump tubing to dispense -- no longer, so none is wasted
-    prime_ounces_default = 0.40
+    # prime_ounces_default = 0.40
     # The motors spike in current for about this amount of time -- don't start all motors at the same time
     current_spike_stabilze = 0.1
 
@@ -114,15 +114,10 @@ class Motors():
     ############################################
     # This gives each motor a name, and a calibration value, and initializes a member for the thread
     # This gets the next motor in line of all the Hats
-    def __init__(self, name, calibration_oz = calibration_default, force_motor_number = 0, force_next_Hat = False):
+    def __init__(self, name, force_motor_number = 0, force_next_Hat = False): #, calibration_oz = calibration_default):
         self.name = name
         self.thread = None
         self.motor = self.get_next_motor(force_motor_number, force_next_Hat)
-        # Each motor should dispense 2oz in 60 seconds (is should dispense calibration_default in calibration_seconds)
-        # But, of course, they vary.
-        # This is the actual amount this particular motor dispenses in calibration_seconds
-        #   See .dispense for the Magic of Math for how it uses this numbers to calibrate the motor
-        self.calibration_oz = calibration_oz
 
         # recommended for auto-disabling motors on shutdown
         # Note: does not work if there's a segfault
@@ -182,71 +177,6 @@ class Motors():
                     each_Hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
                 except:  # Not all motors in all Hats will be available
                     print "Nonexistant motor: #", each_motor
-
-    ############################################
-    # Calibrate pump                           #
-    ############################################
-    # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
-    # then asks for the amount actually dispensed.
-    # It then calculates a normalized 1oz dispense rate.
-    def force_calibrate_pump(self):
-        # Must assign some kind of calibration value before dispensing -- default is calibration_default
-        print "Old calibration ounces: ", self.calibration_oz
-        self.dispense(Motors.calibration_default) # Dispense a calibrated 2.0oz and see if it's correct.  If so, make no changes.
-        self.wait_until_done()
-        amount_dispensed = self.my_yesno.get_number(message="How much liquid was delivered [press Enter if exactly 2.0]? : ", default_val=2.0)
-
-        # This is where things get tricky: we now have to reverse engineer the actual ounces
-        # Let's say, given the current calibration, 2oz should be 2oz:
-        # 2oz theory / 2oz actual = X * (formula) * 2oz / (formula) * 2oz
-        # Test this formula with numbers:
-        # last dispensed 2.5oz in 60 seconds, formula = 1oz/2.5oz*60sec = ~24sec
-        # now dispenses 2.7 in 60 seconds, so now it dispenses more
-        # 2oz theory / 2oz actual = X
-        self.calibration_oz = self.calibration_oz * (float(amount_dispensed) / Motors.calibration_default)
-        print "Adjusted amount for " + self.name + ":" + str(self.calibration_oz)
-        print "Factor: " + str(float(amount_dispensed) / Motors.calibration_default)
-        # Note: it's more useful to return the actual amount dispensed, not the calibration number, because
-        #   the parent can find that here: self.calibration_oz
-        return amount_dispensed
-
-    ############################################
-    # Prime pump                               #
-    ############################################
-    # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
-    # kick the pump by 1/10ths too.
-    def prime(self, prime_value=0.0):
-        if prime_value == 0.0:
-            prime_value = Motors.prime_ounces_default
-        elif prime_value < 0.0:
-            print "Invalid prime value!  Less than zero!  Using default: ", Motors.prime_ounces_default
-            prime_value = Motors.prime_ounces_default
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
-        self.thread = ThreadMotor(self.motor, prime_value, self.name)
-
-    ############################################
-    # Dispense calibrated ounces               #
-    ############################################
-    # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
-    def dispense(self, ounces, forwards = True):
-        # Formala:       1oz / actual oz dispensed in 60 seconds = time for 1oz / 60 seconds
-        #                1oz / calibration_oz = X / Motors.calibration_seconds
-        # Solve for X:   time for one ounce = 1oz / actual oz dispensed in 60 seconds * 60 seconds
-        #                calibrated_time = 1oz / calibration_oz * Motors.calibration_seconds
-        # Multiply X times ounces for the actual time for those calibrated ounces
-        calibrated_time = float(float(ounces) / self.calibration_oz * Motors.calibration_seconds)
-        # Note: this should always be true, but being safe here!
-        if calibrated_time <= 0.0:
-            raise LessThanZeroException(
-                self.name + ' - calibration:' + str(self.calibration_oz) + ' Must be >0 for motors to run!')
-        # Delay to stabilize the current spike on motor startup.
-        time.sleep(Motors.current_spike_stabilze)
-        # The pumps are run as processor threads, so all pumps can run concurrently.
-        self.thread = Motors.ThreadMotor(self.thread_for_time_run, self.motor, calibrated_time, forwards)
-        # print "Finished dispensing ", ounces, " of ", self.name, "."
 
     ############################################
     # Turn effect on and leave it on           #

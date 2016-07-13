@@ -26,7 +26,7 @@ my_yesno = yesno()
 #############################################
 my_recipes = Drink_Recipes("DrinkBot.py")
 my_recipes.get_recipes_from_file('TikiDrinks.csv')
-my_recipes.link_to_motors()
+my_recipes.link_to_pumps()
 
 my_drink_ID = None
 my_drink = ""
@@ -60,8 +60,7 @@ while True:
     # elif my_drink_ID == "0496a589ba665a":  # tiny little RFID tag -- tapes to black bottle opener
     # if my_drink_ID == "dc0a723b": # The sample card that came with the device
 
-#    override_cards = ["dc0a723b", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba578c", "0496a589ba60a0", "0496a589ba56ac", "0496a589ba665a"]
-    override_cards = ["dc0a723b", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba578c", "0496a589ba56ac"]
+    override_cards = ["dc0a723b", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba60a0", "0496a589ba56ac", "0496a589ba665a"]
     if my_drink_ID in override_cards: # All the little rectangular RFIDs, all the Clipper cards, and the white card
         print "OVERRIDE!  Found an override RFID tag -- going into manual mode."
         my_drink = "test"
@@ -103,9 +102,9 @@ while True:
     elif my_drink_ID == "ac5fdba1":
         print "Found the Chief!!!"
         my_drink = "Chief Lapu Lapu"
-    elif my_drink_ID == "0496a589ba60a0":
-        print "Smoke test"
-        my_drink = "Smoke test"
+    elif my_drink_ID == "0496a589ba578c":
+        print "Found hula lady"
+        my_drink = "Tail-less Scorpion"
     elif my_drink_ID == None:
         print "Keyboard inturrupt."
         my_drink = "Exit"
@@ -118,12 +117,11 @@ while True:
     if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
         print "I'm done!"
         break
-    elif my_drink in ["Smoke test"]:
-	print "Found Smoke test"
-        my_recipes.smoke_test()
     elif my_drink not in my_recipes.drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
     # Assert: a valid drink name has been generated
+    elif my_drink in ["S", "s", "Setup", "setup"]:
+        pass
     else:
         my_recipes.make_drink(my_drink)
 

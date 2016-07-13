@@ -1,53 +1,19 @@
 #!/usr/bin/python
-from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
 
 # Invented by Kiki Jewell with a little help from Spaceman Sam, May 6, 2016
 
 #############################################
-# Motors class:                             #
+# Pumps class:                              #
 #############################################
-# This class handles the motors:
-#   It addresses and connects with the RasPi Hats
-#   Executes all the turning on and off of the pumps using threading
-#   It handles priming and calibrating functions for a single pump
-# This class is the hardware interface with the rest of the code
+# This class extends Motors to handle a lot of pump specific needs:
+#   It calibrates the pump
+#   It primes the pumps
+#   It dispenses according to the calibration
 #############################################
 
-# Needed to sleep-wait for pump to finish dispensing.
+# Needed to sleep-wait for motor to finish running.
+from Motors import Motors
 import time
-# Needed to assure all pumps have been turned off if the program ends.
-# Pumps have a state either on or off.
-import atexit
-
-import threading
-from yesno import yesno
-
-#############################################
-# ThreadMe class:                           #
-#############################################
-# This class allows the pumps to all run at the same time.
-# If we didn't, it would take a very long time to make one cocktail!
-#############################################
-class ThreadMe(threading.Thread):
-    # motor = which motor by ref; time = actual time to run; name = name assigned to pump
-    def __init__(self, motor, time, name, forwards = True):
-        # I need only the motor, not the whole list for this.
-        # Passing the name, though, assures the key and name match
-        super(ThreadMe, self).__init__()
-        self.motor = motor
-        self.time = time
-        self.name = name
-        self.forwards = forwards
-        self.start()
-
-    def run(self):
-        self.motor.setSpeed(255)
-        if self.forwards:
-            self.motor.run(Adafruit_MotorHAT.FORWARD)
-        else:
-            self.motor.run(Adafruit_MotorHAT.BACKWARD)
-        time.sleep(self.time)
-        self.motor.run(Adafruit_MotorHAT.RELEASE)
 
 #############################
 #  NOTES: PUMP CALIBRATION  #
@@ -76,127 +42,38 @@ class ThreadMe(threading.Thread):
 # 2oz/Xoz * 60 / 2oz = accurate 1oz -- scaled to 1oz
 # 1oz/Xoz * 60 = accurate 1oz -- complete normalized formula
 
-class LessThanZeroException(Exception):
-    pass
+############################################################################
+# Generalized Motors class for using Adafruit Motor Hats on a Raspberry Pi #
+############################################################################
+# This class is for simple output controlling for Motor Hats
+# This ignores the center pin, and assumes 4 simple motors
+class Pumps(Motors):
 
-
-class HatNotConnected(Exception):
-    pass
-
-
-############################################
-# Initialize the motors on the Bot         #
-############################################
-# Set up the address for each of the pumps #
-# NOTE: Since we don't have all 3 hats,    #
-#   I've commented out for the other       #
-#   two boards, until they come in         #
-############################################
-
-hat_stack = []
-# bottom Hat: Board 0: Address = 0x60 Offset = binary 0000 (no jumpers required)
-# middle Hat: Board 1: Address = 0x61 Offset = binary 0001 (bridge A0)
-# top Hat: Board 1: Address = 0x62 Offset = binary 0010 (bridge A1)
-
-hat_stack.append(Adafruit_MotorHAT(addr=0x60))
-hat_stack.append(Adafruit_MotorHAT(addr=0x61))
-hat_stack.append(Adafruit_MotorHAT(addr=0x62))
-hat_stack.append(Adafruit_MotorHAT(addr=0x64))
-"""
-for Hat_address in range(0x60, 0x70):
-    try:
-        temp_hat = Adafruit_MotorHAT(Hat_address)
-        print "Adding Hat_address: ", Hat_address
-        hat_stack.append(temp_hat)
-    except:
-        print "No Hat at address: ", Hat_address
-"""
-all_hats = Adafruit_MotorHAT(addr=0x70)  # Not used, but should address all hats at once
-
-# Quick test of all motors -- this turns them all on for one second
-def test_all_motors():
-    # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
-    for each_hat in range(3):
-        for each_motor in range(1, 5):
-            hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.FORWARD)
-            print "Testing Hat: ", each_hat, " and Motor: ", each_motor
-            time.sleep(1)
-            hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-
-# Turn off all motors -- this is registered to run at program exit: atexit.register(turnOffMotors)
-# recommended for auto-disabling motors on shutdown!
-def turnOffMotors():
-    # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
-    for each_Hat in hat_stack:
-        for each_motor in range(1, 5):
-            try:
-                each_Hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
-            except: # Not all motors in all Hats will be available
-                print "Nonexistant motor: #", each_motor
-
-# recommended for auto-disabling motors on shutdown!
-atexit.register(turnOffMotors)
-
-class Motors():
-    # Ok, this is sneaky.  We have (possibly) 3 Hats, each with 4 possible pump controllers.
-    # As I create more and more ingredient pumps, I want to iterate through all the pumps available.
-    # I'm going to use a class variable to iterate through them.
-
-    # Motor controllers are numbered [1-4] -- this increments before it's first used, so initialized to 0
-    next_pump_number = 0
-    # Start with the bottom most Hat
-    current_hat = hat_stack[0]
-
-    # The motors spike in current for about this amount of time.
-    # This is used between motor startups so there's not a massive current spike
-    # from all motors starting at once.
-    current_spike_stabilze = 0.1
-    my_yesno = yesno() # Handy little class for user input
-
-
+    ############################################
+    # Pump calibration constants
     # We assume these are pumps that dispense about 2oz every 60 seconds.
     calibration_default = 2.0
     calibration_seconds = 60.0
     # This is how long it should take to fill the pump tubing to dispense -- no longer, so none is wasted
-    prime_seconds_default = 13
-    # Reverse purge a little longer to be sure the tube is completely purged
-    purge_seconds_default = 17
+    prime_ounces_default = 0.40
 
+    ############################################
+    # Initialize the motors on the Bot         #
+    ############################################
     # This gives each motor a name, and a calibration value, and initializes a member for the thread
     # This gets the next motor in line of all the Hats
-    def __init__(self, name, calibration_oz = calibration_default):
-        self.name = name
-        self.thread = None
-        # Each pump should dispense 2oz in 60 seconds (is should dispense calibration_default in calibration_seconds)
+    def __init__(self, name, force_motor_number = 0, force_next_Hat = False, calibration_oz = calibration_default):
+        Motors.__init__(self, name, force_motor_number, force_next_Hat)
+        # Each motor should dispense 2oz in 60 seconds (is should dispense calibration_default in calibration_seconds)
         # But, of course, they vary.
-        # This is the actual amount this particular pump dispenses in calibration_seconds
-        #   See .dispense for the Magic of Math for how it uses this numbers to calibrate the pump
+        # This is the actual amount in ounces that this particular motor dispenses in calibration_seconds
+        #   See .dispense for the Magic of Math for how it uses this numbers to calibrate the motor
         self.calibration_oz = calibration_oz
 
-        # This is my sneaky code to iterate through all the motors as each is initialized
-        # It goes through the 4 pumps for each hat
-        if Motors.next_pump_number >= 4:
-            Motors.next_pump_number = 1
-            if Motors.current_hat == hat_stack[0]:
-                Motors.current_hat = hat_stack[1]
-                # print "Note: now adding pumps from the middle hat."
-            elif Motors.current_hat == hat_stack[1]:
-                Motors.current_hat = hat_stack[2]
-                # print "Note: now adding pumps from the top hat."
-            elif Motors.current_hat == hat_stack[2]:
-                Motors.current_hat = hat_stack[3]
-                # Motors.current_hat = top_hat
-                # print "Note: now adding pumps from the top hat."
-            elif Motors.current_hat == hat_stack[3]:
-                raise HatNotConnected("Trying to use a Hat at address 0x63!  Does not exist!")
-                # Motors.current_hat = top_hat
-                # print "Note: now adding pumps from the top hat."
-            else:
-                raise HatNotConnected("Trying to use a Hat beyond address 0x63!  Does not exist!")
-        else:
-            Motors.next_pump_number += 1
-        self.motor = Motors.current_hat.getMotor(Motors.next_pump_number)
 
+    ############################################
+    # Calibrate pump                           #
+    ############################################
     # If the pump needs to be calibrated, it dispenses for calibration_seconds (probably 2),
     # then asks for the amount actually dispensed.
     # It then calculates a normalized 1oz dispense rate.
@@ -221,85 +98,40 @@ class Motors():
         #   the parent can find that here: self.calibration_oz
         return amount_dispensed
 
+    ############################################
+    # Prime pump                               #
+    ############################################
     # This primes the pump.  It assumes the tubing is totally empty, but also allows the user to
     # kick the pump by 1/10ths too.
     def prime(self, prime_value=0.0):
         if prime_value == 0.0:
-            prime_value = Motors.prime_seconds_default
+            prime_value = Motors.prime_ounces_default
         elif prime_value < 0.0:
-            print "Invalid prime value!  Less than zero!  Using default: ", Motors.prime_seconds_default
-            prime_value = Motors.prime_seconds_default
+            print "Invalid prime value!  Less than zero!  Using default: ", Motors.prime_ounces_default
+            prime_value = Motors.prime_ounces_default
         # The pump will have a current spike when it first starts up.
         # This delay allows that current spike to settle to operating current.
         # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
-        self.thread = ThreadMe(self.motor, prime_value, self.name)
+        Motors.time.sleep(Motors.current_spike_stabilze)
+        self.thread = Motors.ThreadMotor(self.motor, prime_value, self.name)
 
-    def reverse_purgeOLD(self, my_purge_seconds = purge_seconds_default):
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
-        calibrated_time = float(float(my_purge_seconds) / self.calibration_oz * Motors.calibration_seconds)
-        self.thread = ThreadMe(self.motor, calibrated_time, self.name, forwards = False)
-    def forward_purgeOLD(self, my_purge_seconds = purge_seconds_default):
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
-        time.sleep(Motors.current_spike_stabilze)
-        calibrated_time = float(float(my_purge_seconds) / self.calibration_oz * Motors.calibration_seconds)
-        self.thread = ThreadMe(self.motor, calibrated_time, self.name)
-
+    ############################################
+    # Dispense calibrated ounces               #
+    ############################################
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
     def dispense(self, ounces, forwards = True):
-        # Formala: 1oz / actual oz dispensed in 60 seconds = time for 1oz / 60 seconds -- solve for time for 1oz
-        #          1oz / calibration_oz = X / Motors.calibration_seconds
-        # Or:      time for one ounce = 1oz / actual oz dispensed in 60 seconds * 60 seconds
-        #          calibrated_time = 1oz / calibration_oz * Motors.calibration_seconds
+        # Formala:       1oz / actual oz dispensed in 60 seconds = time for 1oz / 60 seconds
+        #                1oz / calibration_oz = X / Motors.calibration_seconds
+        # Solve for X:   time for one ounce = 1oz / actual oz dispensed in 60 seconds * 60 seconds
+        #                calibrated_time = 1oz / calibration_oz * Motors.calibration_seconds
         # Multiply X times ounces for the actual time for those calibrated ounces
-        calibrated_time = float(float(ounces) / self.calibration_oz * Motors.calibration_seconds)
+        calibrated_time = float(float(ounces) / self.calibration_oz * Pumps.calibration_seconds)
         # Note: this should always be true, but being safe here!
         if calibrated_time <= 0.0:
-            raise LessThanZeroException(
+            raise Motors.LessThanZeroException(
                 self.name + ' - calibration:' + str(self.calibration_oz) + ' Must be >0 for motors to run!')
-        # The pump will have a current spike when it first starts up.
-        # This delay allows that current spike to settle to operating current.
-        # That way when multiple pumps start at once, there's not a massive current spike from them all.
+        # Delay to stabilize the current spike on motor startup.
         time.sleep(Motors.current_spike_stabilze)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        self.thread = ThreadMe(self.motor, calibrated_time, self.name, forwards)
+        self.thread = Motors.ThreadMotor(self.thread_for_time_run, self.motor, calibrated_time, forwards)
         # print "Finished dispensing ", ounces, " of ", self.name, "."
-
-    # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz
-    def turn_on_effect(self, forwards = True):
-        print "Effect has been turned on: {}".format(self.name)
-        self.motor.setSpeed(255)
-        if forwards:
-            self.motor.run(Adafruit_MotorHAT.FORWARD)
-        else:
-            self.motor.run(Adafruit_MotorHAT.BACKWARD)
-
-    def turn_off_effect(self):
-        self.motor.run(Adafruit_MotorHAT.RELEASE)
-        print "Effect has been turned off: {}".format(self.name)
-
-    def ramp_effect(self, ramp_up = True, forwards = True):
-        print "Ramping {} effect: {}".format("up" if ramp_up else "down", self.name)
-        #for i in range (255,-1,-1):
-        print "start: {} stop: {} incr: {}".format(0 if ramp_up else 255, 255 if ramp_up else -1, 1 if ramp_up else -1)
-        for i in range(0 if ramp_up else 255, 255 if ramp_up else -1, 2 if ramp_up else -2):
-        #for i in range((0,255,1) if ramp_up else [255, -1, -1]):
-            self.motor.setSpeed(i)
-            self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
-        if not ramp_up:
-            self.motor.run(Adafruit_MotorHAT.RELEASE)
-        print "Done ramping effect: {}".format(self.name)
-
-
-    # This is important: .join() attaches the thread back to the main thread -- essentally un-threading it.
-    # It causes the main program to wait until the pump has completed before it moves on to the next drink.
-    # The upshot is that you have to separate the .join() function from the .start() function, so all
-    # pumps get started first. If you .start() then immediately .join(), then the pumps will run one after the other
-    # instead of all at once.  .join() must be run for every pump *after* all the pumps have started.
-    def wait_until_done(self):
-        self.thread.join()

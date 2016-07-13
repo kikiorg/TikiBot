@@ -18,10 +18,10 @@ import csv
 import sys
 sys.path.insert(0, 'pynfc/src')
 import logging
-import time
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
+from Pumps import Pumps
 from yesno import yesno
 
 #############################################
@@ -235,21 +235,21 @@ class Drink_Recipes():
     #     Create pumps linked to ingredients    #
     #############################################
     # This goes through all the ingredients and attaches then to a motor/pump
-    def link_to_motors(self):
+    def link_to_pumps(self):
         temp_ingr_list = iter(self.ingr_list)
         # We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
         for each_motor in range(1, 13):
             each_ingredient = temp_ingr_list.next() # Go through all the ingredients by name
-            # This is a calibration factor -- more info in Motors.dispense()
+            # This is a calibration factor -- more info in Pumps.dispense()
             calibration_oz = float(self.calibration_values[each_ingredient])
-            self.ingr_pumps[each_ingredient] = Motors( each_ingredient, calibration_oz ) # Create the pump
+            self.ingr_pumps[each_ingredient] = Pumps( name = each_ingredient, calibration_oz = calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
-        # self.smoke_fan = Motors("smoke fan")  # Create the smoke effects -- fan into the dry ice container
-        # self.LED_red = Motors( "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        # self.LED_dispense = Motors( "LED dispense" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        # self.smoke_fan2 = Motors("smoke fan2")  # Create the smoke effects -- fan into the dry ice container
-        self.LED_dispense = Motors("LED dispense",force_motor_number = 3, force_next_Hat = True)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        # self.smoke_fan = Motors("LED dispense",force_motor_number = 4)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.smoke_fan = Motors(name = "smoke fan")  # Create the smoke effects -- fan into the dry ice container
+        # self.LED_red = Motors( name = "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.LED_dispense = Motors( name = "LED dispense" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.smoke_fan2 = Motors(name = "smoke fan2")  # Create the smoke effects -- fan into the dry ice container
+        self.LED_dispense = Pumps(name = "LED dispense",force_motor_number = 3, force_next_Hat = True)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+        # self.smoke_fan = Motors(name = "LED dispense",force_motor_number = 4)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
 
         # self.smoke_fan.turn_on_effect()  # Make sure the fan is off
         # self.smoke_fan2.turn_on_effect()  # Make sure the fan is off
@@ -401,11 +401,6 @@ class Drink_Recipes():
         for each_drink in self.drink_names:
             print each_drink
 
-    def smoke_test(self):
-        print "Kiki smoke test"
-	self.LED_dispense.turn_on_effect()
-	time.sleep(5)
-	self.LED_dispense.turn_off_effect()
 
     #############################################################
     #                       Make the drink!                     #
