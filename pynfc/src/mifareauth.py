@@ -55,7 +55,7 @@ class NFCReader(object):
             self.__modulations[i].nmt = mods[i][0]
             self.__modulations[i].nbr = mods[i][1]
 
-    def run(self, wait_for_clear = False):
+    def run(self, wait_for_clear = False, delay_for_clear = 0):
         """Starts the looping thread"""
         self.__context = ctypes.pointer(nfc.nfc_context())
         nfc.nfc_init(ctypes.byref(self.__context))
@@ -73,6 +73,7 @@ class NFCReader(object):
                         self._poll_loop()
                         while not self._card_uid == None:
                             self._poll_loop()
+                        time.sleep(delay_for_clear) #
                     while not self._card_uid:
                         self._poll_loop()
                 except (KeyboardInterrupt, SystemExit):

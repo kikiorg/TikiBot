@@ -20,51 +20,23 @@ import logging
 import sys
 sys.path.insert(0, 'pynfc/src')
 
-from Recipes import Drink_Recipes
 from yesno import yesno
 
-#############################################
-# READ DRINK LIST FROM SPREADSHEET          #
-#############################################
-my_recipes = Drink_Recipes("SetupBot.py")
-my_recipes.get_recipes_from_file('TikiDrinks.csv')
-my_recipes.link_to_motors()
-my_yesno = yesno()
+class Setup:
+    def __init__(self, my_recipes):
+        #############################################
+        # READ DRINK LIST FROM SPREADSHEET          #
+        #############################################
+        self.my_recipes = my_recipes
+        self.my_yesno = yesno()
+        self.my_drink_ID = None
+        self.my_command = ""
+        self.logger = logging.getLogger("cardhandler").info
 
-my_drink_ID = None
-my_command = ""
-
-while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit", "Quit", "q", "Q"]:
-
-    logger = logging.getLogger("cardhandler").info
-
-    print "List of commands: "
-    print "[C]alibrate: "
-    print "[G]lobal calibration check: "
-    print "    This dispenses all pumps for 1oz -- more like a fast checksum"
-    print "[P]rime -- prime all pumps"
-    print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
-    print "[S]hutdown full phase -- this includes these steps:"
-    print "    Reverse liquids -- then wait"
-    print "    Prime 2x with water -- then wait, purge with air, wait"
-    print "    Prime with bleach -- then wait, purge with air, wait"
-    print "    Prime 2x with water -- then wait, purge with air, DONE"
-    print "E[X]it or [Q]uit"
-    print
-    my_command = raw_input("Please enter your command: ")
-
-    if my_command in ["P", "p", "prime", "Prime"]:
-        my_recipes.prime_all()
-    elif my_command in ["G", "g", "global", "Global"]:
-        my_recipes.checksum_calibration()
-    elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
-        my_recipes.tiny_prime()
-    elif my_command in ["C", "c", "Calibrate", "calibrate"]:
-        my_recipes.calibrate()
-    elif my_command in ["S", "s", "Shutdown", "shutdown"]:
+    def shutdown(self):
         not_done = True
         step = 0
-        steps_list = ["Reverse liquids",
+        steps_list = ["REVERSE LIQUIDS",
                       "Prime 2x with water",
                       "Purge with air",
                       "Prime with bleach",
@@ -81,39 +53,79 @@ while my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit"
 
         while not_done:
             print "***", step, ")", steps_list[step]
+            step = self.my_yesno.get_number("    Press Enter for this step, or step # to skip, or CTRL-C to end) ",
+                                            int_only=True,
+                                            default_val=(step))
 
-            if step == 0:
-                my_recipes.prime_all(forwards = False)
+            if step == 0: # Reverse the liquids back into the bottles
+                self.my_recipes.prime(forwards=False)
                 print "    Put hoses into rinse water."
-            elif step == 1:
-                my_recipes.prime_all()
-                my_recipes.prime_all()
-                print "    Remove the hoses to allow air to enter."
+            elif step == 1 or step == 3 or step == 5:
+                self.my_recipes.prime()
+                self.my_recipes.prime()
+                print "    Remove the hoses to purge with air."
             elif step == 2:
-                my_recipes.prime_all()
+                self.my_recipes.prime()
                 print "    Put hoses into bleach water."
-            elif step == 3:
-                my_recipes.prime_all()
-                my_recipes.prime_all()
-                print "    Remove the hoses to allow air to enter."
             elif step == 4:
-                my_recipes.prime_all()
+                self.my_recipes.prime()
                 print "    Put hoses into rinse water."
-            elif step == 5:
-                my_recipes.prime_all()
-                my_recipes.prime_all()
-                print "    Remove the hoses to allow air to enter"
             elif step == 6:
-                my_recipes.prime_all()
+                self.my_recipes.prime()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
-            step = my_yesno.get_number("    Press Enter for next step, or step #, or CTRL-C to end) ", int_only = True, default_val = (step + 1))
 
-            if step >= len(steps_list) - 1:
-                not_done = False
+            step += 1
 
-    elif my_command in ["X", "x", "E", "e", "Q", "q", "Exit", "exit", "Quit", "quit"]:
-        print "I'm done!"
-        break
-    else:
-        print "This is not a command I understand."
+            # if step > len(steps_list) - 1:  # len = 8, -1 = 7
+            #     not_done = False
+            not_done = (step < len(steps_list))
+
+    def setup_menu(self):
+
+        while self.my_command not in ["end" "End", "e", "E", "exit", "Exit", "x", "X", "quit", "Quit", "q", "Q"]:
+
+            print "List of commands: "
+            print "[P]rime -- prime all pumps"
+            print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
+            print "[B]ottle reprime -- prime a new bottle if it ran out"
+            print "Si[Z]e of cup -- change the size of the cup"
+            print "[G]lobal calibration check: "
+            print "    This dispenses all pumps for 1oz -- more like a fast checksum"
+            print "[C]alibrate: "
+            print "[S]hutdown full phase -- this includes these steps:"
+            print "    Reverse liquids -- then wait"
+            print "    Prime 2x with water -- then wait, purge with air, wait"
+            print "    Prime with bleach -- then wait, purge with air, wait"
+            print "    Prime 2x with water -- then wait, purge with air, DONE"
+            print "E[X]it or [Q]uit"
+            print
+            my_command = raw_input("Please enter your command: ")
+
+            if my_command in ["P", "p", "prime", "Prime"]:
+                self.my_recipes.prime()
+            elif my_command in ["B","b","Bottle","bottle"]:
+                # Print all the pumps as numbers and names
+                pump_num = 0
+                for each_ingr in self.my_recipes.valid_ingr_list:
+                    pump_num += 1
+                    print "{} - {}".format(pump_num, each_ingr)
+                my_pump = raw_input("Please enter the name or pump number to prime:")
+                self.my_recipes.prime(one_pump=my_pump)
+
+            elif my_command in ["G", "g", "global", "Global"]:
+                self.my_recipes.checksum_calibration()
+            elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
+                self.my_recipes.tiny_prime()
+            elif my_command in ["C", "c", "Calibrate", "calibrate"]:
+                self.my_recipes.calibrate()
+            elif my_command in ["Z", "z", "Size", "size"]:
+                self.my_recipes.get_cup_size()
+
+            elif my_command in ["S", "s", "Shutdown", "shutdown"]:
+                self.shutdown()
+            elif my_command in ["X", "x", "E", "e", "Q", "q", "Exit", "exit", "Quit", "quit"]:
+                print "Return to idol worship!"
+                break
+            else:
+                print "This is not a command I understand."
 
