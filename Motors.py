@@ -8,6 +8,9 @@ import atexit
 
 # Allows motors to run concurrently
 import threading
+# For random flashing
+from random import randint
+
 from yesno import yesno
 # This forces using the local library, which has been modified
 import sys
@@ -180,6 +183,8 @@ class Motors:
         # print "Effect turned off: {}".format(self.name)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
 
+
+
     ###########################################################################################################
     # Thread functions: these are the interface for threaded functions -- just use these
     ###########################################################################################################
@@ -196,6 +201,15 @@ class Motors:
     # This ramps up (or down if false) the motor, going forwards (or backwards if false), skipping by step
     def thread_motor_ramp(self, ramp_up=True, forwards=True, step=2):
         self.thread = Motors.ThreadMotor(self._thread_ramp, ramp_up, forwards, step)
+
+    ####################################################
+    # Thread: Flash randomly                           #
+    ####################################################
+    # This flashes randomly for duration amount of time.
+    # shortest and longest are the duration of the types of flashing
+    def thread_motor_flash_randomly(self, duration=5, shortest=0.1, longest=0.5):
+        self.thread = Motors.ThreadMotor(self._thread_flash_randomly, duration, shortest, longest)
+
 
     ############################################
     # Wait until threading is done             #
@@ -216,8 +230,7 @@ class Motors:
     ############################################
     # Run the motor for a certain time         #
     ############################################
-    # This function is not meant to be run by itself.
-    # It is meant to be passed as a pointer, with its arguments, to the threading class on __init__
+    # Simply thread the motor on for duration amount of time, then turn it off
     def _thread_duration(self, duration, forwards=True):
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
@@ -227,16 +240,53 @@ class Motors:
     ############################################
     # Ramp the motor speed up -- like a fade   #
     ############################################
-    # This function is not meant to be run by itself.
-    # It is meant to be passed as a pointer, with its arguments, to the threading class on __init__
+    # Slowly raise or lower the speed of the motor.
+    # The wait is simply how long the loop takes.
     def _thread_ramp(self, ramp_up=True, forwards=True, step=2):
-        # Slowly raise or lower the speed of the motor.
-        # The wait is simply how long the loop takes.
         for i in range(0 if ramp_up else 255, 255 if ramp_up else -1, step if ramp_up else (-step)):
             self.motor.setSpeed(i)
             self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
         if not ramp_up:
             self.motor.run(Adafruit_MotorHAT.RELEASE)
+        print "Ramp: {} {}".format(self.name, "forwards" if forwards else "reverse")
+
+    ############################################
+    # Flash the motor randomly                 #
+    ############################################
+    # Pick random delay times until it exceeds duration
+    # Note: I cheated - the last flash rounds up to duration
+    def _thread_flash_randomly(self, duration=5.0, shortest=0.1, longest=0.5):
+        if shortest > longest:
+            temp_num = longest
+            longest = shortest
+            shortest = temp_num
+        if shortest > duration or longest > duration or duration <=0.0:
+            raise "To thread randomly, shortest and longest must be less than the duration and duration must be > 0!"
+        total_duration = 0.0
+        while duration > total_duration + 2 * longest:
+            # Flash dim
+            self.motor.setSpeed(255)
+            self.motor.run(Adafruit_MotorHAT.FORWARD)
+            percent = randint(0, 100)
+            my_duration = (longest - shortest) * percent/100 + shortest
+            print "on: {}".format(my_duration)
+            time.sleep(my_duration)
+            total_duration += my_duration
+
+            # Flash bright
+            self.motor.setSpeed(0)  # 255/4)
+            self.motor.run(Adafruit_MotorHAT.FORWARD)
+            percent = randint(0, 100)
+            my_duration = (longest - shortest) * percent/100 + shortest
+            print "off: {}".format(my_duration)
+            time.sleep(my_duration)
+            total_duration += my_duration
+
+        self.motor.setSpeed(255)
+        self.motor.run(Adafruit_MotorHAT.FORWARD)
+        my_duration = duration - total_duration
+        print "on: {}".format(my_duration)
+        time.sleep(my_duration)
 
     #############################################
     # ThreadMotor class:                        #

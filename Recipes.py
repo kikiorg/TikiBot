@@ -83,8 +83,10 @@ from yesno import yesno
 #############################################
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
-class DrinkRecipes():
-    def __init__(self, parent_name = ""):
+class DrinkRecipes:
+    BACKUP_HAT = False  # Use the broken backup hat that has only one motor switch
+
+    def __init__(self, parent_name=""):
         # Initialize all member variables:
         self.drinks = {}            # This is a list of all drinks -- key:value pairs of all the ingredient amounts
         self.drink_names = []       # This is simply a list of all the drink names -- the "menu" as it were
@@ -99,10 +101,10 @@ class DrinkRecipes():
         self.my_yesno = yesno()     # Used to ask the user yes/no questions
 
         ############ LED effects
-        self.smoke_fan = None
         self.LED_red = None
+        self.smoke_fan = None
         self.LED_dispense = None
-        self.smoke_fan2 = None
+        self.LED_eyes = None
 
         # These two are loggers, logging all the infos
         # command_log logs all the commands that are executed -- it's comprehensive.
@@ -143,7 +145,7 @@ class DrinkRecipes():
     #############################################
     # Setup log file to log all drinks served   #
     #############################################
-    def setup_each_loggers(self, name, filename = "CommandLog.txt",
+    def setup_each_loggers(self, name, filename="CommandLog.txt",
                            fmt='%(asctime)s, %(name)s, %(message)s', datefmt='%Y-%m-%d %H:%M:%S'):
         file_handler = logging.FileHandler(filename)
         formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
@@ -166,12 +168,12 @@ class DrinkRecipes():
     def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
         try:
-            myFile = open(recipe_file_name, 'r')
+            my_file = open(recipe_file_name, 'r')
         except IOError as my_error:
             raise IOError("%s: %s" % (recipe_file_name, my_error.strerror))
 
         # Read the file into a Dictionary type -- this is useful for spreadsheet configurations of CSV data
-        recipe_book = csv.DictReader(myFile)
+        recipe_book = csv.DictReader(my_file)
 
         # Grab a copy of all the ingredient names (aka the fieldnames)
         for each_ingredient in recipe_book.fieldnames:
@@ -185,17 +187,15 @@ class DrinkRecipes():
         # Each drink has a list of Key:Value pairs that are the ingredient:amount
         for each_drink in recipe_book:
             # Now go through all the ingredients for this drink, and append the amounts into the drink
-            if each_drink[self.recipe_name] in ["Calibration"]: # Pull out the Calibration list separately
-                self.calibration_values = {} # Note, override any previous Calibration lines
+            if each_drink[self.recipe_name] in ["Calibration"]:  # Pull out the Calibration list separately
+                self.calibration_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.calibration_values
-            #elif each_drink[self.recipe_name] in ["Prime"]:  # Pull out the Prime list separately
-            #    self.prime_values = {}  # Note, override any previous Calibration lines
-            #    temp_list = self.prime_values
             elif each_drink[self.recipe_name] in ["Prime"]:  # Pull out the Prime list separately
                 self.prime_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.prime_values
             else:
-                self.drinks[each_drink[self.recipe_name]] = {}  # Start with an empty recipe, so we can append each ingredient Key:Value pair
+                # Start with an empty recipe, so we can append each ingredient Key:Value pair
+                self.drinks[each_drink[self.recipe_name]] = {}
                 self.drink_names.append(each_drink[self.recipe_name])  # Keep a list of all the drink names
                 temp_list = self.drinks[each_drink[self.recipe_name]]
             total_volume = 0.0
@@ -220,7 +220,7 @@ class DrinkRecipes():
                 temp_list[self.total_vol_key] = total_volume
 
         # Done getting the info from the file.
-        myFile.close()
+        my_file.close()
 
         return self
 
@@ -237,17 +237,25 @@ class DrinkRecipes():
             calibration_oz = float(self.calibration_values[each_ingredient])
             self.ingr_pumps[each_ingredient] = Pumps( name = each_ingredient, calibration_oz = calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
-        # self.smoke_fan = Motors(name = "smoke fan")  # Create the smoke effects -- fan into the dry ice container
-        # self.LED_red = Motors( name = "LED red" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        # self.LED_dispense = Motors( name = "LED dispense" ) # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        # self.smoke_fan2 = Motors(name = "smoke fan2")  # Create the smoke effects -- fan into the dry ice container
-        self.LED_dispense = Motors(name = "LED dispense",force_motor_number = 3, force_next_Hat = True)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-        # self.smoke_fan = Motors(name = "LED dispense",force_motor_number = 4)  # Create the LED effects -- white LEDs in the mouth while drink is dispensing
 
-        # self.smoke_fan.turn_on()  # Make sure the fan is off
-        # self.smoke_fan2.turn_on()  # Make sure the fan is off
-        # self.LED_red.turn_on()  # The red light should always be on when the DrinkBot is on
-        # self.LED_dispense.turn_on()  # Make sure the white light is off
+        if DrinkRecipes.BACKUP_HAT:
+            # The backup Hat has only one motor switch -- connect the fan and the white LEDs
+            self.LED_dispense = Motors(name="LED dispense", force_motor_number=3, force_next_Hat=True)
+            self.LED_dispense.turn_off()  # Make sure the white light is off
+        else:
+            # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+            self.LED_red = Motors(name="LED red")
+            # Create the smoke effects -- fan into the dry ice container
+            self.smoke_fan = Motors(name="smoke fan")
+            # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+            self.LED_dispense = Motors(name="LED dispense")
+            # Create the LED effects -- the volcano eyes and upward shining red light on the smoke
+            self.LED_eyes = Motors(name="LED eyes")
+
+            self.LED_red.turn_on()  # The red light should always be on when the DrinkBot is ready
+            self.smoke_fan.turn_off()  # Make sure the fan is off
+            self.LED_dispense.turn_off()  # Make sure the white light is off
+            self.LED_eyes.turn_off()  # Make sure the eyes are off
 
     ##############################################################################
     # This prints all the drinks and their ingredients, not including 'Recipe'   #
@@ -272,7 +280,7 @@ class DrinkRecipes():
     #                Prime pumps                #
     #############################################
     # This primes every pump al at once.
-    def prime(self, percent = 100.0, forwards = True, one_pump = None):
+    def prime(self, percent=100.0, forwards=True, one_pump=None):
         if one_pump is not None:
             if one_pump in self.valid_ingr_list:
                 print "Priming: {}".format(one_pump)
@@ -390,11 +398,15 @@ class DrinkRecipes():
         print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
             " scaled by {0:.2f}".format(scaled_to_fit_glass), \
             " max cocktail volume ", self.max_cocktail_volume
-        # Turn on LEDs and smoke before drink starts to dispense
-        # self.smoke_fan.turn_on()
-        # self.smoke_fan2.turn_on()
-        # self.LED_dispense.thread_motor_ramp(ramp_up = True)
-        self.LED_dispense.turn_on()
+        if DrinkRecipes.BACKUP_HAT:
+            # Because the fan and white LEDs are tied together, can't ramp up the fan
+            self.LED_dispense.turn_on()
+        else:
+            # Turn on LEDs and smoke before drink starts to dispense
+            self.smoke_fan.turn_on()
+            self.LED_dispense.thread_motor_ramp(ramp_up = True)
+            self.LED_eyes.thread_motor_flash_randomly(duration = 60, shortest=0.1, longest = 0.5)  # This will need to be a threaded function
+
         # Start all the pumps going
         log_str = ""
         for each_ingredient in self.valid_ingr_list:
@@ -412,13 +424,17 @@ class DrinkRecipes():
                 self.ingr_pumps[each_ingredient].wait_until_done()
         # These should be done before the ingredients
         # However, wait so they are not threaded with themselves below
-        # self.smoke_fan.turn_off() # The fan takes a long time to stop, so turn off right away
-        # self.smoke_fan2.turn_off() # The fan takes a long time to stop, so turn off right away
-        # self.LED_dispense.wait_until_done()
-        # Close up the effects -- ramp down the dispense light, reel up the dry ice, turn off the fan
-        # self.LED_dispense.thread_motor_ramp(ramp_up = False)
-        # self.LED_dispense.wait_until_done()
-        self.LED_dispense.turn_off()  # The fan takes a long time to stop, so turn off right away
+        if DrinkRecipes.BACKUP_HAT:
+            self.LED_dispense.turn_off()  # The fan takes a long time to stop, so turn off right away
+        else:
+            # Close up the effects -- turn off the fan, ramp down the dispense light and also the eyes
+            self.smoke_fan.turn_off()  # The fan takes a long time to stop, so turn off right away
+            self.LED_eyes.wait_until_done()  # Unthread the eyes -- wait until they are done
+            self.LED_dispense.wait_until_done()  # Unthread the white LEDs -- wait until they are done
+            self.LED_dispense.thread_motor_ramp(ramp_up = False)
+            self.LED_eyes.thread_motor_ramp(ramp_up=False)  # Ramp down the flashing eyes
+            self.LED_dispense.wait_until_done()
+            self.LED_eyes.wait_until_done()
 
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))

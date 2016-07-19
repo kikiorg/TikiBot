@@ -103,5 +103,5 @@ class Pumps(Motors):
         # Delay to stabilize the current spike on motor startup.
         time.sleep(Motors.current_spike_stabilize)
         # The pumps are run as processor threads, so all pumps can run concurrently.
-        print "{} {} of {}.".format("Dispensing" if forwards else "REVERSING", ounces, self.name)
+        # print "{} {} of {}.".format("Dispensing" if forwards else "REVERSING", ounces, self.name)
         self.thread = Motors.ThreadMotor(self._thread_duration, calibrated_time, forwards)
