@@ -85,6 +85,8 @@ from yesno import yesno
 #############################################
 class DrinkRecipes:
     BACKUP_HAT = False  # Use the broken backup hat that has only one motor switch
+    calibration_key = "Calibration"
+    prime_key = "Prime"
 
     def __init__(self, parent_name=""):
         # Initialize all member variables:
@@ -114,7 +116,7 @@ class DrinkRecipes:
                                                    fmt='%(asctime)s, %(name)s, %(message)s')
         # dispense_log logs all events that actually dispense liquids
         #   This log is meant for things like producing graphs, watching for ingredients running low,
-        #   and general data geeking.  This is hwy it is a .csv file -- to be used in a spreadsheet
+        #   and general data geeking.  This is why it is a .csv file -- to be used in a spreadsheet
         self.dispense_log = self.setup_each_loggers("DispenseLog file",
                                                     filename="DispenseLog.csv",
                                                     fmt='%(asctime)s, %(message)s')
@@ -187,10 +189,10 @@ class DrinkRecipes:
         # Each drink has a list of Key:Value pairs that are the ingredient:amount
         for each_drink in recipe_book:
             # Now go through all the ingredients for this drink, and append the amounts into the drink
-            if each_drink[self.recipe_name] in ["Calibration"]:  # Pull out the Calibration list separately
+            if each_drink[self.recipe_name] in [DrinkRecipes.calibration_key]:  # Pull out the Calibration list separately
                 self.calibration_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.calibration_values
-            elif each_drink[self.recipe_name] in ["Prime"]:  # Pull out the Prime list separately
+            elif each_drink[self.recipe_name] in [DrinkRecipes.prime_key]:  # Pull out the Prime list separately
                 self.prime_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.prime_values
             else:
@@ -224,9 +226,9 @@ class DrinkRecipes:
 
         return self
 
-    #############################################
-    #     Create pumps linked to ingredients    #
-    #############################################
+    ###############################################################################
+    #     Create pumps linked to ingredients and special effects (LEDs, smoke)    #
+    ###############################################################################
     # This goes through all the ingredients and attaches then to a motor/pump
     def link_to_pumps(self):
         temp_ingr_list = iter(self.ingr_list)
@@ -235,7 +237,7 @@ class DrinkRecipes:
             each_ingredient = temp_ingr_list.next() # Go through all the ingredients by name
             # This is a calibration factor -- more info in Pumps.dispense()
             calibration_oz = float(self.calibration_values[each_ingredient])
-            self.ingr_pumps[each_ingredient] = Pumps( name = each_ingredient, calibration_oz = calibration_oz ) # Create the pump
+            self.ingr_pumps[each_ingredient] = Pumps( name=each_ingredient, calibration_oz=calibration_oz ) # Create the pump
             self.valid_ingr_list.append(each_ingredient) # Add the pump to the list of valid ingredients
 
         if DrinkRecipes.BACKUP_HAT:
@@ -243,19 +245,22 @@ class DrinkRecipes:
             self.LED_dispense = Motors(name="LED dispense", force_motor_number=3, force_next_Hat=True)
             self.LED_dispense.turn_off()  # Make sure the white light is off
         else:
-            # Create the LED effects -- white LEDs in the mouth while drink is dispensing
-            self.LED_red = Motors(name="LED red")
+            # Wires: clear, blue, white, red
+            # Effects: eyes, fan, white, red LEDs
+            # Create the LED effects -- the volcano eyes and upward shining red light on the smoke
+            self.LED_eyes = Motors(name="LED eyes")
             # Create the smoke effects -- fan into the dry ice container
             self.smoke_fan = Motors(name="smoke fan")
             # Create the LED effects -- white LEDs in the mouth while drink is dispensing
             self.LED_dispense = Motors(name="LED dispense")
-            # Create the LED effects -- the volcano eyes and upward shining red light on the smoke
-            self.LED_eyes = Motors(name="LED eyes")
+            # Create the LED effects -- white LEDs in the mouth while drink is dispensing
+            self.LED_red = Motors(name="LED red")
 
-            self.LED_red.turn_on()  # The red light should always be on when the DrinkBot is ready
             self.smoke_fan.turn_off()  # Make sure the fan is off
             self.LED_dispense.turn_off()  # Make sure the white light is off
             self.LED_eyes.turn_off()  # Make sure the eyes are off
+            self.LED_red.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
+            self.LED_red.wait_until_done()
 
     ##############################################################################
     # This prints all the drinks and their ingredients, not including 'Recipe'   #
@@ -322,12 +327,20 @@ class DrinkRecipes:
     #############################################
     # This is for calibrating the prime sequence
     #   it prints out a new line that can be copy and pasted into the .csv file
+    #
+    # Note: changing the function of this:
+    #   This will now overwrite the prime values it got from the file, locally only
+    #   This can be written back out, but is not (yet)
+    #   This is printed to the command_log as well as to stdout
     def tiny_prime(self):
         percent = 90.0
         increment = 1.0 # Increment by 1%
-        if self.my_yesno.is_yes("Prime the pumps at {} percent?".format(percent)):
+        if self.my_yesno.is_yes("Prime all pumps at {} percent?".format(percent)):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
             self.prime(percent)
+            # Overwrite the prime_values
+            for each_ingr in self.valid_ingr_list:
+                self.prime_values[each_ingr] *= percent/100
         pump_number = 0 # Use this to print the pump number
         # Creat a handy new line for the .csv file to paste in
         total_string = "Prime,"
@@ -335,22 +348,69 @@ class DrinkRecipes:
         # Go through all the pumps
         for each_ingr in self.valid_ingr_list:
             pump_number += 1 # Number the pumps for convenience
-            total_tiny = 0 # Total extra priming added
+            part_tiny = 0 # Total extra priming added
+            total_tiny = self.prime_values[each_ingr]
             # While the user wants more ounces of priming
             while self.my_yesno.is_yes("More for Pump #" + str(pump_number) + " Name: " + str(each_ingr) + "?" ):
                 # Add this amount to the prime ounces
                 self.ingr_pumps[each_ingr].dispense(increment / 100 * self.prime_values[each_ingr])
                 # Keep track of all added
-                total_tiny = total_tiny +  increment / 100 * self.prime_values[each_ingr]
+                part_tiny +=  increment / 100 * self.prime_values[each_ingr]
+                total_tiny += increment / 100 * self.prime_values[each_ingr]
             # Add to the old prime value
-            total_string += "{0:.2f},".format((total_tiny + self.prime_values[each_ingr] * percent / 100.0))
-            if total_tiny == 0.0:
-                tiny_str += "{},".format(int(total_tiny))  # Show which ingredients needed tiny priming
+            total_string += "{0:.2f},".format(total_tiny)
+            # Overwrite the old value needed to prime with the new value
+            self.prime_values[each_ingr] += total_tiny
+            if part_tiny == 0.0:
+                tiny_str += "{},".format(int(part_tiny))  # Show which ingredients needed tiny priming
             else:
-                tiny_str += "{0:.2f},".format(total_tiny)  # Show which ingredients needed tiny priming
+                tiny_str += "{0:.2f},".format(part_tiny)  # Show which ingredients needed tiny priming
         print total_string # Print the handy string so it can be copy and pasted into the .csv file
-        self.command_log.info("Tiny prime: {}".format(total_string))
-        self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
+        self.command_log.info(total_string)
+        # self.command_log.info("Tiny prime: {}".format(total_string))
+        # self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
+
+
+    #############################################
+    #       Teeny Prime: calibrate priming       #
+    #############################################
+    # This is for calibrating the prime sequence
+    #   it prints out a new line that can be copy and pasted into the .csv file
+    #
+    # Note: changing the function of this:
+    #   This will now overwrite the prime values it got from the file, locally only
+    #   This can be written back out, but is not (yet)
+    #   This is printed to the command_log as well as to stdout
+    def calibrate_prime(self):
+        percent = 90.0
+        number_extra_primes = 10  # The number of teeny primes needed to make 100%
+        increment_factor = (100 - percent)/100  # This is how much was held back
+        increment_factor /= number_extra_primes  # Divided into small portions
+
+        self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
+        self.prime(percent)
+        calibration_was_needed = False  # Assume the prime values are already perfect
+        total_string = "Prime,"  # Create a handy new line for the .csv file to paste in
+        # Go through all the pumps
+        for each_ingr in self.valid_ingr_list:
+            num_of_primes = 0  # How many tiny primes did we have to do -- hopefully 10 (number_extra_primes)
+            while self.my_yesno.is_yes("More for: " + str(each_ingr) + "?" ):  # More ounces of priming needed
+                num_of_primes += 1
+                self.ingr_pumps[each_ingr].dispense(increment_factor * self.prime_values[each_ingr])  # Dispense a little bit more...
+            total_tiny = increment_factor * self.prime_values[each_ingr] * num_of_primes
+            total_string += "{0:.2f},".format(total_tiny)  # This is the Prime line for the .csv file
+            if num_of_primes != number_extra_primes:  # If this particular pump needed more or less calibration
+                calibration_was_needed = True
+                # Adjust the old prime value
+                self.prime_values[each_ingr] *= percent/100
+                self.prime_values[each_ingr] += total_tiny
+
+        if calibration_was_needed:
+            print total_string # Print the handy string so it can be copy and pasted into the .csv file
+            self.command_log.info(total_string)
+        else:
+            print "The prime values are already calibrated perfectly!"
+            self.command_log.info("The prime values are already calibrated perfectly!")
 
     #############################################
     #              Calibrate pumps              #
@@ -404,8 +464,10 @@ class DrinkRecipes:
         else:
             # Turn on LEDs and smoke before drink starts to dispense
             self.smoke_fan.turn_on()
-            self.LED_dispense.thread_motor_ramp(ramp_up = True)
-            self.LED_eyes.thread_motor_flash_randomly(duration = 60, shortest=0.1, longest = 0.5)  # This will need to be a threaded function
+            self.LED_eyes.thread_motor_ramp(ramp_up=True)
+            self.LED_dispense.thread_motor_ramp(ramp_up=True)
+            self.LED_eyes.wait_until_done()  # Ramp up until done, then start flashing
+            self.LED_eyes.thread_motor_flash_randomly(shortest=0.1, longest=0.5)
 
         # Start all the pumps going
         log_str = ""
@@ -427,10 +489,12 @@ class DrinkRecipes:
         if DrinkRecipes.BACKUP_HAT:
             self.LED_dispense.turn_off()  # The fan takes a long time to stop, so turn off right away
         else:
+            self.LED_eyes.stop_request.set()  # Stop the eyes from flashing
             # Close up the effects -- turn off the fan, ramp down the dispense light and also the eyes
             self.smoke_fan.turn_off()  # The fan takes a long time to stop, so turn off right away
-            self.LED_eyes.wait_until_done()  # Unthread the eyes -- wait until they are done
             self.LED_dispense.wait_until_done()  # Unthread the white LEDs -- wait until they are done
+            self.LED_eyes.wait_until_done()  # Wait for random flashing to stop
+            self.LED_eyes.stop_request.clear()  # Reset the thread so this can be used again
             self.LED_dispense.thread_motor_ramp(ramp_up = False)
             self.LED_eyes.thread_motor_ramp(ramp_up=False)  # Ramp down the flashing eyes
             self.LED_dispense.wait_until_done()

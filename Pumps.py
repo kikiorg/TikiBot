@@ -86,6 +86,12 @@ class Pumps(Motors):
         self.dispense(prime_ounces)
 
     ############################################
+    # Return calibrated time                   #
+    ############################################
+    def calibrated_time(self, ounces):
+        return float(float(ounces) / self.calibration_oz * Pumps.calibration_seconds)
+
+    ############################################
     # Dispense calibrated ounces               #
     ############################################
     # Dispense the ingredients!  ounces is in ounces, multiplied by the calibration time for 1oz

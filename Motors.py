@@ -72,9 +72,10 @@ class Motors:
     ############################################
     # This gives each motor a name, and a calibration value, and initializes a member for the thread
     # This gets the next motor in line of all the Hats
-    def __init__(self, name, force_motor_number=0, force_next_Hat=False, force_Hat_address=0x0): #, calibration_oz = calibration_default):
+    def __init__(self, name, force_motor_number=0, force_next_Hat=False, force_Hat_address=0x0):  #, calibration_oz = calibration_default):
         self.name = name
         self.thread = None
+        self.stop_request = threading.Event()
         if force_motor_number == 0 and force_next_Hat is False and force_Hat_address == 0x0:
             self.motor = self.get_next_motor()
         else:
@@ -113,7 +114,7 @@ class Motors:
     def get_motor_manual_override(self, force_motor_number, force_next_Hat=False, force_Hat_address=0x0):
         # Change Hats if the user forced a Hat change
         if force_next_Hat and not force_Hat_address == 0x0:
-            raise "Forced a Hat skip AND a Hat address -- can't do both."
+            raise Motors.ForceHatAndSkip("Forced a Hat skip AND a Hat address -- can't do both.")
         if force_next_Hat:
             try:
                 Motors.current_hat = Motors.hat_cycle.next()
@@ -139,15 +140,15 @@ class Motors:
     # Run each motor for 1sec for testing
     #############################################
     @classmethod
-    def test_all_motors(self):
+    def test_all_motors(cls):
         # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
-        for each_hat in Motors.hat_stack:
-            for each_motor in range(1, Motors.motors_on_each_Hat):
+        for each_hat in cls.hat_stack:
+            for each_motor in range(1, Motors.motors_on_each_Hat+1):
                 try:
-                    Motors.hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.FORWARD)
+                    cls.hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.FORWARD)
                     print "Testing Hat: ", each_hat._i2caddr, " and Motor: ", each_motor
                     time.sleep(1)
-                    Motors.hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
+                    cls.hat_stack[each_hat].getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
                 except:  # Not all motors in all Hats will be available
                     print "Nonexistent motor: #{} in HAT: {}".format(each_motor, each_hat._i2caddr)
 
@@ -157,10 +158,10 @@ class Motors:
     # Turn off all motors -- this is registered to run at program exit: atexit.register(turn_off_motors)
     # recommended for auto-disabling motors on shutdown!
     @classmethod
-    def turn_off_motors(self):
+    def turn_off_motors(cls):
         # Note: motors are 1-indexed, range is 0-indexed, begin at 1, goes to 4
-        for each_Hat in Motors.hat_stack:
-            for each_motor in range(1, Motors.motors_on_each_Hat):
+        for each_Hat in cls.hat_stack:
+            for each_motor in range(1, cls.motors_on_each_Hat+1):
                 try:
                     each_Hat.getMotor(each_motor).run(Adafruit_MotorHAT.RELEASE)
                 except:  # Not all motors in all Hats will be available, but let's shut them all down anyway
@@ -182,8 +183,6 @@ class Motors:
     def turn_off(self):
         # print "Effect turned off: {}".format(self.name)
         self.motor.run(Adafruit_MotorHAT.RELEASE)
-
-
 
     ###########################################################################################################
     # Thread functions: these are the interface for threaded functions -- just use these
@@ -207,9 +206,8 @@ class Motors:
     ####################################################
     # This flashes randomly for duration amount of time.
     # shortest and longest are the duration of the types of flashing
-    def thread_motor_flash_randomly(self, duration=5, shortest=0.1, longest=0.5):
-        self.thread = Motors.ThreadMotor(self._thread_flash_randomly, duration, shortest, longest)
-
+    def thread_motor_flash_randomly(self, shortest=0.1, longest=0.5):
+        self.thread = Motors.ThreadMotor(self._thread_flash_randomly, shortest, longest)
 
     ############################################
     # Wait until threading is done             #
@@ -248,45 +246,37 @@ class Motors:
             self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
         if not ramp_up:
             self.motor.run(Adafruit_MotorHAT.RELEASE)
-        print "Ramp: {} {}".format(self.name, "forwards" if forwards else "reverse")
+        print "Ramp {}: {}".format("up" if ramp_up else "down", self.name)
 
     ############################################
     # Flash the motor randomly                 #
     ############################################
     # Pick random delay times until it exceeds duration
     # Note: I cheated - the last flash rounds up to duration
-    def _thread_flash_randomly(self, duration=5.0, shortest=0.1, longest=0.5):
+    def _thread_flash_randomly(self, shortest=0.1, longest=0.5):
         if shortest > longest:
             temp_num = longest
             longest = shortest
             shortest = temp_num
-        if shortest > duration or longest > duration or duration <=0.0:
-            raise "To thread randomly, shortest and longest must be less than the duration and duration must be > 0!"
-        total_duration = 0.0
-        while duration > total_duration + 2 * longest:
+        while not self.stop_request.isSet():
             # Flash dim
             self.motor.setSpeed(255)
             self.motor.run(Adafruit_MotorHAT.FORWARD)
             percent = randint(0, 100)
             my_duration = (longest - shortest) * percent/100 + shortest
-            print "on: {}".format(my_duration)
+            # print "on: {}".format(my_duration)
             time.sleep(my_duration)
-            total_duration += my_duration
 
             # Flash bright
-            self.motor.setSpeed(0)  # 255/4)
+            self.motor.setSpeed(255/10)
             self.motor.run(Adafruit_MotorHAT.FORWARD)
             percent = randint(0, 100)
             my_duration = (longest - shortest) * percent/100 + shortest
-            print "off: {}".format(my_duration)
+            # print "off: {}".format(my_duration)
             time.sleep(my_duration)
-            total_duration += my_duration
 
         self.motor.setSpeed(255)
         self.motor.run(Adafruit_MotorHAT.FORWARD)
-        my_duration = duration - total_duration
-        print "on: {}".format(my_duration)
-        time.sleep(my_duration)
 
     #############################################
     # ThreadMotor class:                        #
@@ -312,4 +302,7 @@ class Motors:
         pass
 
     class HatNotConnected(Exception):
+        pass
+
+    class ForceHatAndSkip(Exception):
         pass

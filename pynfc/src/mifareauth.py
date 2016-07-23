@@ -71,9 +71,10 @@ class NFCReader(object):
                     # Wait until the reader has no card nearby
                     if wait_for_clear:
                         self._poll_loop()
-                        while not self._card_uid == None:
+                        while self._card_uid is not None:
+                            print "while self._card_uid is not None:"
                             self._poll_loop()
-                        time.sleep(delay_for_clear) #
+                        time.sleep(delay_for_clear)
                     while not self._card_uid:
                         self._poll_loop()
                 except (KeyboardInterrupt, SystemExit):
