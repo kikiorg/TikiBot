@@ -246,7 +246,6 @@ class Motors:
             self.motor.run(Adafruit_MotorHAT.FORWARD if forwards else Adafruit_MotorHAT.BACKWARD)
         if not ramp_up:
             self.motor.run(Adafruit_MotorHAT.RELEASE)
-        print "Ramp {}: {}".format("up" if ramp_up else "down", self.name)
 
     ############################################
     # Flash the motor randomly                 #

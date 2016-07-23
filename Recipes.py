@@ -84,6 +84,9 @@ from yesno import yesno
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
 class DrinkRecipes:
+    # Wiring for the broken Hat:
+    #   Red LEDs to the power in
+    #   White LEDs (white) Fan (blue) eyes LEDs (clear) to #3
     BACKUP_HAT = False  # Use the broken backup hat that has only one motor switch
     calibration_key = "Calibration"
     prime_key = "Prime"
@@ -449,16 +452,10 @@ class DrinkRecipes:
             print each_drink
 
     #############################################################
-    #                       Make the drink!                     #
+    #                  Startup the effects                      #
     #############################################################
-    def make_drink(self, my_drink):
-        scaled_to_fit_glass = self.max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
-        print "********************   Making: ", my_drink, " scaled by {0:.2f}".format(scaled_to_fit_glass), \
-            "  ********************"
-        print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
-            " scaled by {0:.2f}".format(scaled_to_fit_glass), \
-            " max cocktail volume ", self.max_cocktail_volume
-        if DrinkRecipes.BACKUP_HAT:
+    def startup_effects(self):
+        if DrinkRecipes.BACKUP_HAT:  # This was the fix for the broken Hat at the DNA DrinkBot Challenge 2016
             # Because the fan and white LEDs are tied together, can't ramp up the fan
             self.LED_dispense.turn_on()
         else:
@@ -469,24 +466,11 @@ class DrinkRecipes:
             self.LED_eyes.wait_until_done()  # Ramp up until done, then start flashing
             self.LED_eyes.thread_motor_flash_randomly(shortest=0.1, longest=0.5)
 
-        # Start all the pumps going
-        log_str = ""
-        for each_ingredient in self.valid_ingr_list:
-            if float(self.drinks[my_drink][each_ingredient]) > 0.0:
-                ounces_to_dispense = float(self.drinks[my_drink][each_ingredient])
-                ounces_to_dispense *= scaled_to_fit_glass
-                print each_ingredient + ":{0:.2f}".format(ounces_to_dispense)
-                self.ingr_pumps[each_ingredient].dispense(ounces_to_dispense)
-            else:
-                ounces_to_dispense = 0.0
-            log_str += ",{0:.2f}".format(ounces_to_dispense)
-        # Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
-        for each_ingredient in self.valid_ingr_list:
-            if float(self.drinks[my_drink][each_ingredient]) > 0.0:
-                self.ingr_pumps[each_ingredient].wait_until_done()
-        # These should be done before the ingredients
-        # However, wait so they are not threaded with themselves below
-        if DrinkRecipes.BACKUP_HAT:
+    #############################################################
+    #                  Shutdown the effects                     #
+    #############################################################
+    def shutdown_effects(self):
+        if DrinkRecipes.BACKUP_HAT:  # In case we need to use the broken Hat from teh DNA DrinkBot challenge 2016
             self.LED_dispense.turn_off()  # The fan takes a long time to stop, so turn off right away
         else:
             self.LED_eyes.stop_request.set()  # Stop the eyes from flashing
@@ -500,5 +484,41 @@ class DrinkRecipes:
             self.LED_dispense.wait_until_done()
             self.LED_eyes.wait_until_done()
 
+    #############################################################
+    #                       Make the drink!                     #
+    #############################################################
+    def make_drink(self, my_drink):
+        ##### Start all the effects
+        self.startup_effects()
+
+        ##### Prepare to dispense drink
+        scaled_to_fit_glass = self.max_cocktail_volume / self.drinks[my_drink][self.total_vol_key]
+        print "********************   Making: ", my_drink, " scaled by {0:.2f}".format(scaled_to_fit_glass), \
+            "  ********************"
+        print "Stats: total original volume: ", self.drinks[my_drink][self.total_vol_key], \
+            " scaled by {0:.2f}".format(scaled_to_fit_glass), \
+            " max cocktail volume ", self.max_cocktail_volume
+
+        ##### Start all the pumps going
+        log_str = ""
+        for each_ingredient in self.valid_ingr_list:
+            if float(self.drinks[my_drink][each_ingredient]) > 0.0:
+                ounces_to_dispense = float(self.drinks[my_drink][each_ingredient])
+                ounces_to_dispense *= scaled_to_fit_glass
+                print each_ingredient + ":{0:.2f}".format(ounces_to_dispense)
+                self.ingr_pumps[each_ingredient].dispense(ounces_to_dispense)
+            else:
+                ounces_to_dispense = 0.0
+            log_str += ",{0:.2f}".format(ounces_to_dispense)
+
+        ##### Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
+        for each_ingredient in self.valid_ingr_list:
+            if float(self.drinks[my_drink][each_ingredient]) > 0.0:
+                self.ingr_pumps[each_ingredient].wait_until_done()
+
+        ##### End the special effects
+        self.shutdown_effects()
+
+        ##### Write out to the logs
         self.command_log.info("{}{}".format(my_drink, log_str))
         self.dispense_log.info("{}{}".format(my_drink, log_str))
