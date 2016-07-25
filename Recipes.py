@@ -30,19 +30,15 @@ from yesno import yesno
 # Critical path:
 #   Remove hard coded RFIDs
 #       add a column to the TikiDrinks.csv file for the RFID tags
-# LEDs don't go off if there's an error -- the atexit function was moved into the Motors class -- check on this
 # If the NFC reader is not plugged in, we get a segfault
 # Calculate and store the actual calibration factor, not the ounces -- this is calculated each dispense! :-p
+# Turn off the mouth lights in Manual Mode (or maybe switch on the white lights?)
 # ---------
 # Documentation pass -- make it really pretty, clean up stuff, be succinct
-#   DONE -- Recipes.py
-#   DONE -- Motors.py
 #   DrinkBot.py
 #   SetupBot.py
-#   DONE -- yesno.py
+#   SoundEffects.py
 # *** Generalize the Motors class!
-#   DONE -- Make the Motors class for all types of motors used with the RasPi Hats
-#   DONE -- Make a subclass for Pumps
 #   Suggest a subclass for Stepper Motors
 #   Better logging
 #       Debug levels and stuff
@@ -55,11 +51,12 @@ from yesno import yesno
 # Refactor:
 #   DrinkBot.py
 #   Setup.py
+#   SoundEffects.py
 #   Recipes.py -- generalize this to open the recipes, not deal with RFID stuff
 # Check again that the stabilizing current wait can't be put into Threading...
 # ---------- Real world issues
 # Change the tubing for pineapple juice
-# Change out pump#1/Dark Rum -- running rough
+# DONE -- Change out pump#1/Dark Rum -- running rough
 # DONE 1 -- 3 more: Install the USB ports
 # Look into Jira and Confluence
 # Make checklist of things for setup -- including making sure the bottle sizes are entered!
@@ -74,7 +71,7 @@ from yesno import yesno
 #   Note: acquire the amounts for each bottle from Sam/Katherine
 # Make a shell script that sets up everything:
 #   Move log files so new log files are fresh
-#   DrinkBot
+#   DONE -- DrinkBot is now a script "db"
 # ---------- Issues found during DNA Competition
 # Check for smoke effect in Setup -- don't run pumps or anything else
 # Pulsing the light when the ingredient may run out could get complicated
@@ -90,6 +87,7 @@ class DrinkRecipes:
     BACKUP_HAT = False  # Use the broken backup hat that has only one motor switch
     calibration_key = "Calibration"
     prime_key = "Prime"
+    prime_percent = 90.0
 
     def __init__(self, parent_name=""):
         # Initialize all member variables:
@@ -336,7 +334,7 @@ class DrinkRecipes:
     #   This can be written back out, but is not (yet)
     #   This is printed to the command_log as well as to stdout
     def tiny_prime(self):
-        percent = 90.0
+        percent = DrinkRecipes.prime_percent
         increment = 1.0 # Increment by 1%
         if self.my_yesno.is_yes("Prime all pumps at {} percent?".format(percent)):
             self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
@@ -385,27 +383,32 @@ class DrinkRecipes:
     #   This can be written back out, but is not (yet)
     #   This is printed to the command_log as well as to stdout
     def calibrate_prime(self):
-        percent = 90.0
+        percent = self.prime_percent
         number_extra_primes = 10  # The number of teeny primes needed to make 100%
-        increment_factor = (100 - percent)/100  # This is how much was held back
-        increment_factor /= number_extra_primes  # Divided into small portions
+        increment_factor = (100.0 - percent)/100.0  # This is how much was held back
+        increment_factor /= float(number_extra_primes)  # Divided into small portions
 
-        self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-        self.prime(percent)
+        print("Press enter to prime all the pumps to {}%.".format(percent))
+        is_yes = self.my_yesno.is_yes("[CTRL-C to exit and not prime the pumps] ")
+        if is_yes:
+            self.prime(percent)
         calibration_was_needed = False  # Assume the prime values are already perfect
         total_string = "Prime,"  # Create a handy new line for the .csv file to paste in
         # Go through all the pumps
         for each_ingr in self.valid_ingr_list:
             num_of_primes = 0  # How many tiny primes did we have to do -- hopefully 10 (number_extra_primes)
-            while self.my_yesno.is_yes("More for: " + str(each_ingr) + "?" ):  # More ounces of priming needed
+            # print "More for: {}?".format(str(each_ingr))  # More ounces of priming needed
+            while self.my_yesno.is_yes("More for: {}?".format(str(each_ingr))):  # More ounces of priming needed
                 num_of_primes += 1
                 self.ingr_pumps[each_ingr].dispense(increment_factor * self.prime_values[each_ingr])  # Dispense a little bit more...
+                self.ingr_pumps[each_ingr].wait_until_done()
             total_tiny = increment_factor * self.prime_values[each_ingr] * num_of_primes
-            total_string += "{0:.2f},".format(total_tiny)  # This is the Prime line for the .csv file
+            # This is the Prime line for the .csv file
+            total_string += "{0:.2f},".format(total_tiny + self.prime_values[each_ingr] * percent/100.0)
             if num_of_primes != number_extra_primes:  # If this particular pump needed more or less calibration
                 calibration_was_needed = True
                 # Adjust the old prime value
-                self.prime_values[each_ingr] *= percent/100
+                self.prime_values[each_ingr] *= percent/100.0
                 self.prime_values[each_ingr] += total_tiny
 
         if calibration_was_needed:

@@ -115,7 +115,7 @@ class Setup:
             elif my_command in ["G", "g", "global", "Global"]:
                 self.my_recipes.checksum_calibration()
             elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
-                self.my_recipes.tiny_prime()
+                self.my_recipes.calibrate_prime()
             elif my_command in ["C", "c", "Calibrate", "calibrate"]:
                 self.my_recipes.calibrate()
             elif my_command in ["Z", "z", "Size", "size"]:
