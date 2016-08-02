@@ -31,7 +31,9 @@ my_recipes.link_to_pumps()
 
 my_drink_ID = None
 my_drink = ""
-my_sound = SoundEffects()
+my_sound_lady = SoundEffects(sound_name="sounds/Scream.wav", channel=1)
+my_sound_Howie = SoundEffects(sound_name="sounds/HowieScream.ogg", channel=2)
+my_sound_wilhelm = SoundEffects(sound_name="sounds/wilhelm.wav", channel=3)
 
 #############################################
 #     Now start polling the RFID reader     #
@@ -79,43 +81,43 @@ while True:
 
     elif my_drink_ID == "ecf5dea1":
         print "Found Tall freaky lady"
-        my_sound.play_sound()
+        my_sound_lady.play_sound()
         my_drink = "Pieces of Eight"
     elif my_drink_ID == "8ca3dba1":
         print "Found the tan bottle opener"
-        my_sound.play_sound()
+        my_sound_Howie.play_sound()
         my_drink = "Hurricane"
     elif my_drink_ID == "bc7adba1":
         print "Found the black bottle opener"
-        my_sound.play_sound()
+        my_sound_wilhelm.play_sound()
         my_drink = "Outrigger"
     elif my_drink_ID == "1cbfdba1":
         print "Found the BIG BUTT brown Hawaiin idol"
-        my_sound.play_sound()
+        my_sound_wilhelm.play_sound()
         my_drink = "Hawaiian Eye"
     elif my_drink_ID == "0cd9dea1":
         print "Found the black Hawaiin idol"
-        my_sound.play_sound()
+        my_sound_Howie.play_sound()
         my_drink = "Trader Vic Grog"
     elif my_drink_ID == "bc5bdca1":
         print "Found the tall black idol"
-        my_sound.play_sound()
+        my_sound_wilhelm.play_sound()
         my_drink = "Scorpion"
     elif my_drink_ID == "6ce7dea1":
         print "Found the seahorse"
-        my_sound.play_sound()
+        my_sound_Howie.play_sound()
         my_drink = "Mai Tai"
     elif my_drink_ID == "3c62dba1":
         print "Found the Lady Virgin"
-        my_sound.play_sound()
+        my_sound_lady.play_sound()
         my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "8c97dba1":
         print "Found Charlotte's Hula Lady"
-        my_sound.play_sound()
+        my_sound_lady.play_sound()
         my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "ac5fdba1":
         print "Found the Chief!!!"
-        my_sound.play_sound()
+        my_sound_lady.play_sound()
         my_drink = "Chief Lapu Lapu"
     elif my_drink_ID == None:
         print "Keyboard inturrupt."

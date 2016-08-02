@@ -12,11 +12,11 @@ import os
 import pygame.mixer
 
 class SoundEffects():
-    def __init__(self, sound_name="Scream.wav"):
+    def __init__(self, sound_name="sounds/Scream.wav", channel = 1):
         pygame.mixer.init(48000, -16, 1, 1024)
         self.name = sound_name
         self.sound = pygame.mixer.Sound(sound_name)
-        self.soundChannel = pygame.mixer.Channel(1)
+        self.soundChannel = pygame.mixer.Channel(channel)
         return
 
     # Get a yes/no answer from the user, defaulting to Yes

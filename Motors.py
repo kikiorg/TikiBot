@@ -127,6 +127,8 @@ class Motors:
             except IOError as error_msg:
                 # This raise will happen for EVERY address with no Hat -- not needed unless you are full! :)
                 raise IOError(error_msg.message + ' happens at % Motors.py')
+        elif force_Hat_address == 0x0:
+            pass
         else:
             raise ("Invalid forced Hat address {} -- must be in the range of 0x60 and 0x70".format(force_Hat_address))
 
