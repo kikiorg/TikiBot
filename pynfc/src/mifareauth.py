@@ -18,6 +18,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import time
+import datetime
 import logging
 import ctypes
 import string
@@ -71,17 +72,20 @@ class NFCReader(object):
                     # Wait until the reader has no card nearby
                     if wait_for_clear:
                         self._poll_loop()
-                        while self._card_uid is not None:
+                        start_time = datetime.datetime.now()
+                        while (datetime.datetime.now() - start_time).seconds <= delay_for_clear:
                             self._poll_loop()
-                        time.sleep(delay_for_clear)
-                    while not self._card_uid:
+                            if self._card_uid is not None:  # Keep resetting while there's a card on the reader
+                                start_time = datetime.datetime.now()  # Reset the timer
+                        print "The NFC reader is now clear."
+                        self.log("NFC has cleared for {} seconds.".format(delay_for_clear))
+                    while not self._card_uid:  # Wait while there is no card
                         self._poll_loop()
                 except (KeyboardInterrupt, SystemExit):
                     loop = False
                     self._clean_card()
 
                 finally:
-                    self.log("Nothing in this finally clause --Kiki")
                     nfc.nfc_close(self.__device)
             else:
                 self.log("NFC Waiting for device.")
