@@ -114,7 +114,7 @@ while True:
     elif my_drink_ID == "8c97dba1":
         print "Found Charlotte's Hula Lady"
         my_sound_lady.play_sound()
-        my_drink = "Tail-less Scorpion"
+        my_drink = "Moonlight"
     elif my_drink_ID == "ac5fdba1":
         print "Found the Chief!!!"
         my_sound_lady.play_sound()

@@ -81,10 +81,12 @@ from yesno import yesno
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
 class DrinkRecipes:
+    number_of_pumps = 12
     # Wiring for the broken Hat:
     #   Red LEDs to the power in
     #   White LEDs (white) Fan (blue) eyes LEDs (clear) to #3
     BACKUP_HAT = False  # Use the broken backup hat that has only one motor switch
+    NO_EFFECTS = True # Turn off all effcts
     calibration_key = "Calibration"
     prime_key = "Prime"
     prime_percent = 90.0
@@ -234,7 +236,7 @@ class DrinkRecipes:
     def link_to_pumps(self):
         temp_ingr_list = iter(self.ingr_list)
         # We have three hats right now, so 12 pumps -- range is zero indexed, 0-12, starting at 1
-        for each_motor in range(1, 13):
+        for each_motor in range(1, DrinkRecipes.number_of_pumps + 1):
             each_ingredient = temp_ingr_list.next() # Go through all the ingredients by name
             # This is a calibration factor -- more info in Pumps.dispense()
             calibration_oz = float(self.calibration_values[each_ingredient])
@@ -245,6 +247,8 @@ class DrinkRecipes:
             # The backup Hat has only one motor switch -- connect the fan and the white LEDs
             self.LED_dispense = Motors(name="LED dispense", force_motor_number=3, force_next_Hat=True)
             self.LED_dispense.turn_off()  # Make sure the white light is off
+        elif DrinkRecipes.NO_EFFECTS:
+            pass
         else:
             # Wires: clear, blue, white, red
             # Effects: eyes, fan, white, red LEDs
@@ -461,6 +465,8 @@ class DrinkRecipes:
         if DrinkRecipes.BACKUP_HAT:  # This was the fix for the broken Hat at the DNA DrinkBot Challenge 2016
             # Because the fan and white LEDs are tied together, can't ramp up the fan
             self.LED_dispense.turn_on()
+        elif DrinkRecipes.NO_EFFECTS:
+            pass
         else:
             # Turn on LEDs and smoke before drink starts to dispense
             self.smoke_fan.turn_on()
@@ -475,6 +481,8 @@ class DrinkRecipes:
     def shutdown_effects(self):
         if DrinkRecipes.BACKUP_HAT:  # In case we need to use the broken Hat from teh DNA DrinkBot challenge 2016
             self.LED_dispense.turn_off()  # The fan takes a long time to stop, so turn off right away
+        elif DrinkRecipes.NO_EFFECTS:
+            pass
         else:
             self.LED_eyes.stop_request.set()  # Stop the eyes from flashing
             # Close up the effects -- turn off the fan, ramp down the dispense light and also the eyes
