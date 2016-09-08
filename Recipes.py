@@ -534,11 +534,27 @@ class DrinkRecipes:
             pass  # Leaving these here, in case things change -- again!
         else:
             if cancel:
-                self.LED_red.thread_motor_ramp(ramp_up=False)  # Turn on the red LEDs: "ready to dispense"
+                self.LED_red.thread_motor_ramp(ramp_up=False)  # Ramp down the red LEDs: "ready to dispense"
                 self.LED_red.wait_until_done()
             else:
                 self.LED_red.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
                 self.LED_red.wait_until_done()
+
+
+    #############################################################
+    #                  Startup the effects                      #
+    #############################################################
+    def hard_off_effects(self):
+        if DrinkRecipes.BACKUP_HAT:
+            # The backup Hat has only one motor switch -- connect the fan and the white LEDs
+            self.LED_dispense.turn_off()  # Make sure the white light is off
+        elif DrinkRecipes.NO_EFFECTS_HAT:
+            pass
+        else:
+            self.smoke_fan.turn_off()  # Make sure the fan is off
+            self.LED_dispense.turn_off()  # Make sure the white light is off
+            self.LED_eyes.turn_off()  # Make sure the eyes are off
+            self.LED_red.turn_off()  # Turn on the red LEDs: "ready to dispense"
 
     #############################################################
     #                  Startup the effects                      #

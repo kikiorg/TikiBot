@@ -31,14 +31,9 @@ my_recipes.link_to_pumps()
 
 my_drink_ID = None
 my_drink = ""
-#my_sound_lady = SoundEffects(sound_name="sounds/Scream.wav", channel=1)
-#my_sound_Howie = SoundEffects(sound_name="sounds/HowieScream.ogg", channel=1)
-#my_sound_wilhelm = SoundEffects(sound_name="sounds/wilhelm.wav", channel=1)
-#my_sound_drums = SoundEffects(sound_name="sounds/Bora_Bora.mp3", channel=2)
 my_sound_lady = SoundEffects(sound_name="sounds/Scream.wav", channel=1)
 my_sound_Howie = SoundEffects(sound_name="sounds/HowieScream.ogg", channel=1)
 my_sound_wilhelm = SoundEffects(sound_name="sounds/wilhelm.wav", channel=1)
-#my_sound_drums = SoundEffects(sound_name="sounds/Bora_Bora.wav", channel=2)
 my_sound_drums = SoundEffects(sound_name="sounds/BoraBora.wav", channel=1, music=True, skip=1300000)
 
 #############################################
@@ -50,6 +45,7 @@ while True:
 
     logger = logging.getLogger("cardhandler").info
     RFID_reader = NFCReader(logger)
+    my_recipes.hard_off_effects()
     RFID_reader.run2(no_card_for_seconds=5) # True waits until the reader has no card before it begins reading
 
     my_recipes.ready_to_dispense()
@@ -67,10 +63,10 @@ while True:
     # elif my_drink_ID == "04380edafe1f80":  # Charlotte's Clipper card
     # elif my_drink_ID == "045f8552334680":  # Kiki's Clipper card
     # elif my_drink_ID == "044e906a502d80":  # Sam's Clipper card
-    # elif my_drink_ID == "0496a589ba578c":  # tiny little RFID tag -- tapes to black bottle opener
-    # elif my_drink_ID == "0496a589ba60a0":  # tiny little RFID tag -- tapes to black bottle opener
-    # elif my_drink_ID == "0496a589ba56ac":  # tiny little RFID tag -- tapes to black bottle opener
-    # elif my_drink_ID == "0496a589ba665a":  # tiny little RFID tag -- tapes to black bottle opener
+    # elif my_drink_ID == "0496a589ba578c":  # tiny little RFID tag
+    # elif my_drink_ID == "0496a589ba60a0":  # tiny little RFID tag
+    # elif my_drink_ID == "0496a589ba56ac":  # tiny little RFID tag
+    # elif my_drink_ID == "0496a589ba665a":  # tiny little RFID tag
     # if my_drink_ID == "dc0a723b": # The sample card that came with the device
 
     override_cards = ["dc0a723b", "0496a589ba578c", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba60a0", "0496a589ba56ac", "0496a589ba665a"]
@@ -182,6 +178,8 @@ while True:
         break
     elif my_drink not in my_recipes.drink_names:
         print "THAT'S NOT A DRINK, YOU SILLY!"
+        my_recipes.ready_to_dispense(cancel=True)
+
     # Assert: a valid drink name has been generated
     elif my_drink in ["S", "s", "Setup", "setup"]:
         pass
