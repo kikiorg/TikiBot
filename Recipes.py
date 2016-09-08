@@ -12,6 +12,8 @@
 #   Execute the making of drinks
 # It does not include directly addressing the motors (Motors.py) nor the RFID reader (DrinkBot.py)
 # It does not interact with the user (SetupBot.py/DrinkBot.py)
+# It does include all the lighting special effects.
+#   This should be moved to another class
 #############################################
 
 import csv
@@ -55,26 +57,25 @@ from yesno import yesno
 #   Recipes.py -- generalize this to open the recipes, not deal with RFID stuff
 # Check again that the stabilizing current wait can't be put into Threading...
 # ---------- Real world issues
-# Change the tubing for pineapple juice
-# DONE -- Change out pump#1/Dark Rum -- running rough
-# DONE 1 -- 3 more: Install the USB ports
-# Look into Jira and Confluence
-# Make checklist of things for setup -- including making sure the bottle sizes are entered!
+# >>> Check for ingredients to run out -- PRIORITY
+#   New file for ingredient backstock
+#   Build this file in Setup Mode -- ask user for each bottle, and partial bottle
+#       Ask user for height of fluid when full, then height where fluid is now, and size of bottle -- use math
+#   Rewrite this file each drink to drain the ingredients -- each time, so crashing doesn't require flush of this file
+#   When ingredient gets low, flash the pump by running it backwards then forwards a few times
+#       Assume the user changes the bottle.
+#       Note: consolidate bottles only at end of event -- less headaches that way!
+# >>> Fix segfault in libnfc -- PRIORITY
+# >>> Make checklist of things for setup -- including making sure the bottle sizes are entered!
 #   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
 #   Possibly keep track of amounts dispensed and add those on each time the program runs.
 # (Make up a poster for Kiki describing the technical details of what she did)
-# ---------- Issues found during Bob benefit
-# Pulse the pump when the ingredient might run out
-#   Alternately, pulse the mouth lights when ingredients might run out
-#   Note: this could get quite complicated
-#   Note above: running setup, then repriming the pump cancels the light pulsing to check ingredients.
-#   Note: acquire the amounts for each bottle from Sam/Katherine
-# Make a shell script that sets up everything:
-#   Move log files so new log files are fresh
+# DONE -- Make a shell script that sets up everything:
+#   DEFERRED -- Move log files so new log files are fresh
+#       Not needed: just let logs accumulate and pick events out by hand.  No big deal.
 #   DONE -- DrinkBot is now a script "db"
-# ---------- Issues found during DNA Competition
-# Check for smoke effect in Setup -- don't run pumps or anything else
-# Pulsing the light when the ingredient may run out could get complicated
+# DONE 3 -- 1 more: Install the USB ports
+# Look into Jira and Confluence
 
 
 #############################################
@@ -265,11 +266,11 @@ class DrinkRecipes:
             # Create the LED effects -- white LEDs in the mouth while drink is dispensing
             self.LED_red = Motors(name="LED red")
 
-            self.smoke_fan.turn_off()  # Make sure the fan is off
-            self.LED_dispense.turn_off()  # Make sure the white light is off
-            self.LED_eyes.turn_off()  # Make sure the eyes are off
-            # self.LED_red.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
-            # self.LED_red.wait_until_done()
+            # Make sure everything begins in OFF position
+            self.smoke_fan.turn_off()
+            self.LED_dispense.turn_off()
+            self.LED_eyes.turn_off()
+            self.LED_red.turn_off()
 
     ##############################################################################
     # This prints all the drinks and their ingredients, not including 'Recipe'   #
@@ -284,11 +285,15 @@ class DrinkRecipes:
             print "*** ", each_drink, " ***"
             self.print_ingredients(self.drinks[each_drink])
 
-    def print_ingredients(self, my_list):
-        for each_ingredient in my_list:
+    ############################################
+    #             Print ingredients            #
+    ############################################
+    # print out all the ingredients and amounts used to the srceen
+    def print_ingredients(self, my_recipe):
+        for each_ingredient in my_recipe:
             # Skip the ingredients that are not used in this recipe
-            if my_list[each_ingredient] is not '' and my_list[each_ingredient] != 0.0:
-                print each_ingredient + ': ', my_list[each_ingredient]
+            if my_recipe[each_ingredient] is not '' and my_recipe[each_ingredient] != 0.0:
+                print each_ingredient + ': ', my_recipe[each_ingredient]
 
     #############################################
     #                Prime pumps                #
@@ -332,63 +337,11 @@ class DrinkRecipes:
         self.dispense_log.info("Checksum,{}".format( log_str ))
 
     #############################################
-    #       Tiny Prime: calibrate priming       #
+    #     kid_drink: copied from tiny_prime     #
     #############################################
-    # This is for calibrating the prime sequence
-    #   it prints out a new line that can be copy and pasted into the .csv file
+    # For creating new drinks quickly by dispensing tiny squirts of ingredients
     #
-    # Note: changing the function of this:
-    #   This will now overwrite the prime values it got from the file, locally only
-    #   This can be written back out, but is not (yet)
-    #   This is printed to the command_log as well as to stdout
-    def tiny_prime(self):
-        percent = DrinkRecipes.prime_percent
-        increment = 1.0 # Increment by 1%
-        if self.my_yesno.is_yes("Prime all pumps at {} percent?".format(percent)):
-            self.my_yesno.is_yes("Press enter to prime all the pumps at once. [CTRL-C to exit and not prime the pumps] ")
-            self.prime(percent)
-            # Overwrite the prime_values
-            for each_ingr in self.valid_ingr_list:
-                self.prime_values[each_ingr] *= percent/100
-        pump_number = 0 # Use this to print the pump number
-        # Creat a handy new line for the .csv file to paste in
-        total_string = "Prime,"
-        tiny_str = "Tiny prime, "
-        # Go through all the pumps
-        for each_ingr in self.valid_ingr_list:
-            pump_number += 1 # Number the pumps for convenience
-            part_tiny = 0 # Total extra priming added
-            total_tiny = self.prime_values[each_ingr]
-            # While the user wants more ounces of priming
-            while self.my_yesno.is_yes("More for Pump #" + str(pump_number) + " Name: " + str(each_ingr) + "?" ):
-                # Add this amount to the prime ounces
-                self.ingr_pumps[each_ingr].dispense(increment / 100 * self.prime_values[each_ingr])
-                # Keep track of all added
-                part_tiny +=  increment / 100 * self.prime_values[each_ingr]
-                total_tiny += increment / 100 * self.prime_values[each_ingr]
-            # Add to the old prime value
-            total_string += "{0:.2f},".format(total_tiny)
-            # Overwrite the old value needed to prime with the new value
-            self.prime_values[each_ingr] += total_tiny
-            if part_tiny == 0.0:
-                tiny_str += "{},".format(int(part_tiny))  # Show which ingredients needed tiny priming
-            else:
-                tiny_str += "{0:.2f},".format(part_tiny)  # Show which ingredients needed tiny priming
-        print total_string # Print the handy string so it can be copy and pasted into the .csv file
-        self.command_log.info(total_string)
-        # self.command_log.info("Tiny prime: {}".format(total_string))
-        # self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
-
-    #############################################
-    #       Tiny Prime: calibrate priming       #
-    #############################################
-    # This is for calibrating the prime sequence
-    #   it prints out a new line that can be copy and pasted into the .csv file
-    #
-    # Note: changing the function of this:
-    #   This will now overwrite the prime values it got from the file, locally only
-    #   This can be written back out, but is not (yet)
-    #   This is printed to the command_log as well as to stdout
+    # The new drink will be printed to the screen (and log) when you're done and satisfied
     def kid_drink(self):
         squirt = 0.1 # Increment by 0.1oz
 
