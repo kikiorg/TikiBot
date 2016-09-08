@@ -18,7 +18,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import time
-import datetime
+from datetime import datetime,timedelta
 import logging
 import ctypes
 import string
@@ -72,15 +72,66 @@ class NFCReader(object):
                     # Wait until the reader has no card nearby
                     if wait_for_clear:
                         self._poll_loop()
-                        start_time = datetime.datetime.now()
-                        while (datetime.datetime.now() - start_time).seconds <= delay_for_clear:
+                        start_time = datetime.now()
+                        while (datetime.now() - start_time).seconds <= delay_for_clear:
                             self._poll_loop()
                             if self._card_uid is not None:  # Keep resetting while there's a card on the reader
-                                start_time = datetime.datetime.now()  # Reset the timer
+                                start_time = datetime.now()  # Reset the timer
                         print "The NFC reader is now clear."
                         self.log("NFC has cleared for {} seconds.".format(delay_for_clear))
                     while not self._card_uid:  # Wait while there is no card
                         self._poll_loop()
+                except (KeyboardInterrupt, SystemExit):
+                    loop = False
+                    self._clean_card()
+
+                finally:
+                    nfc.nfc_close(self.__device)
+            else:
+                self.log("NFC Waiting for device.")
+                time.sleep(self.card_timeout)
+        except (KeyboardInterrupt, SystemExit):
+            loop = False
+            self._clean_card()
+        except IOError, e:
+            self.log("Exception: " + str(e))
+            loop = True  # not str(e).startswith("NFC Error whilst polling")
+        # except Exception, e:
+        # loop = True
+        #    print "[!]", str(e)
+        finally:
+            nfc.nfc_exit(self.__context)
+            self.log("NFC Clean shutdown called")
+        self.log("run() is done, ID: ", self._card_uid)
+        return loop
+
+    def run2(self, no_card_for_seconds=0):
+        """Starts the looping thread"""
+        self.__context = ctypes.pointer(nfc.nfc_context())
+        nfc.nfc_init(ctypes.byref(self.__context))
+        loop = True
+        try:
+            self._clean_card()
+            conn_strings = (nfc.nfc_connstring * 10)()
+            devices_found = nfc.nfc_list_devices(self.__context, conn_strings, 10)
+            if devices_found >= 1:
+                self.__device = nfc.nfc_open(self.__context, conn_strings[0])
+                try:
+                    _ = nfc.nfc_initiator_init(self.__device)
+
+                    # If we need to wait until the reader clears, then do this loop
+                    if no_card_for_seconds > 0:
+                        done_time = datetime.now() + timedelta(seconds=no_card_for_seconds)
+                        while (datetime.now()<done_time):
+                            self._poll_loop()
+                            if self._card_uid is not None:  # Keep resetting while there's a card on the reader
+                                done_time = datetime.now() + timedelta(seconds=no_card_for_seconds)
+                        print "The NFC reader is now clear."
+                    else: # Assert: no_card_for_seconds <= 0, treat negative values as 0
+                        # Get a valid RFID
+                        while self._card_uid is None:
+                            self._poll_loop()
+
                 except (KeyboardInterrupt, SystemExit):
                     loop = False
                     self._clean_card()

@@ -87,6 +87,7 @@ class Setup:
             print "List of commands: "
             print "[P]rime -- prime all pumps"
             print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
+            print "[K]id drinks -- create new drinks by shot size."
             print "[B]ottle reprime -- prime a new bottle if it ran out"
             print "Si[Z]e of cup -- change the size of the cup"
             print "[G]lobal calibration check: "
@@ -116,6 +117,8 @@ class Setup:
                 self.my_recipes.checksum_calibration()
             elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
                 self.my_recipes.calibrate_prime()
+            elif my_command in ["K", "k", "kid drink", "Kid Drink"]:
+                self.my_recipes.kid_drink()
             elif my_command in ["C", "c", "Calibrate", "calibrate"]:
                 self.my_recipes.calibrate()
             elif my_command in ["Z", "z", "Size", "size"]:

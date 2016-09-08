@@ -217,6 +217,9 @@ class DrinkRecipes:
                     try:
                         temp_list[each_ingredient] = float(each_drink[each_ingredient])
                         total_volume += float(each_drink[each_ingredient])
+                    except TypeError:
+                        print "float() error -- is it possible you are missing ingredients in the csv file?"
+                        raise
                     except ValueError:
                         print each_drink[each_ingredient], " is not an amount in ounces! Please fix.  Setting to zero."
                         temp_list[each_ingredient] = 0.0
@@ -265,8 +268,8 @@ class DrinkRecipes:
             self.smoke_fan.turn_off()  # Make sure the fan is off
             self.LED_dispense.turn_off()  # Make sure the white light is off
             self.LED_eyes.turn_off()  # Make sure the eyes are off
-            self.LED_red.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
-            self.LED_red.wait_until_done()
+            # self.LED_red.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
+            # self.LED_red.wait_until_done()
 
     ##############################################################################
     # This prints all the drinks and their ingredients, not including 'Recipe'   #
@@ -376,6 +379,68 @@ class DrinkRecipes:
         # self.command_log.info("Tiny prime: {}".format(total_string))
         # self.command_log.info("Tiny prime (pumps): {}".format(tiny_str))
 
+    #############################################
+    #       Tiny Prime: calibrate priming       #
+    #############################################
+    # This is for calibrating the prime sequence
+    #   it prints out a new line that can be copy and pasted into the .csv file
+    #
+    # Note: changing the function of this:
+    #   This will now overwrite the prime values it got from the file, locally only
+    #   This can be written back out, but is not (yet)
+    #   This is printed to the command_log as well as to stdout
+    def kid_drink(self):
+        squirt = 0.1 # Increment by 0.1oz
+
+        my_new_drink = raw_input("Name of your new drink:")
+        while my_new_drink is not "":
+            # Create an empty set of ingredients
+            new_drink = {}
+            for each_ingr in self.valid_ingr_list:
+                new_drink[each_ingr] = 0.0
+
+            user_still_making_this_drink = True
+            while user_still_making_this_drink:
+                # print the names of all the ingredients
+                pump_num = 0
+                for each_ingr in self.valid_ingr_list:
+                    pump_num += 1
+                    print "{} - {}".format(pump_num, each_ingr)
+                my_pump = raw_input("Please enter pump number to dispense [minus to take away, eg: -10]:")
+                my_pump = int(my_pump)
+                if my_pump > 0:
+                    my_pump -= 1  # Zero index
+                    self.ingr_pumps[self.valid_ingr_list[int(my_pump)]].dispense(squirt)
+                    self.ingr_pumps[self.valid_ingr_list[int(my_pump)]].wait_until_done()
+                    new_drink[self.valid_ingr_list[int(my_pump)]] += squirt
+                elif my_pump < 0:
+                    my_pump -= 1  # Zero index
+                    new_drink[self.valid_ingr_list[int(my_pump)]] -= squirt
+                    if self.my_yesno.is_yes("Would you like to redispense the entire drink to taste it? [Y/n]"):
+                        for dispense_ingr in new_drink:
+                            if float(new_drink[dispense_ingr]) > 0.0:
+                                print dispense_ingr + ":{0:.2f}".format(new_drink[dispense_ingr])
+                                self.ingr_pumps[dispense_ingr].dispense(new_drink[dispense_ingr])
+                        for dispense_ingr in new_drink:
+                            if float(new_drink[dispense_ingr]) > 0.0:
+                                self.ingr_pumps[dispense_ingr].wait_until_done()
+                else:  # Assert: my_pump == 0:
+                    user_still_making_this_drink = False # Stop making this drink
+                    if self.my_yesno.is_yes("Would you like to redispense the entire drink to taste it? [Y/n]"):
+                        for ingr_num in range(0,11):
+                            dispense_ingr = self.valid_ingr_list[int(ingr_num)]
+                            if float(new_drink[dispense_ingr]) > 0.0:
+                                print dispense_ingr + ":{0:.2f}".format(new_drink[dispense_ingr])
+                                self.ingr_pumps[dispense_ingr].dispense(new_drink[dispense_ingr])
+                    if self.my_yesno.is_yes("Do you want to record this drink recipe? [Y/n]"):
+                        new_drink_str = "{}, ".format(my_new_drink)  # Start with the new drink name
+                        # Append all the ingrdient amounts
+                        for each_new_ingr in range(len(new_drink)):
+                            new_drink_str += "{},".format(new_drink[self.valid_ingr_list[int(each_new_ingr)]])  # Show which ingredients needed kid priming
+                        print new_drink_str  # Print to the sreen
+                        self.command_log.info(new_drink_str)  # Print to the Command Log
+            # Lather, rinse, repeat
+            my_new_drink = raw_input("Name of your new drink: ")
 
     #############################################
     #       Teeny Prime: calibrate priming       #
@@ -462,6 +527,22 @@ class DrinkRecipes:
     #############################################################
     #                  Startup the effects                      #
     #############################################################
+    def ready_to_dispense(self, cancel=False):
+        if DrinkRecipes.BACKUP_HAT:  # This was the fix for the broken Hat at the DNA DrinkBot Challenge 2016
+            pass  # Leaving these here, in case things change -- again!
+        elif DrinkRecipes.NO_EFFECTS_HAT:
+            pass  # Leaving these here, in case things change -- again!
+        else:
+            if cancel:
+                self.LED_red.thread_motor_ramp(ramp_up=False)  # Turn on the red LEDs: "ready to dispense"
+                self.LED_red.wait_until_done()
+            else:
+                self.LED_red.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
+                self.LED_red.wait_until_done()
+
+    #############################################################
+    #                  Startup the effects                      #
+    #############################################################
     def startup_effects(self):
         if DrinkRecipes.BACKUP_HAT:  # This was the fix for the broken Hat at the DNA DrinkBot Challenge 2016
             # Because the fan and white LEDs are tied together, can't ramp up the fan
@@ -495,6 +576,7 @@ class DrinkRecipes:
             self.LED_eyes.thread_motor_ramp(ramp_up=False)  # Ramp down the flashing eyes
             self.LED_dispense.wait_until_done()
             self.LED_eyes.wait_until_done()
+            self.ready_to_dispense(cancel=True)
 
     #############################################################
     #                       Make the drink!                     #
