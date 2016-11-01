@@ -28,9 +28,9 @@ my_yesno = yesno()
 print "MassiveDrinks.csv"
 print "TikiDrinks_orig.csv"
 print "KidDrinks.csv"
-drink_file = raw_input("Please enter the drink file name, or [Enter] to use TikiDrinks.csv: ")
+drink_file = raw_input("Please enter the drink file name, or [Enter] to use MassiveDrinks.csv: ")
 if drink_file is "":
-    drink_file = "TikiDrinks.csv"
+    drink_file = "MassiveDrinks.csv"
 
 my_recipes = DrinkRecipes("DrinkBot.py")
 my_recipes.get_recipes_from_file(drink_file)
@@ -115,8 +115,8 @@ while True:
         my_drink = "Mai Tai"
     elif my_drink_ID == "3c62dba1":
         print "Found the Lady Virgin"
-        my_sound_NW_Kathy1.play_sound()
-        my_sound_NW_Kathy1.join()
+        my_sound_NW_Sam3.play_sound()
+        my_sound_NW_Sam3.join()
         my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "bc5bdca1":
         print "Found the tall black idol"
@@ -125,8 +125,8 @@ while True:
         my_drink = "Scorpion"
     elif my_drink_ID == "0cd9dea1":
         print "Found the black Hawaiin idol"
-        my_sound_NW_Sam3.play_sound()
-        my_sound_NW_Sam3.join()
+        my_sound_NW_Kathy1.play_sound()
+        my_sound_NW_Kathy1.join()
         my_drink = "Trader Vic Grog"
     elif my_drink_ID == "ecf5dea1":
         print "Found Tall freaky lady"
@@ -163,8 +163,8 @@ while True:
         my_sound_NW_Victor2.play_sound()
         my_sound_NW_Victor2.join()
         my_drink = "Citrus Sunset"
-    elif my_drink_ID == "0496a589ba578c":
-        print "Found the Swan!!!"
+    elif my_drink_ID == "0496a589ba60a0":
+        print "Found the Owl!!!"
         my_sound_NW_Victor3.play_sound()
         my_sound_NW_Victor3.join()
         my_drink = "Passionfruit Wellness"
@@ -173,8 +173,8 @@ while True:
         my_sound_NW_I_heard_your_prayers.play_sound()
         my_sound_NW_I_heard_your_prayers.join()
         my_drink = "Cool Coconut"
-    elif my_drink_ID == "0496a589ba60a0":
-        print "Found the Owl!!!"
+    elif my_drink_ID == "0496a589ba578c":
+        print "Found the Swan!!!"
         my_sound_NW_Victor4.play_sound()
         my_sound_NW_Victor4.join()
         my_drink = "Pina Co-nada"

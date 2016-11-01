@@ -35,6 +35,7 @@ from yesno import yesno
 # If the NFC reader is not plugged in, we get a segfault
 # Calculate and store the actual calibration factor, not the ounces -- this is calculated each dispense! :-p
 # Turn off the mouth lights in Manual Mode (or maybe switch on the white lights?)
+# List ingredients after drink name -- cheat sheet!
 # ---------
 # Documentation pass -- make it really pretty, clean up stuff, be succinct
 #   DrinkBot.py
