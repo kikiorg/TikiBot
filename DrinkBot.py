@@ -99,6 +99,7 @@ while True:
     override_cards = ["dc0a723b", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba56ac"]
     if my_drink_ID in override_cards: # All the little rectangular RFIDs, all the Clipper cards, and the white card
         print "OVERRIDE!  Found an override RFID tag -- going into manual mode."
+        my_recipes.setup_effects()
         my_drink = "test"
         my_drink = raw_input("Enter a drink from the menu, or [S]etup to enter setup mode: ")
         while my_drink not in my_recipes.drink_names + ["S", "s", "Setup", "setup"]:
@@ -110,6 +111,7 @@ while True:
             print "Setup mode..."
             my_setup = Setup(my_recipes)
             my_setup.setup_menu()
+        my_recipes.hard_off_effects()
 
     elif my_drink_ID == "6ce7dea1":
         print "Found the seahorse"

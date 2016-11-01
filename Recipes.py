@@ -497,8 +497,9 @@ class DrinkRecipes:
 
 
     #############################################################
-    #                  Startup the effects                      #
+    #                  Hard off the effects                     #
     #############################################################
+    # This shuts everything off, without fanfair
     def hard_off_effects(self):
         if DrinkRecipes.BACKUP_HAT:
             # The backup Hat has only one motor switch -- connect the fan and the white LEDs
@@ -514,6 +515,7 @@ class DrinkRecipes:
     #############################################################
     #                  Startup the effects                      #
     #############################################################
+    # For starting up the effects for when a drink begins dispensing
     def startup_effects(self):
         if DrinkRecipes.BACKUP_HAT:  # This was the fix for the broken Hat at the DNA DrinkBot Challenge 2016
             # Because the fan and white LEDs are tied together, can't ramp up the fan
@@ -531,6 +533,7 @@ class DrinkRecipes:
     #############################################################
     #                  Shutdown the effects                     #
     #############################################################
+    # For shutting down the effects when a drink is finished dispensing
     def shutdown_effects(self):
         if DrinkRecipes.BACKUP_HAT:  # In case we need to use the broken Hat from teh DNA DrinkBot challenge 2016
             self.LED_dispense.turn_off()  # The fan takes a long time to stop, so turn off right away
@@ -548,6 +551,22 @@ class DrinkRecipes:
             self.LED_dispense.wait_until_done()
             self.LED_eyes.wait_until_done()
             self.ready_to_dispense(cancel=True)
+
+    #############################################################
+    #                  Startup the effects                      #
+    #############################################################
+    # Turn on all the lights when in setup mode -- this also tests the lights
+    def setup_effects(self):
+        if DrinkRecipes.BACKUP_HAT:
+            # The backup Hat has only one motor switch -- connect the fan and the white LEDs
+            self.LED_dispense.turn_off()  # Make sure the white light is off
+        elif DrinkRecipes.NO_EFFECTS_HAT:
+            pass
+        else:
+            self.smoke_fan.turn_off()  # Make sure the fan is off
+            self.LED_dispense.turn_on()  # Make sure the white light is off
+            self.LED_eyes.turn_on()  # Make sure the eyes are off
+            self.LED_red.turn_on()  # Turn on the red LEDs: "ready to dispense"
 
     #############################################################
     #                       Make the drink!                     #
