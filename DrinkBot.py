@@ -36,6 +36,9 @@ my_recipes = DrinkRecipes("DrinkBot.py")
 my_recipes.get_recipes_from_file(drink_file)
 my_recipes.link_to_pumps()
 
+if not my_yesno.is_no("Prime the pumps?"):
+    my_recipes.prime()
+
 my_drink_ID = None
 my_drink = ""
 my_sound_lady = SoundEffects(sound_name="sounds/Scream.wav", channel=1)
@@ -110,13 +113,13 @@ while True:
 
     elif my_drink_ID == "6ce7dea1":
         print "Found the seahorse"
-        my_sound_NW_Birdbath1.play_sound()
-        my_sound_NW_Birdbath1.join()
+        my_sound_wilhelm.play_sound()
+        my_sound_wilhelm.join()
         my_drink = "Mai Tai"
     elif my_drink_ID == "3c62dba1":
         print "Found the Lady Virgin"
-        my_sound_NW_Sam3.play_sound()
-        my_sound_NW_Sam3.join()
+        my_sound_lady.play_sound()
+        my_sound_lady.join()
         my_drink = "Tail-less Scorpion"
     elif my_drink_ID == "bc5bdca1":
         print "Found the tall black idol"
@@ -125,8 +128,8 @@ while True:
         my_drink = "Scorpion"
     elif my_drink_ID == "0cd9dea1":
         print "Found the black Hawaiin idol"
-        my_sound_NW_Kathy1.play_sound()
-        my_sound_NW_Kathy1.join()
+        my_sound_Howie.play_sound()
+        my_sound_Howie.join()
         my_drink = "Trader Vic Grog"
     elif my_drink_ID == "ecf5dea1":
         print "Found Tall freaky lady"
@@ -135,8 +138,8 @@ while True:
         my_drink = "Pieces of Eight"
     elif my_drink_ID == "8ca3dba1":
         print "Found the tan bottle opener"
-        my_sound_NW_Sam1.play_sound()
-        my_sound_NW_Sam1.join()
+        my_sound_NW_Kathy1.play_sound()
+        my_sound_NW_Kathy1.join()
         my_drink = "Hurricane"
     elif my_drink_ID == "bc7adba1":
         print "Found the black bottle opener"

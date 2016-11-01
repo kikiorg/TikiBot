@@ -135,7 +135,7 @@ class DrinkRecipes:
     # Ask the user what cup size -- NOTE: ACTUAL VOLUME eg 16oz cups hold 18oz to the top  #
     ########################################################################################
     def get_cup_size(self, percent_ice=55.0):
-        cup_size = self.my_yesno.get_number("What cup size (in ounces) is provided? ")
+        cup_size = self.my_yesno.get_number("What cup size is provided? [default 9.0 oz] ", default_val= 9.0)
         self.max_cocktail_volume = cup_size * ((100.0 - percent_ice) / 100.0)  # Subtract out the ice
         # Report to the operator -- to the screen, and to both log files
         format_str = "Cup: {f[0]} - max cocktail volume: {f[1]} - percent cocktail: {f[2]}% - percent ice: {f[3]}%"
@@ -315,6 +315,7 @@ class DrinkRecipes:
             self.ingr_pumps[one_pump].dispense(self.prime_values[one_pump] * percent/100.0, forwards)
             self.ingr_pumps[one_pump].wait_until_done()
         elif one_pump is None:
+            print "Priming all pumps."
             self.command_log.info('Prime all ' + ("forwards" if forwards else "reverse"))
             for each_ingr in self.valid_ingr_list:
                 self.ingr_pumps[each_ingr].dispense(self.prime_values[each_ingr] * percent/100.0, forwards)
