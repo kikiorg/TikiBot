@@ -72,6 +72,7 @@ class Setup:
                 print "    Put hoses into rinse water."
             elif step == 6:
                 self.my_recipes.prime()
+                self.my_recipes.prime()
                 print "    YOU ARE NOW READY TO SHUT DOWN"
 
             step += 1
