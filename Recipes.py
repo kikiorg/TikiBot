@@ -429,12 +429,17 @@ class DrinkRecipes:
                 self.ingr_pumps[each_ingr].wait_until_done()
             total_tiny = increment_factor * self.prime_values[each_ingr] * num_of_primes
             # This is the Prime line for the .csv file
-            total_string += "{0:.2f},".format(total_tiny + self.prime_values[each_ingr] * percent/100.0)
-            if num_of_primes != number_extra_primes:  # If this particular pump needed more or less calibration
+            if (num_of_primes != number_extra_primes) and (num_of_primes != 0):  # If this particular pump needed more or less calibration
                 calibration_was_needed = True
                 # Adjust the old prime value
                 self.prime_values[each_ingr] *= percent/100.0
                 self.prime_values[each_ingr] += total_tiny
+            print "num_of_primes: ", num_of_primes
+            if num_of_primes == 0:
+                # If this pump didn't need calibration, then put the original number back
+                total_string += "{0:.2f},".format(self.prime_values[each_ingr])
+            else:
+                total_string += "{0:.2f},".format(total_tiny + self.prime_values[each_ingr] * percent/100.0)
 
         if calibration_was_needed:
             print total_string # Print the handy string so it can be copy and pasted into the .csv file
@@ -466,7 +471,8 @@ class DrinkRecipes:
                 # log_str += "," + str(0.0)
                 log_str += ",{0:.2f}".format(0.0)
             new_calibration_string += "," + str(self.ingr_pumps[each_ingr].calibration_oz)
-        print new_calibration_string
+        new_calibration_string += ","
+	print new_calibration_string
         self.command_log.info("Calibration string: {}".format(new_calibration_string))
         self.command_log.info("Calibration dispensed{}".format(log_str))
         self.dispense_log.info("Calibrated{}".format(log_str))
