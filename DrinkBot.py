@@ -135,8 +135,8 @@ while True:
         my_drink = "Trader Vic Grog"
     elif my_drink_ID == "ecf5dea1":
         print "Found Tall freaky lady"
-        my_sound_NW_Birdbath4.play_sound()
-        my_sound_NW_Birdbath4.join()
+        my_sound_NW_Kathy1.play_sound()
+        my_sound_NW_Kathy1.join()
         my_drink = "Pieces of Eight"
     elif my_drink_ID == "8ca3dba1":
         print "Found the tan bottle opener"
