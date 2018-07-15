@@ -13,6 +13,7 @@ import sys
 sys.path.insert(0, 'pynfc/src')
 from mifareauth import NFCReader
 from SetupBot import Setup
+from subprocess import call
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Recipes import DrinkRecipes
@@ -26,18 +27,35 @@ my_yesno = yesno()
 # READ DRINK LIST FROM SPREADSHEET          #
 #############################################
 print "MassiveDrinks.csv"
-print "TikiDrinks_orig.csv"
-print "KidDrinks.csv"
-drink_file = raw_input("Please enter the drink file name, or [Enter] to use MassiveDrinks.csv: ")
-if drink_file is "":
-    drink_file = "MassiveDrinks.csv"
+#print "TikiDrinks_orig.csv"
+#print "KidDrinks.csv"
+#drink_file = raw_input("Please enter the drink file name, or [Enter] to use MassiveDrinks.csv: ")
+#if drink_file is "":
+#    drink_file = "MassiveDrinks.csv"
+drink_file = "MassiveDrinks.csv"
+
+# Kiki init and bottles low
+my_sound_init_prime = SoundEffects(sound_name="sounds/init/init_prime_pumps.wav", channel=1)
+my_sound_init_date = SoundEffects(sound_name="sounds/init/init_date.wav", channel=1)
 
 my_recipes = DrinkRecipes("DrinkBot.py")
 my_recipes.get_recipes_from_file(drink_file)
 my_recipes.link_to_pumps()
 
+my_sound_init_prime.play_sound()
 if not my_yesno.is_no("Prime the pumps?"):
     my_recipes.prime()
+my_sound_init_prime.join()
+
+print "Date: MMDDhhmm[[CC]YY]"
+my_sound_init_date.play_sound()
+new_time = raw_input("Please enter the time, or [Enter]: ")
+my_sound_init_date.join()
+if new_time is not "":
+    while call(["sudo", "date", new_time]) == 1:
+        my_sound_init_date.play_sound()
+        new_time = raw_input("Please enter the time, or [Enter]: ")
+        my_sound_init_date.join()
 
 my_drink_ID = None
 my_drink = ""
@@ -212,6 +230,7 @@ while True:
         my_sound_drums.play_sound()
         my_recipes.make_drink(my_drink)
         my_sound_drums.stop_sound(fade_time=1000)
+        my_recipes.check_inventory() # Make sure bottles aren't empty
 
 
 
