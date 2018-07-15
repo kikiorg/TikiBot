@@ -97,8 +97,10 @@ class DrinkRecipes:
 
     # Initialization  sounds
     # Since the text is so hard to read, this prompts you in audio
-    my_sound_init_cup = SoundEffects(sound_name="sounds/init/init_cup_size.wav", channel=1)
-    my_sound_init_event_name = SoundEffects(sound_name="sounds/init/init_event_name.wav", channel=1)
+    #my_sound_init_cup = SoundEffects(sound_name="sounds/init/init_cup_size.wav", channel=1)
+    my_sound_init_cup = SoundEffects(sound_name="sounds/init_q/init_cup_sizeQ.wav", channel=1)
+    #my_sound_init_event_name = SoundEffects(sound_name="sounds/init/init_event_name.wav", channel=1)
+    my_sound_init_event_name = SoundEffects(sound_name="sounds/init_q/init_event_nameQ.wav", channel=1)
 
     def __init__(self, parent_name=""):
         # Initialize all member variables:
@@ -117,7 +119,7 @@ class DrinkRecipes:
         self.dispensed = {}         # This is how much has been dispensed since start
         self.inventory = {}         # Size of the current bottle
         self.maxdisp = {}           # We don't dispense if a bottle doesn't hve this much
-        self.buffer = 2             # 3oz buffer to cover the tube
+        self.buffer = 3             # 3oz buffer to cover the tube
         self.bottle_sounds = {}     # audio prompts for which bottle to replace
 
         ############ LED effects
@@ -208,7 +210,7 @@ class DrinkRecipes:
         for each_ingredient in recipe_book.fieldnames:
             self.ingr_list.append(each_ingredient)
             temp_sound_file = each_ingredient.replace(" ", "_")
-            temp_sound_file = "sounds/bottles/low_{}.wav".format(temp_sound_file)
+            temp_sound_file = "sounds/bottles_q/low_{}Q.wav".format(temp_sound_file)
             self.bottle_sounds[each_ingredient] = SoundEffects(sound_name=temp_sound_file, channel=1)
 
         # This is the upper left entry, the column title for all drink names, and the key for each drink name

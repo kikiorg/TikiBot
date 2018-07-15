@@ -35,8 +35,8 @@ print "MassiveDrinks.csv"
 drink_file = "MassiveDrinks.csv"
 
 # Kiki init and bottles low
-my_sound_init_prime = SoundEffects(sound_name="sounds/init/init_prime_pumps.wav", channel=1)
-my_sound_init_date = SoundEffects(sound_name="sounds/init/init_date.wav", channel=1)
+my_sound_init_prime = SoundEffects(sound_name="sounds/init_q/init_prime_pumpsQ.wav", channel=1)
+my_sound_init_date = SoundEffects(sound_name="sounds/init_q/init_dateQ.wav", channel=1)
 
 my_recipes = DrinkRecipes("DrinkBot.py")
 my_recipes.get_recipes_from_file(drink_file)
