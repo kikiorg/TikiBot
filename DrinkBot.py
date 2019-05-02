@@ -84,6 +84,11 @@ my_sound_NW_Victor4 = SoundEffects(sound_name="sounds/Neverwas/Victor4.wav", cha
 #############################################
 #     Now start polling the RFID reader     #
 #############################################
+
+## zzzz TEST!! zzzz ##
+#my_recipes.test_lights()
+
+
 while True:
 
     my_recipes.print_menu()
@@ -95,6 +100,7 @@ while True:
 
     my_recipes.ready_to_dispense()
     RFID_reader.run2() # Now, find a card
+
 
     my_drink_ID = RFID_reader._card_uid
 
@@ -113,8 +119,9 @@ while True:
     # elif my_drink_ID == "0496a589ba56ac":  # tiny little RFID tag
     # elif my_drink_ID == "0496a589ba665a":  # White Duck -- tiny little RFID tag
     # if my_drink_ID == "dc0a723b": # The sample card that came with the device
-
-    override_cards = ["dc0a723b", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba56ac"]
+    # elif my_drink_ID == "ac5fdba1": #Old Chief Lapu Lapu
+    # SPARE - listed below, last "c52f76ff"
+    override_cards = ["dc0a723b", "04380edafe1f80", "045f8552334680", "044e906a502d80", "0496a589ba56ac", "c52f76ff"]
     if my_drink_ID in override_cards: # All the little rectangular RFIDs, all the Clipper cards, and the white card
         print "OVERRIDE!  Found an override RFID tag -- going into manual mode."
         my_recipes.setup_effects()
@@ -122,6 +129,8 @@ while True:
         my_drink = raw_input("Enter a drink from the menu, or [S]etup to enter setup mode: ")
         while my_drink not in my_recipes.drink_names + ["S", "s", "Setup", "setup"]:
             if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
+                break
+            if my_drink in ["S", "s", "Setup", "setup"]:
                 break
             print "Invalid drink name!"
             my_drink = raw_input("Enter a drink from the menu: ")
@@ -166,7 +175,7 @@ while True:
         my_sound_NW_Sam2.play_sound()
         my_sound_NW_Sam2.join()
         my_drink = "Outrigger"
-    elif my_drink_ID == "ac5fdba1":
+    elif my_drink_ID == "858379ff":
         print "Found the Chief!!!"
         my_sound_NW_Birdbath3.play_sound()
         my_sound_NW_Birdbath3.join()
@@ -186,7 +195,7 @@ while True:
         my_sound_NW_Victor2.play_sound()
         my_sound_NW_Victor2.join()
         my_drink = "Citrus Sunset"
-    elif my_drink_ID == "0496a589ba60a0":
+    elif my_drink_ID == "95a287ff":
         print "Found the Owl!!!"
         my_sound_NW_Victor3.play_sound()
         my_sound_NW_Victor3.join()
@@ -196,12 +205,12 @@ while True:
         my_sound_NW_I_heard_your_prayers.play_sound()
         my_sound_NW_I_heard_your_prayers.join()
         my_drink = "Cool Coconut"
-    elif my_drink_ID == "0496a589ba578c":
+    elif my_drink_ID == "f5f974ff":
         print "Found the Swan!!!"
         my_sound_NW_Victor4.play_sound()
         my_sound_NW_Victor4.join()
         my_drink = "Pina Co-nada"
-    elif my_drink_ID == "0496a589ba665a":
+    elif my_drink_ID == "05367bff":
         print "Found the White Duck!!!"
         my_sound_NW_Sam4.play_sound()
         my_sound_NW_Sam4.join()
@@ -232,5 +241,5 @@ while True:
         my_sound_drums.stop_sound(fade_time=1000)
         my_recipes.check_inventory() # Make sure bottles aren't empty
 
-
-
+## zzzz TEST!! zzzz ##
+#    my_recipes.test_lights()

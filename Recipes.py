@@ -16,6 +16,7 @@
 #   This should be moved to another class
 #############################################
 
+import time
 import csv
 import sys
 sys.path.insert(0, 'pynfc/src')
@@ -149,7 +150,43 @@ class DrinkRecipes:
         self.command_log.info("Starting up: {}".format(event_name))
         self.dispense_log.info("Starting up: {}".format(event_name))
 
+        self.max_cocktail_volume = 0.0
         self.max_cocktail_volume = self.get_cup_size()
+
+    def test_lights(self):
+        while True:
+#            self.smoke_fan.turn_on()
+#            self.LED_eyes.thread_motor_ramp(ramp_up=True)
+#            self.LED_dispense.thread_motor_ramp(ramp_up=True)
+#            self.LED_eyes.thread_motor_flash_randomly(shortest=0.1, longest=0.5)
+            print("Testing lights: FAN")
+            self.smoke_fan.thread_motor_ramp()  # Turn on the red LEDs: "ready to dispense"
+            self.smoke_fan.wait_until_done()
+#            self.smoke_fan.turn_on()
+            time.sleep(5)
+            self.smoke_fan.turn_off()
+
+            print("Testing lights: RED LAVA")
+            self.LED_red.thread_motor_ramp(ramp_up=True)
+            self.LED_red.wait_until_done()
+            self.LED_red.turn_on()
+            time.sleep(5)
+            self.LED_red.turn_off()
+
+            print("Testing lights: WHITE")
+            self.LED_dispense.turn_on()
+            time.sleep(5)
+            self.LED_dispense.turn_off()
+
+            print("Testing lights: DEVIL EYES")
+            self.LED_eyes.turn_on()
+            time.sleep(5)
+            self.LED_eyes.turn_off()
+
+            time.sleep(8)
+
+
+
 
     ########################################################################################
     # Ask the user what cup size -- NOTE: ACTUAL VOLUME eg 16oz cups hold 18oz to the top  #
