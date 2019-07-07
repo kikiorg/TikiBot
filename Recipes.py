@@ -772,3 +772,45 @@ class DrinkRecipes:
         inventory_file.write(inventory_line + "\r\n")
         inventory_file.write(dispensed_line + "\r\n")
         inventory_file.close()
+
+    #############################################################
+    #                   Take bottle inventory                   #
+    #############################################################
+    def take_inventory(self):
+        # Make sure all the bottle have enough for the next drink
+        for each_ingredient in self.valid_ingr_list:
+            # Ask user for the size of the bottle -- allow [Enter] for last bottle size
+            self.bottle_sounds[each_ingredient].play_sound()
+            temp_inv = self.get_oz(message="Bottle size for {}".format(each_ingredient))
+            self.bottle_sounds[each_ingredient].join()
+            # Ask user how much is left -- allow [Enter] for last value
+            temp_left = self.get_portion(message="How much of the {} bottle is left ".format(each_ingredient))
+            # We want how much has been dispensed, not how much is left
+            temp_disp = temp_inv * (1.0 - temp_left)
+
+            # (else) If user pressed [ENTER] or entered a 0, then skip this bottle
+            if (temp_inv == 0.0):
+                pass # If the user enters zero, then skip this bottle
+            else:
+                self.inventory[each_ingredient] = temp_inv
+                self.dispensed[each_ingredient] = temp_disp
+
+                # Overwrite the inventuroy file with new inventory
+                # FOR EVERY FRIKKIN INVENTORY BOTTLE ENTRY!!!
+                names_line = "Ingredients"
+                inventory_line = "BottleSize"
+                dispensed_line = "Dispensed"
+
+                for each_ingredient in self.valid_ingr_list:
+                    names_line += ", {}".format(each_ingredient)
+                    inventory_line += ", {}".format(self.inventory[each_ingredient])
+                    dispensed_line += ", {}".format(self.dispensed[each_ingredient])
+                inventory_file = open(DrinkRecipes.inventory_filename, "w+")
+                inventory_file.write(names_line + "\r\n")
+                inventory_file.write(inventory_line + "\r\n")
+                inventory_file.write(dispensed_line + "\r\n")
+                inventory_file.close()
+
+                print "INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(each_ingredient, temp_inv, temp_disp)
+                self.command_log.info("INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(each_ingredient, temp_inv, temp_disp))
+

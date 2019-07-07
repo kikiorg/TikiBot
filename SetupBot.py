@@ -90,6 +90,7 @@ class Setup:
             print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
             print "[K]id drinks -- create new drinks by shot size."
             print "[B]ottle reprime -- prime a new bottle if it ran out"
+            print "[I]nventory -- enter the status of all bottles"
             print "Si[Z]e of cup -- change the size of the cup"
             print "[G]lobal calibration check: "
             print "    This dispenses all pumps for 1oz -- more like a fast checksum"
@@ -114,6 +115,8 @@ class Setup:
                 my_pump = raw_input("Please enter the name or pump number to prime:")
                 self.my_recipes.prime(one_pump=my_pump)
 
+            elif my_command in ["I", "i", "inventory", "Inventory"]:
+                self.my_recipes.take_inventory()
             elif my_command in ["G", "g", "global", "Global"]:
                 self.my_recipes.checksum_calibration()
             elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
