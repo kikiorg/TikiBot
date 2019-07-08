@@ -30,16 +30,14 @@ class oz_gal_ml():
                 break # Let user press [ENTER] for nothing
             try:
                 # Split the answer into the number and the size (the first (nul) is garbage)
-                nul, num, sz = re.split(r'(\d+)', answer) # \d is decimal values
+                nul, num, sz = re.split(r'(\d*\.\d*|\d+)', answer) # \d is decimal values
                 sz = sz.split()[0] # Strip any lead/trailing whitespace
                 if (sz in self.valid_sizes):
                     new_val = float(num) * self.valid_sizes[sz]
                     break
-            except ValueError:
+            except (ValueError, IndexError, UnboundLocalError):
                 pass
-            except UnboundLocalError:
-                pass
-            print("ERROR: try '16oz', or '1gal', or '750ml', or '1L'")
+            print(">>>>>>>> ERROR: try '16oz', or '1gal', or '750ml', or '1L'")
         return new_val
 
     # Get a number from the user, forcing them if they enter not a number
@@ -63,7 +61,7 @@ class oz_gal_ml():
                     elif (new_val < 1.0 and new_val > 0):
                         break # Acceptable value
                 except ValueError:
-                    print("ERROR: must be a fraction or decimal!")
+                    print(">>>>>>>>> ERROR: must be a fraction, percent, or decimal!")
             else:
                 #######################################
                 # Percent
@@ -76,7 +74,7 @@ class oz_gal_ml():
                         elif (new_val < 1.0 and new_val > 0):
                             break # Acceptable value
                     except ValueError:
-                        print("ERROR: must be a fraction, percent, or decimal!")
+                        print(">>>>>>>>> ERROR: must be a fraction, percent, or decimal!")
                 else:
                     #######################################
                     # Simple float value (eg: from 0.0 - 1.0)
@@ -87,7 +85,7 @@ class oz_gal_ml():
                         elif (new_val <= 1.0 and new_val >= 0):
                             break  # Acceptable value
                     except ValueError:
-                        print("ERROR: must be a fraction, percent, or decimal!")
+                        print(">>>>>>>>> ERROR: must be a fraction, percent, or decimal!")
 
         return new_val
 

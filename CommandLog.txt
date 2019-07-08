@@ -1957,3 +1957,131 @@
 2019-05-25 11:59:05, Recipes.py:DrinkBot.py , Prime all forwards
 2019-05-25 11:59:33, Recipes.py:DrinkBot.py , Prime all forwards
 2019-05-25 11:59:51, Recipes.py:DrinkBot.py , Prime all forwards
+2019-07-07 14:48:29, Recipes.py:DrinkBot.py , Starting up: Testing take inventory
+2019-07-07 14:48:45, Recipes.py:DrinkBot.py , Cup: 9.0 - max cocktail volume: 4.05 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 14:49:40, Recipes.py:DrinkBot.py , Starting up: Test take inventory
+2019-07-07 14:49:45, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 14:52:38, Recipes.py:DrinkBot.py , Starting up: Test take inventory
+2019-07-07 14:52:43, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:04:55, Recipes.py:DrinkBot.py , Starting up: Test take inventory
+2019-07-07 15:05:00, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:06:25, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:06:30, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:19:05, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:19:10, Recipes.py:DrinkBot.py , Cup: 9.0 - max cocktail volume: 4.05 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:19:54, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:19:59, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:25:51, Recipes.py:DrinkBot.py , INVENTORY: Orgeat BOTTLE: 25.3605oz DISPENSED: 25.3605oz
+2019-07-07 15:28:14, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:28:19, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:28:34, Recipes.py:DrinkBot.py , INVENTORY: Orgeat BOTTLE: 25.3605oz DISPENSED: 25.3605oz
+2019-07-07 15:32:45, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:32:50, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:33:03, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 25.3605oz
+2019-07-07 15:37:14, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:37:19, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:37:52, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 25.3605oz
+2019-07-07 15:39:40, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:39:45, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:40:01, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 0.0oz
+2019-07-07 15:40:38, Recipes.py:DrinkBot.py , INVENTORY: Light Rum BOTTLE: 64.0oz DISPENSED: 64.0oz
+2019-07-07 15:42:36, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:42:41, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:42:53, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 25.3605oz
+2019-07-07 15:43:47, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:43:52, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:44:03, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 64.0oz DISPENSED: 64.0oz
+2019-07-07 15:46:32, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:46:37, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:48:31, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 25.3605oz
+2019-07-07 15:50:19, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:50:24, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:50:33, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 0.0oz
+2019-07-07 15:51:46, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 15:51:51, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 15:52:02, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 12.68025oz
+2019-07-07 15:52:34, Recipes.py:DrinkBot.py , INVENTORY: Light Rum BOTTLE: 64.0oz DISPENSED: 42.6666666667oz
+2019-07-07 15:53:38, Recipes.py:DrinkBot.py , INVENTORY: Gold Rum BOTTLE: 8.0oz DISPENSED: 0.8oz
+2019-07-07 16:02:05, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:02:10, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:03:36, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:03:41, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:06:10, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:06:15, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:10:12, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:10:17, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:21:35, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:21:40, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:26:09, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:26:14, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:29:59, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:30:03, Recipes.py:DrinkBot.py , Cup: 9.0 - max cocktail volume: 4.05 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:30:37, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:30:42, Recipes.py:DrinkBot.py , Cup: 9.0 - max cocktail volume: 4.05 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:37:22, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:37:27, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:37:51, Recipes.py:DrinkBot.py , INVENTORY: Light Rum BOTTLE: 25.3605oz DISPENSED: 42.6666666667oz
+2019-07-07 16:38:59, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:39:04, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:39:11, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 0.0oz
+2019-07-07 16:43:19, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:43:24, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:44:55, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:45:00, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:48:11, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 16:48:16, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:48:41, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 0.0oz
+2019-07-07 16:48:55, Recipes.py:DrinkBot.py , INVENTORY: Light Rum BOTTLE: 33.8oz DISPENSED: 0.0oz
+2019-07-07 16:49:30, Recipes.py:DrinkBot.py , Starting up: Test
+2019-07-07 16:49:35, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 16:49:57, Recipes.py:DrinkBot.py , INVENTORY: Dark Rum BOTTLE: 25.3605oz DISPENSED: 6.340125oz
+2019-07-07 17:00:55, Recipes.py:DrinkBot.py , Starting up: Test
+2019-07-07 17:01:06, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 17:01:47, Recipes.py:DrinkBot.py , TAKE INVENTORY: Dark Rum 6.34% of 25.36oz
+2019-07-07 17:05:22, Recipes.py:DrinkBot.py , Starting up: Test
+2019-07-07 17:05:27, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 17:05:53, Recipes.py:DrinkBot.py , TAKE INVENTORY: Dark Rum 12.68% of 25.36oz
+2019-07-07 17:06:30, Recipes.py:DrinkBot.py , TAKE INVENTORY: Gold Rum 0.00% of 33.80oz
+2019-07-07 17:21:38, Recipes.py:DrinkBot.py , Starting up: Test
+2019-07-07 17:21:43, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 17:23:45, Recipes.py:DrinkBot.py , TAKE INVENTORY: Dark Rum 12.68% of 25.36oz
+2019-07-07 17:23:56, Recipes.py:DrinkBot.py , TAKE INVENTORY: Light Rum 0.00% of 33.80oz
+2019-07-07 17:27:12, Recipes.py:DrinkBot.py , TAKE INVENTORY: Gold Rum 39.45% of 59.17oz
+2019-07-07 17:28:22, Recipes.py:DrinkBot.py , TAKE INVENTORY: Curacao 22.65% of 33.80oz
+2019-07-07 17:30:54, Recipes.py:DrinkBot.py , TAKE INVENTORY: Lemon Juice 5.00% of 15.00oz
+2019-07-07 17:31:24, Recipes.py:DrinkBot.py , TAKE INVENTORY: Pina Colada 19.50% of 39.00oz
+2019-07-07 17:31:38, Recipes.py:DrinkBot.py , TAKE INVENTORY: Orange Juice 0.00% of 64.00oz
+2019-07-07 17:32:50, Recipes.py:DrinkBot.py , TAKE INVENTORY: Simple Syrup 16.90% of 33.80oz
+2019-07-07 17:33:04, Recipes.py:DrinkBot.py , TAKE INVENTORY: Passionfruit Syrup 29.74% of 33.80oz
+2019-07-07 17:33:19, Recipes.py:DrinkBot.py , TAKE INVENTORY: Lime Juice 7.50% of 15.00oz
+2019-07-07 17:45:51, Recipes.py:DrinkBot.py , Starting up: Test
+2019-07-07 17:45:56, Recipes.py:DrinkBot.py , Cup: 9.0 - max cocktail volume: 4.05 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 17:46:31, Recipes.py:DrinkBot.py , TAKE INVENTORY: Dark Rum 8.45% of 25.36oz
+2019-07-07 17:46:51, Recipes.py:DrinkBot.py , TAKE INVENTORY: Light Rum 19.72% of 59.15oz
+2019-07-07 17:53:53, Recipes.py:DrinkBot.py , TAKE INVENTORY: Gold Rum 6.34% of 25.36oz
+2019-07-07 17:54:36, Recipes.py:DrinkBot.py , TAKE INVENTORY: Curacao 22.53% of 33.80oz
+2019-07-07 17:55:00, Recipes.py:DrinkBot.py , TAKE INVENTORY: Lemon Juice 4.00% of 16.00oz
+2019-07-07 18:01:30, Recipes.py:DrinkBot.py , TAKE INVENTORY: Pina Colada 0.42% of 1.69oz
+2019-07-07 18:01:44, Recipes.py:DrinkBot.py , TAKE INVENTORY: Orange Juice 0.38% of 1.50oz
+2019-07-07 18:02:06, Recipes.py:DrinkBot.py , TAKE INVENTORY: Simple Syrup 5.00% of 10.00oz
+2019-07-07 18:02:37, Recipes.py:DrinkBot.py , TAKE INVENTORY: Lime Juice 4.00% of 16.00oz
+2019-07-07 18:02:58, Recipes.py:DrinkBot.py , TAKE INVENTORY: Pineapple Juice 16.00% of 64.00oz
+2019-07-07 18:03:17, Recipes.py:DrinkBot.py , TAKE INVENTORY: Orgeat 6.34% of 25.36oz
+2019-07-07 18:13:31, Recipes.py:DrinkBot.py , Starting up: 
+2019-07-07 18:13:39, Recipes.py:DrinkBot.py , Cup: 16.0 - max cocktail volume: 7.2 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 18:13:57, Recipes.py:DrinkBot.py , TAKE INVENTORY: Dark Rum 24.00% of 32.00oz
+2019-07-07 18:16:39, Recipes.py:DrinkBot.py , Trader Vic Grog,2.82,0.00,0.00,0.00,1.41,0.00,0.00,0.00,1.41,0.00,1.41,0.00
+2019-07-07 18:16:39, Recipes.py:DrinkBot.py , Dispensed so far: ,26.82,19.72,6.34,22.53,5.41,0.42,0.38,5.00,31.16,4.00,17.41,6.34
+2019-07-07 18:17:37, Recipes.py:DrinkBot.py , CHANGED: Dark Rum SIZE: 25.3605
+2019-07-07 18:18:17, Recipes.py:DrinkBot.py , CHANGED: Pina Colada SIZE: 1.6907
+2019-07-07 18:18:53, Recipes.py:DrinkBot.py , CHANGED: Orange Juice SIZE: 1.5
+2019-07-07 18:20:16, Recipes.py:DrinkBot.py , Starting up: Test running out
+2019-07-07 18:20:21, Recipes.py:DrinkBot.py , Cup: 16.0 - max cocktail volume: 7.2 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 18:21:09, Recipes.py:DrinkBot.py , Starting up: Test running out
+2019-07-07 18:21:15, Recipes.py:DrinkBot.py , Cup: 100.0 - max cocktail volume: 45.0 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 18:23:35, Recipes.py:DrinkBot.py , Starting up: Test running
+2019-07-07 18:23:40, Recipes.py:DrinkBot.py , Cup: 10.0 - max cocktail volume: 4.5 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-07 18:24:59, Recipes.py:DrinkBot.py , Trader Vic Grog,1.76,0.00,0.00,0.00,0.88,0.00,0.00,0.00,0.88,0.00,0.88,0.00
+2019-07-07 18:24:59, Recipes.py:DrinkBot.py , Dispensed so far: ,1.76,19.72,6.34,22.53,6.29,0.00,0.00,5.00,32.04,4.00,18.29,6.34
+2019-07-07 18:25:09, Recipes.py:DrinkBot.py , CHANGED: Pina Colada SIZE: 25.3605
+2019-07-07 18:27:33, Recipes.py:DrinkBot.py , CHANGED: Orange Juice SIZE: 64.0

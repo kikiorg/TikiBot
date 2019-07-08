@@ -42,10 +42,6 @@ my_recipes = DrinkRecipes("DrinkBot.py")
 my_recipes.get_recipes_from_file(drink_file)
 my_recipes.link_to_pumps()
 
-
-if not my_yesno.is_no("Take inventory (it's kinda long)?"):
-    my_recipes.take_inventory()
-
 # Ask user to if they want to prime?
 my_sound_init_prime.play_sound()
 if not my_yesno.is_no("Prime the pumps?"):
