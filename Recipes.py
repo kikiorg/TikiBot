@@ -27,6 +27,7 @@ from SoundEffects import SoundEffects
 from Motors import Motors
 from Pumps import Pumps
 from yesno import yesno
+from oz_gal_ml import oz_gal_ml
 
 #############################################
 # To Do List for this file:                 #
@@ -116,6 +117,7 @@ class DrinkRecipes:
         self.prime_values = {}      # This is how much fluid is needed to exactly fill the tubing
         self.primeOz_values = {}    # This is how much fluid is needed to exactly fill the tubing
         self.my_yesno = yesno()     # Used to ask the user yes/no questions
+        self.my_oz = oz_gal_ml()    # Used for inventory stuff
 
         self.dispensed = {}         # This is how much has been dispensed since start
         self.inventory = {}         # Size of the current bottle
@@ -738,62 +740,90 @@ class DrinkRecipes:
 #                self.startup_effects()
 #                self.shutdown_effects()
                 print "Change: {}".format(each_ingredient)
-                val = 0.0
-                while val == 0.0:
-                    self.bottle_sounds[each_ingredient].play_sound()
-                    temp_inventory = raw_input("What size bottle of {}?".format(each_ingredient))
-                    self.bottle_sounds[each_ingredient].join()
-                    if temp_inventory == "":
-                        val = self.inventory[each_ingredient]
-                    else:
-                        try:
-                            val = float(temp_inventory)
-                        except:
-                            print "Not a number!"
-                self.inventory[each_ingredient] = val 
+
+                self.bottle_sounds[each_ingredient].play_sound()
+                val = self.my_oz.get_oz(message="Bottle size for {} ".format(each_ingredient))
+                self.bottle_sounds[each_ingredient].join()
+                if val != 0.0:
+                    self.inventory[each_ingredient] = val 
+                # else: leave the bottle size as the old bottle size
+#                val = 0.0
+#                while val == 0.0:
+#                    self.bottle_sounds[each_ingredient].play_sound()
+#                    temp_inventory = raw_input("What size bottle of {}?".format(each_ingredient))
+#                    self.bottle_sounds[each_ingredient].join()
+#                    if temp_inventory == "":
+#                        val = self.inventory[each_ingredient]
+#                    else:
+#                        try:
+#                            val = float(temp_inventory)
+#                        except:
+#                            print "Not a number!"
                 # Reset how much dispensed from this bottle
                 # Note: to find out how much was dispensed since running
                 # You'll just have to calculate that from logs
                 self.dispensed[each_ingredient] = 0.0 # Not dispensed anything from this bottle
-                print "CHANGED: {} SIZE: {}".format(each_ingredient, val)
-                self.command_log.info("CHANGED: {} SIZE: {}".format(each_ingredient, val))
+                print "CHANGED: {} SIZE: {}".format(each_ingredient, 
+                                                    self.inventory[each_ingredient])
+                self.command_log.info("CHANGED: {} SIZE: {}".format(each_ingredient,
+                                                    self.inventory[each_ingredient]))
 
-        # Overwrite the inventuroy file with new inventory
-        names_line = "Ingredients"
-        inventory_line = "BottleSize"
-        dispensed_line = "Dispensed"
+                # Overwrite the inventuroy file with new inventory
+                names_line = "Ingredients"
+                inventory_line = "BottleSize"
+                dispensed_line = "Dispensed"
 
-        for each_ingredient in self.valid_ingr_list:
-            names_line += ", {}".format(each_ingredient)
-            inventory_line += ", {}".format(self.inventory[each_ingredient])
-            dispensed_line += ", {}".format(self.dispensed[each_ingredient])
-        inventory_file = open(DrinkRecipes.inventory_filename, "w+")
-        inventory_file.write(names_line + "\r\n")
-        inventory_file.write(inventory_line + "\r\n")
-        inventory_file.write(dispensed_line + "\r\n")
-        inventory_file.close()
+                for each_ingredient2 in self.valid_ingr_list:
+                    names_line += ", {}".format(each_ingredient2)
+                    inventory_line += ", {}".format(self.inventory[each_ingredient2])
+                    dispensed_line += ", {}".format(self.dispensed[each_ingredient2])
+                inventory_file = open(DrinkRecipes.inventory_filename, "w+")
+                inventory_file.write(names_line + "\r\n")
+                inventory_file.write(inventory_line + "\r\n")
+                inventory_file.write(dispensed_line + "\r\n")
+                inventory_file.close()
 
     #############################################################
     #                   Take bottle inventory                   #
     #############################################################
     def take_inventory(self):
         # Make sure all the bottle have enough for the next drink
+        print
+        print
+        print ("Key: 25.36oz = 750ml  33.80oz = 1L  64oz = 1gal")
+        print
+        for each_ingredient in self.valid_ingr_list:
+            print("{:20} bottle size: {:6.2f}oz   amount left: {:6.2f}oz".format(
+                                  each_ingredient, 
+                                  self.inventory[each_ingredient],
+                                  self.inventory[each_ingredient] -
+                                  self.dispensed[each_ingredient]))
+
+        print
         for each_ingredient in self.valid_ingr_list:
             # Ask user for the size of the bottle -- allow [Enter] for last bottle size
             self.bottle_sounds[each_ingredient].play_sound()
-            temp_inv = self.get_oz(message="Bottle size for {}".format(each_ingredient))
+            message = "{}: [press enter for {:3.0f}% of {:3.2f}oz]".format(
+                                  each_ingredient, 
+                                  100 - (self.dispensed[each_ingredient] /
+                                  self.inventory[each_ingredient]) * 100,
+                                  self.inventory[each_ingredient])
+            temp_inv = self.my_oz.get_oz(message=message)
             self.bottle_sounds[each_ingredient].join()
-            # Ask user how much is left -- allow [Enter] for last value
-            temp_left = self.get_portion(message="How much of the {} bottle is left ".format(each_ingredient))
-            # We want how much has been dispensed, not how much is left
-            temp_disp = temp_inv * (1.0 - temp_left)
 
             # (else) If user pressed [ENTER] or entered a 0, then skip this bottle
             if (temp_inv == 0.0):
                 pass # If the user enters zero, then skip this bottle
             else:
                 self.inventory[each_ingredient] = temp_inv
-                self.dispensed[each_ingredient] = temp_disp
+                # Ask user how much is left -- allow [Enter] for last value
+                temp_left = self.my_oz.get_portion(message="How much of the {} bottle is left [Enter for full] ".format(each_ingredient))
+                if (temp_left != 0.0):
+                    # We want how much has been dispensed, not how much is left
+                    temp_disp = temp_inv * (1.0 - temp_left)
+                    self.dispensed[each_ingredient] = temp_disp
+                else:
+                    self.dispensed[each_ingredient] = 0.0
 
                 # Overwrite the inventuroy file with new inventory
                 # FOR EVERY FRIKKIN INVENTORY BOTTLE ENTRY!!!
@@ -801,16 +831,32 @@ class DrinkRecipes:
                 inventory_line = "BottleSize"
                 dispensed_line = "Dispensed"
 
-                for each_ingredient in self.valid_ingr_list:
-                    names_line += ", {}".format(each_ingredient)
-                    inventory_line += ", {}".format(self.inventory[each_ingredient])
-                    dispensed_line += ", {}".format(self.dispensed[each_ingredient])
+                print "TAKE INVENTORY: {} {:3.0f}% of {:3.2f}oz".format(
+                                  each_ingredient, 
+                                  100 - (self.dispensed[each_ingredient] /
+                                  self.inventory[each_ingredient]) * 100,
+                                  self.inventory[each_ingredient])
+                self.command_log.info("TAKE INVENTORY: {} {:3.2f}% of {:3.2f}oz".format(
+                                  each_ingredient, 
+                                  self.dispensed[each_ingredient],
+                                  self.inventory[each_ingredient]))
+#                print "INVENTORY: {} BOTTLE: {:3.2f}oz DISPENSED: {}oz".format(
+#                                  each_ingredient, 
+#                                  self.inventory[each_ingredient],
+#                                  self.dispensed[each_ingredient])
+#                self.command_log.info("TAKE INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(
+#                                  each_ingredient, 
+#                                  self.inventory[each_ingredient],
+#                                  self.dispensed[each_ingredient]))
+
+                for each_ingredient2 in self.valid_ingr_list:
+                    names_line += ", {}".format(each_ingredient2)
+                    inventory_line += ", {}".format(self.inventory[each_ingredient2])
+                    dispensed_line += ", {}".format(self.dispensed[each_ingredient2])
                 inventory_file = open(DrinkRecipes.inventory_filename, "w+")
                 inventory_file.write(names_line + "\r\n")
                 inventory_file.write(inventory_line + "\r\n")
                 inventory_file.write(dispensed_line + "\r\n")
                 inventory_file.close()
 
-                print "INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(each_ingredient, temp_inv, temp_disp)
-                self.command_log.info("INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(each_ingredient, temp_inv, temp_disp))
 

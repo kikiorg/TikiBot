@@ -42,20 +42,21 @@ my_recipes = DrinkRecipes("DrinkBot.py")
 my_recipes.get_recipes_from_file(drink_file)
 my_recipes.link_to_pumps()
 
+
+if not my_yesno.is_no("Take inventory (it's kinda long)?"):
+    my_recipes.take_inventory()
+
+# Ask user to if they want to prime?
 my_sound_init_prime.play_sound()
 if not my_yesno.is_no("Prime the pumps?"):
     my_recipes.prime()
 my_sound_init_prime.join()
 
-print "Date: MMDDhhmm[[CC]YY]"
-my_sound_init_date.play_sound()
-new_time = raw_input("Please enter the time, or [Enter]: ")
-my_sound_init_date.join()
-if new_time is not "":
-    while call(["sudo", "date", new_time]) == 1:
-        my_sound_init_date.play_sound()
-        new_time = raw_input("Please enter the time, or [Enter]: ")
-        my_sound_init_date.join()
+# Ask user to if they want to prime?
+#my_sound_init_prime.play_sound()
+if not my_yesno.is_no("Take inventory (it's kinda long)?"):
+    my_recipes.take_inventory()
+#my_sound_init_prime.join()
 
 my_drink_ID = None
 my_drink = ""
