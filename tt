@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /home/pi/TikiBot
+PATH=$PATH:/home/pi
+python DrinkBot.py
