@@ -732,7 +732,7 @@ class DrinkRecipes:
             temp_leftover = self.maxdisp[each_ingredient]
             # Check what we have against what we might dispense, 
             # leaving a buffer to cover the end of the tube
-            print "    {}:{3.2f} > max:{3.2f} + buf:{3.2f}?".format(each_ingredient,temp_inv, temp_leftover, self.buffer)
+            print "    {}:{:3.2f} > max:{:3.2f} + buf:{:3.2f}?".format(each_ingredient,temp_inv, temp_leftover, self.buffer)
             if temp_inv >= temp_leftover + self.buffer:
                 print "    OK!"
             else:
