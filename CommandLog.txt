@@ -5617,3 +5617,14 @@
 2019-07-07 18:24:59, Recipes.py:DrinkBot.py , Dispensed so far: ,1.76,19.72,6.34,22.53,6.29,0.00,0.00,5.00,32.04,4.00,18.29,6.34
 2019-07-07 18:25:09, Recipes.py:DrinkBot.py , CHANGED: Pina Colada SIZE: 25.3605
 2019-07-07 18:27:33, Recipes.py:DrinkBot.py , CHANGED: Orange Juice SIZE: 64.0
+2019-07-07 20:50:45, Recipes.py:DrinkBot.py , Starting up: Test backup
+2019-07-07 20:50:50, Recipes.py:DrinkBot.py , Cup: 9.0 - max cocktail volume: 4.05 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-19 15:46:05, Recipes.py:DrinkBot.py , Starting up: Test[E calibration
+2019-07-19 15:46:10, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-19 15:51:29, Recipes.py:DrinkBot.py , Starting up: Test prime
+2019-07-19 15:51:34, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2019-07-19 15:53:14, Recipes.py:DrinkBot.py , Prime all forwards
+2019-07-19 15:57:16, Recipes.py:DrinkBot.py , Prime,0.62,0.58,0.62,0.58,0.70,0.46,0.56,0.43,0.54,0.54,0.41,0.57,
+2019-07-19 16:19:34, Recipes.py:DrinkBot.py , Calibration string: Calibration,2.29878278437,2.296875,2.2248441875,1.9125,2.008125,2.220435,1.9663875,1.8915414375,2.028,2.09757625,2.20471852125,1.9062225,
+2019-07-19 16:19:34, Recipes.py:DrinkBot.py , Calibration dispensed,2.25,2.50,2.33,2.00,2.00,2.40,2.00,2.00,2.00,2.00,2.33,2.00
+2019-07-19 16:25:14, Recipes.py:DrinkBot.py , Executing Checksum,,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00

@@ -3496,3 +3496,11 @@
 2019-07-07 18:23:35, Starting up: Test running
 2019-07-07 18:23:40, Cup, 10.0, max cocktail volume, 4.5, percent cocktail, 45.0%, percent ice, 55.0%
 2019-07-07 18:24:59, Trader Vic Grog,1.76,0.00,0.00,0.00,0.88,0.00,0.00,0.00,0.88,0.00,0.88,0.00
+2019-07-07 20:50:45, Starting up: Test backup
+2019-07-07 20:50:50, Cup, 9.0, max cocktail volume, 4.05, percent cocktail, 45.0%, percent ice, 55.0%
+2019-07-19 15:46:05, Starting up: Test[E calibration
+2019-07-19 15:46:10, Cup, 1.0, max cocktail volume, 0.45, percent cocktail, 45.0%, percent ice, 55.0%
+2019-07-19 15:51:29, Starting up: Test prime
+2019-07-19 15:51:34, Cup, 1.0, max cocktail volume, 0.45, percent cocktail, 45.0%, percent ice, 55.0%
+2019-07-19 16:19:34, Calibrated,2.25,2.50,2.33,2.00,2.00,2.40,2.00,2.00,2.00,2.00,2.33,2.00
+2019-07-19 16:25:14, Checksum,,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00
