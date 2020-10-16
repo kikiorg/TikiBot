@@ -35,8 +35,13 @@ class yesno():
         while True:
             try:
                 answer = raw_input(message)
+                fraction = answer.split('/')
                 if int_only:
                     my_number = int(answer)
+                elif len(fraction) == 2:
+                    numerator = float(fraction[0])
+                    denominator = float(fraction[1])
+                    my_number = numerator/denominator
                 else:
                     my_number = float(answer)
                 if not neg_ok and my_number < my_zero:
