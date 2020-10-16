@@ -236,7 +236,12 @@ while True:
         my_sound_drums.play_sound()
         my_recipes.make_drink(my_drink)
         my_sound_drums.stop_sound(fade_time=1000)
-        my_recipes.check_inventory() # Make sure bottles aren't empty
+        # **********************************
+        # Checking Bottle Inventory
+        # This is useful for big parites, when bottles run low quickly
+        # Uncomment this line if you want to check inventory for each drink
+        # **********************************
+	# my_recipes.check_inventory() # Make sure bottles aren't empty
 
 ## zzzz TEST!! zzzz ##
 #    my_recipes.test_lights()
