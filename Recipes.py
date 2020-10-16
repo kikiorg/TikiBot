@@ -20,11 +20,13 @@ import csv
 import sys
 sys.path.insert(0, 'pynfc/src')
 import logging
+from SoundEffects import SoundEffects
 
 # Kiki's awesome Motors Class that does threading and other cool stuff!  (She's overly proud of herself. :) )
 from Motors import Motors
 from Pumps import Pumps
 from yesno import yesno
+from oz_gal_ml import oz_gal_ml
 
 #############################################
 # To Do List for this file:                 #
@@ -67,11 +69,14 @@ from yesno import yesno
 #       Assume the user changes the bottle.
 #       Note: consolidate bottles only at end of event -- less headaches that way!
 # >>> Fix segfault in libnfc -- PRIORITY
-# >>> Remove hard coded RFIDs -- PRIORITY
 # >>> Make checklist of things for setup -- including making sure the bottle sizes are entered!
 #   Note: print the total amounts dispensed into the log.  Compare to size of bottle.
 #   Possibly keep track of amounts dispensed and add those on each time the program runs.
 # (Make up a poster for Kiki describing the technical details of what she did)
+# DONE -- Make a shell script that sets up everything:
+#   DEFERRED -- Move log files so new log files are fresh
+#       Not needed: just let logs accumulate and pick events out by hand.  No big deal.
+#   DONE -- DrinkBot is now a script "db"
 # DONE 3 -- 1 more: Install the USB ports
 # Look into Jira and Confluence
 
@@ -86,29 +91,38 @@ class DrinkRecipes:
     BACKUP_HAT = False  # Use the broken backup hat that has only one motor switch
     NO_EFFECTS_HAT = False  # Did you break the extra Motor HAT??
 
-    recipe_file_name = None
     calibration_key = "Calibration"
     prime_key = "Prime"
-    bottle_size_key = "Bottle_Size"
-    bottle_left_key = "Bottle_Left"
     prime_percent = 90.0
-    almost_out = 10.0
+    inventory_filename = "TikiBottleInventory.csv"
+
+    # Initialization  sounds
+    # Since the text is so hard to read, this prompts you in audio
+    #my_sound_init_cup = SoundEffects(sound_name="sounds/init/init_cup_size.wav", channel=1)
+    my_sound_init_cup = SoundEffects(sound_name="sounds/init_q/init_cup_sizeQ.wav", channel=1)
+    #my_sound_init_event_name = SoundEffects(sound_name="sounds/init/init_event_name.wav", channel=1)
+    my_sound_init_event_name = SoundEffects(sound_name="sounds/init_q/init_event_nameQ.wav", channel=1)
 
     def __init__(self, parent_name=""):
         # Initialize all member variables:
-        self.drinks = {}             # This is a list of all drinks -- key:value pairs of all the ingredient amounts
-        self.drink_names = []        # This is simply a list of all the drink names -- the "menu" as it were
-        self.ingr_list = []          # List of all ingredients and their link to their respective pumps -- by csv column
-        self.recipe_name = "Recipe"  # Eventually the upper left cell -- the column name, and key for all drink names
-        self.total_vol_key = "Total" # The key to the total volume of each cocktail
-        self.ingr_pumps = {}         # List of the pumps themselves
-        self.valid_ingr_list = []    # List of all the real ingredients that may be used
-        self.calibration_values = {} # These are the factors to multiply to make a perfect 1oz
-        self.prime_values = {}       # This is how much fluid is needed to exactly fill the tubing
-        self.bottle_size = {}        # This is how much fluid is in each bottle
-        self.bottle_left = {}        # This is how much fluid is left in each bottle
-        self.primeOz_values = {}     # This is how much fluid is needed to exactly fill the tubing
-        self.my_yesno = yesno()      # Used to ask the user yes/no questions
+        self.drinks = {}                # This is a list of all drinks -- key:value pairs of all the ingredient amounts
+        self.drink_names = []           # This is simply a list of all the drink names -- the "menu" as it were
+        self.ingr_list = []             # List of all ingredients and their link to their respective pumps -- by csv column
+        self.recipe_name = "Recipe"     # Eventually the upper left cell -- the column name, and key for all drink names
+        self.total_vol_key = "Total"    # The key to the total volume of each cocktail
+        self.ingr_pumps = {}            # List of the pumps themselves
+        self.valid_ingr_list = []       # List of all the real ingredients that may be used
+        self.calibration_values = {}    # These are the factors to multiply to make a perfect 1oz
+        self.prime_values = {}          # This is how much fluid is needed to exactly fill the tubing
+        self.primeOz_values = {}        # This is how much fluid is needed to exactly fill the tubing
+        self.my_yesno = yesno()         # Used to ask the user yes/no questions
+        self.my_oz_gal_ml = oz_gal_ml() # Used to get liquid measurements
+
+        self.dispensed = {}         # This is how much has been dispensed since start
+        self.inventory = {}         # Size of the current bottle
+        self.maxdisp = {}           # We don't dispense if a bottle doesn't hve this much
+        self.buffer = 3             # 3oz buffer to cover the tube
+        self.bottle_sounds = {}     # audio prompts for which bottle to replace
 
         ############ LED effects
         if not DrinkRecipes.NO_EFFECTS_HAT:
@@ -129,8 +143,13 @@ class DrinkRecipes:
         self.dispense_log = self.setup_each_loggers("DispenseLog file",
                                                     filename="DispenseLog.csv",
                                                     fmt='%(asctime)s, %(message)s')
-        self.command_log.info('Starting up.')
-        self.dispense_log.info('Starting up.')
+
+        DrinkRecipes.my_sound_init_event_name.play_sound()
+        event_name = raw_input("Please enter the Event Name: ")
+        DrinkRecipes.my_sound_init_event_name.join()
+
+        self.command_log.info("Starting up: {}".format(event_name))
+        self.dispense_log.info("Starting up: {}".format(event_name))
 
         self.max_cocktail_volume = self.get_cup_size()
 
@@ -138,7 +157,10 @@ class DrinkRecipes:
     # Ask the user what cup size -- NOTE: ACTUAL VOLUME eg 16oz cups hold 18oz to the top  #
     ########################################################################################
     def get_cup_size(self, percent_ice=55.0):
+        DrinkRecipes.my_sound_init_cup.play_sound()
         cup_size = self.my_yesno.get_number("What cup size is provided? [default 9.0 oz] ", default_val= 9.0)
+        DrinkRecipes.my_sound_init_cup.join()
+
         self.max_cocktail_volume = cup_size * ((100.0 - percent_ice) / 100.0)  # Subtract out the ice
         # Report to the operator -- to the screen, and to both log files
         format_str = "Cup: {f[0]} - max cocktail volume: {f[1]} - percent cocktail: {f[2]}% - percent ice: {f[3]}%"
@@ -176,14 +198,12 @@ class DrinkRecipes:
     # Create the list of drink recipes  #
     #####################################
     # This opens the file and snarfs it into a list drinks with a list of ingredients
-    def get_recipes_from_file(self, recipe_file_name=None):
-        if recipe_file_name != None:
-            self.recipe_file_name = recipe_file_name
+    def get_recipes_from_file(self, recipe_file_name):
         # Open the spreadsheet.
         try:
-            my_file = open(self.recipe_file_name, 'r')
+            my_file = open(recipe_file_name, 'r')
         except IOError as my_error:
-            raise IOError("%s: %s" % (self.recipe_file_name, my_error.strerror))
+            raise IOError("%s: %s" % (recipe_file_name, my_error.strerror))
 
         # Read the file into a Dictionary type -- this is useful for spreadsheet configurations of CSV data
         recipe_book = csv.DictReader(my_file)
@@ -191,6 +211,10 @@ class DrinkRecipes:
         # Grab a copy of all the ingredient names (aka the fieldnames)
         for each_ingredient in recipe_book.fieldnames:
             self.ingr_list.append(each_ingredient)
+            temp_sound_file = each_ingredient.replace(" ", "_")
+            temp_sound_file = "sounds/bottles_q/low_{}Q.wav".format(temp_sound_file)
+            self.bottle_sounds[each_ingredient] = SoundEffects(sound_name=temp_sound_file, channel=1)
+
         # This is the upper left entry, the column title for all drink names, and the key for each drink name
         self.recipe_name = self.ingr_list[0]
         # The first row is all the ingredients, not a drink recipe.
@@ -201,17 +225,11 @@ class DrinkRecipes:
         for each_drink in recipe_book:
             # Now go through all the ingredients for this drink, and append the amounts into the drink
             if each_drink[self.recipe_name] in [DrinkRecipes.calibration_key]:  # Pull out the Calibration list separately
-                self.calibration_values = []  # Note, override any previous Calibration lines
+                self.calibration_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.calibration_values
             elif each_drink[self.recipe_name] in [DrinkRecipes.prime_key]:  # Pull out the Prime list separately
-                self.prime_values = []  # Note, override any previous Prime lines
+                self.prime_values = {}  # Note, override any previous Calibration lines
                 temp_list = self.prime_values
-            elif each_drink[self.recipe_name] in [DrinkRecipes.bottle_size_key]:  # Pull out the Inventory list separately
-                self.bottle_size = []  # Note, override any previous Inventory lines
-                temp_list = self.bottle_size
-            elif each_drink[self.recipe_name] in [DrinkRecipes.bottle_left_key]:  # Pull out the Inventory list separately
-                self.bottle_left = []  # Note, override any previous Inventory lines
-                temp_list = self.bottle_left
             else:
                 # Start with an empty recipe, so we can append each ingredient Key:Value pair
                 self.drinks[each_drink[self.recipe_name]] = {}
@@ -220,6 +238,7 @@ class DrinkRecipes:
             total_volume = 0.0
 
             ### Go through every ingredient ###
+            temp_oz = 0.0
             for each_ingredient in self.ingr_list:
                 # Append the ingredient amount to the recipe list
                 if each_drink[each_ingredient] is not '':
@@ -228,8 +247,9 @@ class DrinkRecipes:
                     # "Orgeat" = each_ingredient -- goes through all ingredients
                     # ".25oz" = each_drink[each_ingredient] -- goes through every amount for that drink
                     try:
-                        temp_list[each_ingredient] = float(each_drink[each_ingredient])
-                        total_volume += float(each_drink[each_ingredient])
+                        temp_oz = float(each_drink[each_ingredient])
+                        temp_list[each_ingredient] = temp_oz
+                        total_volume += temp_oz
                     except TypeError:
                         print "float() error -- is it possible you are missing ingredients in the csv file?"
                         raise
@@ -244,38 +264,40 @@ class DrinkRecipes:
         # Done getting the info from the file.
         my_file.close()
 
-        return self
+        # Set up for empty bottle detection
+        # This kinda sucks.
+        # First, initialize the sets
 
-    #####################################
-    # Create the list of drink recipes  #
-    #####################################
-    # This opens the file and snarfs it into a list drinks with a list of ingredients
-    def put_recipes_into_file(self, new_recipe_file_name=None):
-        # Open the spreadsheet.
-        temp_recipe_file_name = new_recipe_file_name + '.tmp'
+        for each_ingredient in self.ingr_list:
+            # Initialize the maximum that can be dispensed to 0
+            self.maxdisp[each_ingredient] = 0.0
 
-        original_recipe_file = open(self.recipe_file_name, 'r')
-        temp_recipe_file = open(temp_recipe_file_name, 'w')
+        # Second, go through every dang drink yet again
+        # to find the maximum that any ingredient could dispense
+        for each_drink_key in self.drinks:
+            # Scale the max dispensed for each ingredient
+            scaled_to_fit = self.max_cocktail_volume
+            scaled_to_fit /= self.drinks[each_drink_key][self.total_vol_key]
+            for each_ingredient in self.ingr_list:
+                # Find the max that can be dispensed in one drink
+                # (The bottle will have to have at least this in it plus a buffer)
+                scaled_ingr = self.drinks[each_drink_key][each_ingredient]
+                scaled_ingr *= scaled_to_fit # Scale the ingredient for this drink
+                self.maxdisp[each_ingredient] = scaled_ingr if scaled_ingr > self.maxdisp[each_ingredient] else self.maxdisp[each_ingredient]
+                # FIXX!!!!  I could put back scaled ingredients at this point!
+                # each_drink[each_ingredient] = scaled_ingr
 
-        reader = csv.reader(original_recipe_file)
-        for row in reader:
-            if (row[0] is self.bottle_size_key):
-                temp_recipe_file.write(self.bottle_size_key)
-                for size in self.bottle_size:
-                    temp_recipe_file.write(',')
-                    temp_recipe_file.write(size)
-            elif (row[0] is not self.bottle_left_key):
-                temp_recipe_file.write(self.bottle_left_key)
-                for left in self.bottle_left:
-                    temp_recipe_file.write(',')
-                    temp_recipe_file.write(left)
-            else:
-                temp_recipe_file.write(row)
-
-        # Done getting the info from the file.
-        original_recipe_file.close()
-        temp_recipe_file.close()
-        # Rename the file -- test first
+        # Third: Read the dang inventory file
+        with open(DrinkRecipes.inventory_filename, "r") as inventory_f:
+            temp_line = inventory_f.readline().strip() # strip() means remove /r/n
+            temp_ingr = temp_line.split(", ")[1:] # [1:] means take off title
+            temp_line = inventory_f.readline().strip()
+            temp_invn = [float(x) for x in temp_line.split(", ")[1:]]
+            temp_line = inventory_f.readline().strip()
+            temp_disp = [float(x) for x in temp_line.split(", ")[1:]]
+        # I should change the mess above to do it so nicely like this
+        self.inventory = dict(zip(temp_ingr,temp_invn))
+        self.dispensed = dict(zip(temp_ingr,temp_disp))
 
         return self
 
@@ -326,8 +348,6 @@ class DrinkRecipes:
         self.print_ingredients(self.calibration_values)
         print ">>> Prime <<<"
         self.print_ingredients(self.prime_values)
-        print ">>> Inventory <<<"
-        self.print_ingredients(self.bottle_left)
         for each_drink in self.drink_names:
             print "*** ", each_drink, " ***"
             self.print_ingredients(self.drinks[each_drink])
@@ -369,27 +389,6 @@ class DrinkRecipes:
                 self.ingr_pumps[each_ingr].wait_until_done()
         else:
             print "Pump {} is invalid for priming.".format(one_pump)
-
-    #############################################
-    #                Prime pumps                #
-    #############################################
-    # This primes every pump al at once.
-    def inventory_reset(self, one_pump=None, fluid_oz=25.3605): # 25.3605oz is 750ml, common alcohol bottle size
-        if one_pump is not None:
-            if one_pump in self.valid_ingr_list:
-                print "Priming: {}".format(one_pump)
-            else:
-                try:
-                    pump_num = int(one_pump)
-                    one_pump = self.valid_ingr_list[pump_num - 1]
-                    print "Inventory reset by number: {}".format(one_pump)
-                except:
-                    print "Invalid pump: {}".format(one_pump)
-                    return
-            self.bottle_left[one_pump] = fluid_oz
-            # Write out the recipe file
-        else:
-            print "Pump {} is invalid for inventory reset.".format(one_pump)
 
     #############################################
     #         Global Checksum prime test        #
@@ -496,12 +495,17 @@ class DrinkRecipes:
                 self.ingr_pumps[each_ingr].wait_until_done()
             total_tiny = increment_factor * self.prime_values[each_ingr] * num_of_primes
             # This is the Prime line for the .csv file
-            total_string += "{0:.2f},".format(total_tiny + self.prime_values[each_ingr] * percent/100.0)
-            if num_of_primes != number_extra_primes:  # If this particular pump needed more or less calibration
+            if (num_of_primes != number_extra_primes) and (num_of_primes != 0):  # If this particular pump needed more or less calibration
                 calibration_was_needed = True
                 # Adjust the old prime value
                 self.prime_values[each_ingr] *= percent/100.0
                 self.prime_values[each_ingr] += total_tiny
+            print "num_of_primes: ", num_of_primes
+            if num_of_primes == 0:
+                # If this pump didn't need calibration, then put the original number back
+                total_string += "{0:.2f},".format(self.prime_values[each_ingr])
+            else:
+                total_string += "{0:.2f},".format(total_tiny + self.prime_values[each_ingr] * percent/100.0)
 
         if calibration_was_needed:
             print total_string # Print the handy string so it can be copy and pasted into the .csv file
@@ -533,7 +537,8 @@ class DrinkRecipes:
                 # log_str += "," + str(0.0)
                 log_str += ",{0:.2f}".format(0.0)
             new_calibration_string += "," + str(self.ingr_pumps[each_ingr].calibration_oz)
-        print new_calibration_string
+        new_calibration_string += ","
+	print new_calibration_string
         self.command_log.info("Calibration string: {}".format(new_calibration_string))
         self.command_log.info("Calibration dispensed{}".format(log_str))
         self.dispense_log.info("Calibrated{}".format(log_str))
@@ -652,17 +657,18 @@ class DrinkRecipes:
 
         ##### Start all the pumps going
         log_str = ""
+        log_dsp = ""
         for each_ingredient in self.valid_ingr_list:
             if float(self.drinks[my_drink][each_ingredient]) > 0.0:
                 ounces_to_dispense = float(self.drinks[my_drink][each_ingredient])
                 ounces_to_dispense *= scaled_to_fit_glass
                 print each_ingredient + ":{0:.2f}".format(ounces_to_dispense)
                 self.ingr_pumps[each_ingredient].dispense(ounces_to_dispense)
-                if self.bottle_left != 0: # There's a zero if we don't know how much is in this bottle
-                    self.bottle_left -= ounces_to_dispense / self.bottle_size
+                self.dispensed[each_ingredient] += ounces_to_dispense
             else:
                 ounces_to_dispense = 0.0
             log_str += ",{0:.2f}".format(ounces_to_dispense)
+            log_dsp += ",{0:.2f}".format(self.dispensed[each_ingredient])
 
         ##### Wait for all the pumps to complete before moving on -- technical: this calls .join() on each thread
         for each_ingredient in self.valid_ingr_list:
@@ -674,18 +680,108 @@ class DrinkRecipes:
 
         ##### Write out to the logs
         self.command_log.info("{}{}".format(my_drink, log_str))
+        self.command_log.info("Dispensed so far: {}".format(log_dsp))
         self.dispense_log.info("{}{}".format(my_drink, log_str))
 
-        ##### Check that nothing has run out
-        # Right now, this checks for a simple percent.
-        # Better would be to check that it can make the next maximum drink
-        for each_ingr in self.valid_ingr_list:
-            if self.bottle_left[each_ingr] < self.almost_out:
-                print("Almost out:", each_ingr) # Print this out in case the performer is still interacting with the customer
-                # (run pump back and forth)
-                self.prime(percent=1.0, forwards=False, one_pump=each_ingr)
-                self.prime(percent=1.0, forwards=True, one_pump=each_ingr)
-                self.prime(percent=1.0, forwards=False, one_pump=each_ingr)
-                self.prime(percent=1.0, forwards=True, one_pump=each_ingr)
+    #############################################################
+    #                       Check bottles                       #
+    #############################################################
+    def check_inventory(self):
+        # Make sure all the bottle have enough for the next drink
+        for each_ingredient in self.valid_ingr_list:
+            # What we will have when the drink is dispensed
+            temp_inv = self.inventory[each_ingredient] - self.dispensed[each_ingredient]
+            # The largest amount we might dispense
+            temp_leftover = self.maxdisp[each_ingredient]
+            # Check what we have against what we might dispense, 
+            # leaving a buffer to cover the end of the tube
+            print "    {}:{} > max:{} + buf:{}?".format(each_ingredient,temp_inv, temp_leftover, self.buffer)
+            if temp_inv < temp_leftover + self.buffer:
+                # Flash the lights!! WARNING!!  DANGER!!
+#                self.startup_effects()
+#                self.shutdown_effects()
+#                self.startup_effects()
+#                self.shutdown_effects()
+                print "Change: {}".format(each_ingredient)
+                self.bottle_sounds[each_ingredient].play_sound()
+                val = self.get_oz(message="Bottle size for {}".format(each_ingredient))
+                self.bottle_sounds[each_ingredient].join()
+                if val == 0.0:
+                    val = self.inventory[each_ingredient]
 
-        ## Write out the recipe file, including updated bottle left amounts -- in case the program crashes
+'''
+                val = 0.0
+                while val == 0.0:
+                    self.bottle_sounds[each_ingredient].play_sound()
+                    temp_inv = raw_input("What size bottle of {}?".format(each_ingredient))
+                    self.bottle_sounds[each_ingredient].join()
+                    if temp_inv == "":
+                        val = self.inventory[each_ingredient]
+                    else:
+                        try:
+                            val = float()
+                        except:
+                            print "Not a number!"
+'''
+                self.inventory[each_ingredient] = val
+                # Reset how much dispensed from this bottle
+                # Note: to find out how much was dispensed since running
+                # You'll just have to calculate that from logs
+                self.dispensed[each_ingredient] = 0.0 # Not dispensed anything from this bottle
+                print "CHANGED: {} SIZE: {}oz".format(each_ingredient, val)
+                self.command_log.info("CHANGED: {} SIZE: {}oz".format(each_ingredient, val))
+
+        # Overwrite the inventuroy file with new inventory
+        names_line = "Ingredients"
+        inventory_line = "BottleSize"
+        dispensed_line = "Dispensed"
+
+        for each_ingredient in self.valid_ingr_list:
+            names_line += ", {}".format(each_ingredient)
+            inventory_line += ", {}".format(self.inventory[each_ingredient])
+            dispensed_line += ", {}".format(self.dispensed[each_ingredient])
+        inventory_file = open(DrinkRecipes.inventory_filename, "w+")
+        inventory_file.write(names_line + "\r\n")
+        inventory_file.write(inventory_line + "\r\n")
+        inventory_file.write(dispensed_line + "\r\n")
+        inventory_file.close()
+
+
+    #############################################################
+    #                   Take bottle inventory                   #
+    #############################################################
+    def take_inventory(self):
+        # Make sure all the bottle have enough for the next drink
+        for each_ingredient in self.valid_ingr_list:
+            # Ask user for the size of the bottle -- allow [Enter] for last bottle size
+            self.bottle_sounds[each_ingredient].play_sound()
+            temp_inv = self.get_oz(message="Bottle size for {}".format(each_ingredient))
+            self.bottle_sounds[each_ingredient].join()
+            # Ask user how much is left -- allow [Enter] for last value
+            temp_left = self.get_portion(message="How much of the {} bottle is left ".format(each_ingredient))
+            # We want how much has been dispensed, not how much is left
+            temp_disp = temp_inv * (1.0 - temp_left)
+
+            # (else) If user pressed [ENTER] or entered a 0, then skip this bottle
+            if (temp_inv > 0.0 and temp_left > 0.0):
+                self.inventory[each_ingredient] = temp_inv
+                self.dispensed[each_ingredient] = temp_disp
+
+                # Overwrite the inventuroy file with new inventory
+                # FOR EVERY FRIKKIN INVENTORY BOTTLE ENTRY!!!
+                names_line = "Ingredients"
+                inventory_line = "BottleSize"
+                dispensed_line = "Dispensed"
+
+                for each_ingredient in self.valid_ingr_list:
+                    names_line += ", {}".format(each_ingredient)
+                    inventory_line += ", {}".format(self.inventory[each_ingredient])
+                    dispensed_line += ", {}".format(self.dispensed[each_ingredient])
+                inventory_file = open(DrinkRecipes.inventory_filename, "w+")
+                inventory_file.write(names_line + "\r\n")
+                inventory_file.write(inventory_line + "\r\n")
+                inventory_file.write(dispensed_line + "\r\n")
+                inventory_file.close()
+
+                print "INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(each_ingredient, temp_inv, temp_disp)
+                self.command_log.info("INVENTORY: {} BOTTLE: {}oz DISPENSED: {}oz".format(each_ingredient, temp_inv, temp_disp))

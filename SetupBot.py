@@ -37,11 +37,11 @@ class Setup:
         not_done = True
         step = 0
         steps_list = ["REVERSE LIQUIDS",
-                      "Prime 2x with cleaning water",
+                      "Prime 2x with water",
                       "Purge with air",
-                      "Prime 2x with cleaning water",
+                      "Prime with bleach",
                       "Purge with air",
-                      "Prime 2x with cleaning water",
+                      "Prime 2x with water",
                       "Purge with air",
                       "DONE"]
         # Print the instructions
@@ -59,17 +59,17 @@ class Setup:
 
             if step == 0: # Reverse the liquids back into the bottles
                 self.my_recipes.prime(forwards=False)
-                print "    Put hoses into cleaning water."
+                print "    Put hoses into rinse water."
             elif step == 1 or step == 3 or step == 5:
                 self.my_recipes.prime()
                 self.my_recipes.prime()
                 print "    Remove the hoses to purge with air."
             elif step == 2:
                 self.my_recipes.prime()
-                print "    Put hoses into cleaning water."
+                print "    Put hoses into bleach water."
             elif step == 4:
                 self.my_recipes.prime()
-                print "    Put hoses into cleaning water."
+                print "    Put hoses into rinse water."
             elif step == 6:
                 self.my_recipes.prime()
                 self.my_recipes.prime()
@@ -90,7 +90,7 @@ class Setup:
             print "[T]iny Prime -- do small, incremental priming of each pump (tedius)"
             print "[K]id drinks -- create new drinks by shot size."
             print "[B]ottle reprime -- prime a new bottle if it ran out"
-            print "[I]nventory -- new bottle: enter the size"
+            print "[I]nventory -- enter the status of all bottles"
             print "Si[Z]e of cup -- change the size of the cup"
             print "[G]lobal calibration check: "
             print "    This dispenses all pumps for 1oz -- more like a fast checksum"
@@ -114,16 +114,9 @@ class Setup:
                     print "{} - {}".format(pump_num, each_ingr)
                 my_pump = raw_input("Please enter the name or pump number to prime:")
                 self.my_recipes.prime(one_pump=my_pump)
-            elif my_command in ["I","i","Inventory","inventory"]:
-                # Print all the pumps as numbers and names
-                pump_num = 0
-                for each_ingr in self.my_recipes.valid_ingr_list:
-                    pump_num += 1
-                    print "{} - {}".format(pump_num, each_ingr)
-                new_bottle = raw_input("Please enter the name or pump number of the replaced bottle:")
-                new_bottle_size = raw_input("Please enter the size in fluide ounces:")
-                self.my_recipes.inventory_reset(one_pump=new_bottle, fluid_oz=new_bottle_size)
 
+            elif my_command in ["I", "i", "inventory", "Inventory"]:
+                self.my_recipes.take_inventory()
             elif my_command in ["G", "g", "global", "Global"]:
                 self.my_recipes.checksum_calibration()
             elif my_command in ["T", "t", "tiny prime", "Tiny Prime"]:
