@@ -5990,3 +5990,46 @@
 2020-10-16 13:54:45, Recipes.py:DrinkBot.py , Dispensed so far: ,0.00,0.62,0.00,0.00,0.46,0.00,0.93,0.00,0.00,0.00,0.46,0.23
 2020-10-16 13:55:09, Recipes.py:DrinkBot.py , Scorpion,0.00,0.21,0.00,0.00,0.15,0.00,0.31,0.00,0.00,0.00,0.15,0.08
 2020-10-16 13:55:09, Recipes.py:DrinkBot.py , Dispensed so far: ,0.00,0.82,0.00,0.00,0.62,0.00,1.23,0.00,0.00,0.00,0.62,0.31
+2020-10-17 17:12:32, Recipes.py:DrinkBot.py , Starting up: Megan Test!
+2020-10-17 17:12:39, Recipes.py:DrinkBot.py , Cup: 1.0 - max cocktail volume: 0.45 - percent cocktail: 45.0% - percent ice: 55.0%
+2020-10-17 17:13:37, Recipes.py:DrinkBot.py , Scorpion,0.00,0.10,0.00,0.00,0.08,0.00,0.15,0.00,0.00,0.00,0.08,0.04
+2020-10-17 17:13:37, Recipes.py:DrinkBot.py , Dispensed so far: ,0.00,0.10,0.00,0.00,0.08,0.00,0.15,0.00,0.00,0.00,0.08,0.04
+2020-10-17 17:14:12, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-17 17:15:31, Recipes.py:DrinkBot.py , Trader Vic Grog,0.18,0.00,0.00,0.00,0.09,0.00,0.00,0.00,0.09,0.00,0.09,0.00
+2020-10-17 17:15:31, Recipes.py:DrinkBot.py , Dispensed so far: ,0.18,0.10,0.00,0.00,0.17,0.00,0.15,0.00,0.09,0.00,0.17,0.04
+2020-10-24 12:33:40, Recipes.py:DrinkBot.py , Starting up:  2020 Cocktail Robotics
+2020-10-24 12:34:02, Recipes.py:DrinkBot.py , Cup: 6.0 - max cocktail volume: 2.7 - percent cocktail: 45.0% - percent ice: 55.0%
+2020-10-24 12:39:39, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 12:42:27, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 12:43:24, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 12:49:29, Recipes.py:DrinkBot.py , Starting up: 2020 Cocktail Robotics
+2020-10-24 12:49:37, Recipes.py:DrinkBot.py , Cup: 6.0 - max cocktail volume: 2.7 - percent cocktail: 45.0% - percent ice: 55.0%
+2020-10-24 12:56:31, Recipes.py:DrinkBot.py , Trader Vic Grog,1.06,0.00,0.00,0.00,0.53,0.00,0.00,0.00,0.53,0.00,0.53,0.00
+2020-10-24 12:56:31, Recipes.py:DrinkBot.py , Dispensed so far: ,1.06,0.00,0.00,0.00,0.53,0.00,0.00,0.00,0.53,0.00,0.53,0.00
+2020-10-24 14:03:16, Recipes.py:DrinkBot.py , Trader Vic Grog,1.06,0.00,0.00,0.00,0.53,0.00,0.00,0.00,0.53,0.00,0.53,0.00
+2020-10-24 14:03:16, Recipes.py:DrinkBot.py , Dispensed so far: ,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 14:10:04, Recipes.py:DrinkBot.py , Trader Vic Grog,1.06,0.00,0.00,0.00,0.53,0.00,0.00,0.00,0.53,0.00,0.53,0.00
+2020-10-24 14:10:04, Recipes.py:DrinkBot.py , Dispensed so far: ,3.18,0.00,0.00,0.00,1.59,0.00,0.00,0.00,1.59,0.00,1.59,0.00
+2020-10-24 14:11:04, Recipes.py:DrinkBot.py , Trader Vic Grog,1.06,0.00,0.00,0.00,0.53,0.00,0.00,0.00,0.53,0.00,0.53,0.00
+2020-10-24 14:11:04, Recipes.py:DrinkBot.py , Dispensed so far: ,4.24,0.00,0.00,0.00,2.12,0.00,0.00,0.00,2.12,0.00,2.12,0.00
+2020-10-24 15:01:02, Recipes.py:DrinkBot.py , Starting up: Kiki is smart
+2020-10-24 15:01:15, Recipes.py:DrinkBot.py , Cup: 12.0 - max cocktail volume: 5.4 - percent cocktail: 45.0% - percent ice: 55.0%
+2020-10-24 15:02:35, Recipes.py:DrinkBot.py , Trader Vic Grog,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 15:02:35, Recipes.py:DrinkBot.py , Dispensed so far: ,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 15:04:43, Recipes.py:DrinkBot.py , Trader Vic Grog,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 15:04:43, Recipes.py:DrinkBot.py , Dispensed so far: ,4.24,0.00,0.00,0.00,2.12,0.00,0.00,0.00,2.12,0.00,2.12,0.00
+2020-10-24 15:08:06, Recipes.py:DrinkBot.py , Trader Vic Grog,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 15:08:06, Recipes.py:DrinkBot.py , Dispensed so far: ,6.35,0.00,0.00,0.00,3.18,0.00,0.00,0.00,3.18,0.00,3.18,0.00
+2020-10-24 15:27:35, Recipes.py:DrinkBot.py , Pina Colada,0.00,1.35,0.00,0.00,0.00,3.15,0.00,0.00,0.00,0.00,0.90,0.00
+2020-10-24 15:27:35, Recipes.py:DrinkBot.py , Dispensed so far: ,6.35,1.35,0.00,0.00,3.18,3.15,0.00,0.00,3.18,0.00,4.08,0.00
+2020-10-24 15:30:18, Recipes.py:DrinkBot.py , Trader Vic Grog,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 15:30:18, Recipes.py:DrinkBot.py , Dispensed so far: ,8.47,1.35,0.00,0.00,4.24,3.15,0.00,0.00,4.24,0.00,5.14,0.00
+2020-10-24 15:33:37, Recipes.py:DrinkBot.py , Trader Vic Grog,2.12,0.00,0.00,0.00,1.06,0.00,0.00,0.00,1.06,0.00,1.06,0.00
+2020-10-24 15:33:37, Recipes.py:DrinkBot.py , Dispensed so far: ,10.59,1.35,0.00,0.00,5.29,3.15,0.00,0.00,5.29,0.00,6.19,0.00
+2020-10-24 16:56:00, Recipes.py:DrinkBot.py , Prime all reverse
+2020-10-24 17:02:31, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 17:02:52, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 17:03:19, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 17:05:14, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 17:05:36, Recipes.py:DrinkBot.py , Prime all forwards
+2020-10-24 17:05:57, Recipes.py:DrinkBot.py , Prime all forwards
