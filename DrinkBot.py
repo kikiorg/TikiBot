@@ -122,19 +122,19 @@ while True:
     if my_drink_ID in override_cards: # All the little rectangular RFIDs, all the Clipper cards, and the white card
         print "OVERRIDE!  Found an override RFID tag -- going into manual mode."
         my_recipes.setup_effects()
-        my_drink = "test"
-        my_drink = raw_input("Enter a drink from the menu, or [S]etup to enter setup mode: ")
-        while my_drink not in my_recipes.drink_names + ["S", "s", "Setup", "setup"]:
-            if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
-                break
-            if my_drink in ["S", "s", "Setup", "setup"]:
-                break
-            print "Invalid drink name!"
-            my_drink = raw_input("Enter a drink from the menu: ")
-        if my_drink in ["S", "s", "Setup", "setup"]:
-            print "Setup mode..."
-            my_setup = Setup(my_recipes)
-            my_setup.setup_menu()
+#        my_drink = "test"
+#        my_drink = raw_input("Enter a drink from the menu, or [S]etup to enter setup mode: ")
+#        while my_drink not in my_recipes.drink_names + ["S", "s", "Setup", "setup"]:
+#            if my_drink in ["Kill", "Exit", "exit", "X", "x"]:
+#                break
+#            if my_drink in ["S", "s", "Setup", "setup"]:
+#                break
+#            print "Invalid drink name!"
+#            my_drink = raw_input("Enter a drink from the menu: ")
+#        if my_drink in ["S", "s", "Setup", "setup"]:
+        print "Setup mode..."
+        my_setup = Setup(my_recipes)
+        my_setup.setup_menu()
         my_recipes.hard_off_effects()
 
     elif my_drink_ID == "6ce7dea1":
@@ -241,7 +241,7 @@ while True:
         # This is useful for big parites, when bottles run low quickly
         # Uncomment this line if you want to check inventory for each drink
         # **********************************
-	# my_recipes.check_inventory() # Make sure bottles aren't empty
+	    my_recipes.check_inventory() # Make sure bottles aren't empty
 
 ## zzzz TEST!! zzzz ##
 #    my_recipes.test_lights()
